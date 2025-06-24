@@ -3,13 +3,18 @@ package com.voc.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class HomeController {
 
     @GetMapping("/index")
     public String helloPage(Model model) {
-        model.addAttribute("username", "fsdgsdfdsgdfg");
         return "index";
+    }
+
+    @RequestMapping("/helloworld")
+    public String helloworld() {
+        return "helloworld";
     }
 }
