@@ -2,8 +2,10 @@ package com.voc.database;
 
 import java.sql.*;
 
-public class valicateDatabase {
+public class dbUtils {
     
+    private static Connection globalConnection = null;
+
     private Connection createDatabase(String url, String dbName, String user, String password) {
         Connection connection = null;
         try {
@@ -24,7 +26,7 @@ public class valicateDatabase {
         }
 
         if (connection != null) {
-            createTables(connection); // Create tables after establishing the connection
+            createTables(connection);
         } else {
             System.out.println("Failed to establish a connection to the database.");
         }
@@ -34,7 +36,6 @@ public class valicateDatabase {
 
     private void createTables(Connection connection) {
         try {
-            // Table inclide id, session, username, password, finished word(dynamic int array), setting, levels(int array of 6), exp, and created date
             Statement statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -68,14 +69,20 @@ public class valicateDatabase {
         } catch (SQLException e) {
             System.out.println("Database " + dbName + " does not exist. Creating database...");
             connection = createDatabase(url, dbName, user, password);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+
+        if (connection != null) {
+            globalConnection = connection; // Store the connection in a global variable
+            System.out.println("Database connection established successfully.");
+        } else {
+            System.out.println("Failed to establish a database connection.");
+        }
+    }
+
+    public Connection getConnection() {
+        if (globalConnection == null) {
+            checkDatabase();
+        }
+        return globalConnection;
     }
 }
