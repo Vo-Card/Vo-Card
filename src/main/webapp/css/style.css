@@ -3,6 +3,11 @@
     padding: 0;
 }
 
+a {
+    text-decoration: none;
+    color: white;
+}
+
 .menu {
     display: flex;
     flex-direction: column;
@@ -39,8 +44,6 @@
     height: 2.5rem;
     display: flex;
     align-items: center;
-    border: solid;
-    border-color: hsl(0deg 0% 14.9%);
 }
 
 .namePage {
@@ -57,11 +60,12 @@
     width: 100%;
     height: 100%;
     position: relative;
+
 }
 
 .slideBar {
     background-color: hsl(0deg, 0%, 5%);
-    width: 150px;
+    width: 180px;
     height: 100%;
     z-index: 9999;
 }
@@ -75,6 +79,12 @@
 .profileName {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.profilePicture {
+    height: 20px;
+    width: 20px;
+    border-radius: 2px;
 }
 
 .deck {
