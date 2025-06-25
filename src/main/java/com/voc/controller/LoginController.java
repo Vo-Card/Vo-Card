@@ -1,6 +1,11 @@
 package com.voc.controller;
 
+import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpSession;
+
+import com.voc.database.dbUtils;
+import com.voc.database.userUtils;
 import com.voc.security.tokenUtils;
 
 import org.springframework.stereotype.Controller;
@@ -30,14 +35,23 @@ public class LoginController {
             HttpSession session,
             Model model) {
         
-        // You can replace this with database/user-service check
-        if ("admin".equals(username) && "1234".equals(password)) {
-            session.setAttribute("username", username);
-            return "redirect:/index"; // go to homepage after login
-        } else {
-            model.addAttribute("error", "Invalid credentials");
+            // username conditions ^(?!.*_.*_)[a-z_]{1,20}$
+        if(!Pattern.compile("^(?!.*_.*_)[a-z_]{3,20}$")
+               .matcher(username)
+               .find()) {
+            model.addAttribute("error", "Username must be 3-20 characters long, contain only lowercase letters and underscores, and cannot contain consecutive underscores.");
             return "login";
         }
+        // password conditions
+        if(Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
+               .matcher(password)
+               .find()) {
+            model.addAttribute("error", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.");
+            return "login";
+        }
+        // Give the client a session id as a cookie
+        return "login";
+
     }
 
     @GetMapping("/logout")
