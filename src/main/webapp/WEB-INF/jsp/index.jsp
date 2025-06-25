@@ -4,33 +4,10 @@
     <head>
         <title>Home</title>
 
+        <link rel="stylesheet" href="./css/style.css">
         <style>
-            * {
-                margin: 0;
-                padding: 0;
-            }
-
-            .flex {
-                display: flex;
-            }
-
-            .px-2 {
-                padding-left: .5rem;
-                padding-right: .5rem;
-            }
-
-            .p-2 {
-                padding: .5rem;
-            }
-
-            .spitPage {
-                display: flex;
-                min-height: 100svh;
-                width: 100%;
-            }
-
-            .slideBar {
-                background-color: rgb(138, 138, 138);
+            li {
+                color: white;
             }
         </style>
     </head>
@@ -39,42 +16,59 @@
         <div class="spitPage">
 
             <div class="slideBar">
-                <div class="header p-2" style="background-color: rgb(49, 49, 49);">
-                    <a href="#">
-                        <p>${username}</p>
-                    </a>
-                </div>
-
-                <div class="home px-2">
-                    <ul>
-                        <li>Home</li>
-                        <li>Dashboard</li>
-                        <li>Inbox</li>
-                        <li>Stat</li>
+                <div class="username p-2">
+                    <ul class="menu">
+                        <li class="menuItem">
+                            <a href="#" class="flex gap-2">
+                                <div class="profilePicture">pic</div>
+                                <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
-                <div class="deckSelection px-2">
+                <div class="home p-2">
+                    <ul class="menu">
+                        <li class="menuItem">Home</li>
+                        <li class="menuItem">Dashboard</li>
+                        <li class="menuItem">Inbox</li>
+                        <li class="menuItem">Stat</li>
+                    </ul>
+                </div>
+
+                <div class="deckSelection p-2">
                     <div class="deck">Deck</div>
 
-                    <div class="historyDeck">
+                    <div class="historyDeck p-2">
                         <!-- {viewed deck} example-->
-                        <div class="viewed">A1</div>
-                        <div class="viewed">A2</div>
+                        <ul class="menu">
+                            <li class="menuItem">A1</li>
+                            <li class="menuItem">A2</li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="group-content p-2">
-                    <ul>
-                        <li>setting</li>
-                        <li>log-out</li>
+                <div class="slideBottom p-2">
+                    <ul class="menu">
+                        <li class="menuItem">setting</li>
+                        <li class="menuItem">log-out</li>
                     </ul>
-
                 </div>
 
             </div>
 
-            <div class="namePage flex">asd</div>
+            <header class="namePage flex p-2" style="background-color: rgb(40, 40, 40);">
+                <div class="">
+                    <ul class="topBar">
+                        <button>
+                            <li>sub</li>
+                        </button>
+                        <!-- {Current Page name} -->
+                        <li style="color: white;">Home</li>
+                    </ul>
+                </div>
+
+            </header>
         </div>
 
         </div>
