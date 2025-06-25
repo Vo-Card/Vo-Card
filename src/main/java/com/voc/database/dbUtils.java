@@ -40,7 +40,8 @@ public class dbUtils {
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
                     "session VARCHAR(255), " +
-                    "username VARCHAR(255) NOT NULL, " +
+                    "username VARCHAR(255) NOT NULL UNIQUE, " +
+                    "display_name VARCHAR(255)" +
                     "password VARCHAR(255) NOT NULL, " +
                     "finished_words TEXT, " +
                     "settings TEXT, " +
