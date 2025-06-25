@@ -6,7 +6,7 @@ public class dbUtils {
     
     private static Connection globalConnection = null;
 
-    private Connection createDatabase(String url, String dbName, String user, String password) {
+    private static Connection createDatabase(String url, String dbName, String user, String password) {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(url, user, password);
@@ -34,7 +34,7 @@ public class dbUtils {
         return connection;
     }
 
-    private void createTables(Connection connection) {
+    private static void createTables(Connection connection) {
         try {
             Statement statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
@@ -56,7 +56,7 @@ public class dbUtils {
         }
     }
 
-    public void checkDatabase() {
+    public static void checkDatabase() {
         String url = "jdbc:mysql://localhost:3306/"; // start with the base URL for MySQL
         String dbName = "vocard";
         String user = "test";
@@ -79,7 +79,7 @@ public class dbUtils {
         }
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         if (globalConnection == null) {
             checkDatabase();
         }
