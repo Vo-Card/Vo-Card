@@ -11,7 +11,7 @@ public class RegisterController {
 
     @GetMapping("/register")
     public String showRegistrationPage() {
-        return "register"; // return the name of the registration view
+        return "register";
     }
     
     @PostMapping("/register")
@@ -27,11 +27,11 @@ public class RegisterController {
 
     // Example method to process registration
     private String processRegistration(String username, String password) {
-        userUtils.createUser(dbUtils.getConnection(), username, password); // Replace null with actual database connection
-        if (userUtils.userExists(null, username)) { // Replace null with actual database connection
-            return "registrationSuccess"; // Registration successful
+        if (!userUtils.userExists(dbUtils.getConnection(), username)) { // Replace null with actual database connection
+            userUtils.createUser(dbUtils.getConnection(), username, password);
+            return "registrationSuccess";
         } else {
-            return "registrationFailed"; // Registration failed, user already exists
+            return "registrationFailed";
         }
     }
 }
