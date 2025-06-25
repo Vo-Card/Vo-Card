@@ -93,9 +93,10 @@ public class userUtils {
     }
 
     public static boolean validateSession(Connection db, String token) {
-    String sql = "SELECT username FROM users WHERE session = ?";
+    String sql = "SELECT session FROM users WHERE username = ? AND id = ?";
     try (PreparedStatement pstmt = db.prepareStatement(sql)) {
-        pstmt.setString(1, token);
+        pstmt.setString(1, tokenUtils.getUsernameFromToken(token));
+        pstmt.setInt(2, tokenUtils.getUserIdFromToken(token));
         ResultSet rs = pstmt.executeQuery();
         if (rs.next()) {
             String username = rs.getString("username");

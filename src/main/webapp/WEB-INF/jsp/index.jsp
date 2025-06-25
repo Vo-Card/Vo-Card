@@ -4,7 +4,7 @@
     <head>
         <title>Home</title>
 
-        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
         <style>
             li {
                 color: white;
