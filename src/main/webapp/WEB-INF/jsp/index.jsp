@@ -4,7 +4,7 @@
     <head>
         <title>Home</title>
 
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
+        <link rel="stylesheet" type="text/css" href="/css/style.css">
         <style>
             li {
                 color: white;
@@ -20,7 +20,7 @@
                     <ul class="menu">
                         <li class="menuItem">
                             <a href="#" class="flex gap-2">
-                                <div class="profilePicture">pic</div>
+                                <div class="profilePicture"><img src="/resources/profileTemplate.png" alt=""></div>
                                 <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
                             </a>
                         </li>

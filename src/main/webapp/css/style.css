@@ -76,3 +76,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.deck {
+    color: white;
+}
