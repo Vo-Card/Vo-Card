@@ -4,6 +4,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.voc.database.dbUtils;
+import com.voc.database.userUtils;
+
 public class RegisterController {
 
     @GetMapping("/register")
@@ -16,7 +19,7 @@ public class RegisterController {
         String result = processRegistration(username, password);
         
         if ("registrationSuccess".equals(result)) {
-            return "redirect:/login"; // redirect to login page after successful registration
+            return "redirect:/login";
         } else {
             return "register"; // return to registration page with an error message
         }
@@ -24,6 +27,11 @@ public class RegisterController {
 
     // Example method to process registration
     private String processRegistration(String username, String password) {
-        return "registrationSuccess";
+        userUtils.createUser(dbUtils.getConnection(), username, password); // Replace null with actual database connection
+        if (userUtils.userExists(null, username)) { // Replace null with actual database connection
+            return "registrationSuccess"; // Registration successful
+        } else {
+            return "registrationFailed"; // Registration failed, user already exists
+        }
     }
 }
