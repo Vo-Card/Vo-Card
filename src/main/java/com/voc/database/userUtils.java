@@ -11,6 +11,9 @@ public class userUtils {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             pstmt.executeUpdate();
+
+            createNewSession(db, username, password);
+            
             System.out.println("User created successfully: " + username);
         } catch (SQLException e) {
             System.out.println("Error creating user: " + e.getMessage());
@@ -29,6 +32,46 @@ public class userUtils {
             System.out.println("Error checking user existence: " + e.getMessage());
         }
         return false;
+    }
+
+    public static String getUserSession(Connection db, String username) {
+        String sql = "SELECT session FROM users WHERE username = ?";
+        try (PreparedStatement pstmt = db.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("session");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving user session: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static boolean validateUser(Connection db, String username, String password) {
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ? AND password = ?";
+        try (PreparedStatement pstmt = db.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error validating user: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private static void createNewSession(Connection db, String username, String password) {
+        String sql = "UPDATE users SET session = ? WHERE username = ?";
+        try (PreparedStatement pstmt = db.prepareStatement(sql)) {
+            pstmt.setString(1, tokenUtils.generateToken(username, getUserId(db, username), password));
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error clearing user session: " + e.getMessage());
+        }
     }
 
     public static String getUserPassword(Connection db, String username) {
