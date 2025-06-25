@@ -19,8 +19,8 @@
                 <div class="username p-2">
                     <ul class="menu">
                         <li class="menuItem">
-                            <a href="#" class="flex gap-2">
-                                <div class="profilePicture"><img src="/resources/profileTemplate.png" alt=""></div>
+                            <a href="#" class=" flex gap-2">
+                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture"></div>
                                 <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
                             </a>
                         </li>
