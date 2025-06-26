@@ -33,8 +33,6 @@ public class RegisterController {
             return "register"; // return to registration page with an error message
         }
 
-
-
         if(!Pattern.compile("^(?!.*_.*_)[a-z_]{3,20}$").matcher(username).find()) {
             model.addAttribute("error", "Username must be 3-20 characters long, contain only lowercase letters and underscores, and cannot contain consecutive underscores.");
             return "register";

@@ -18,7 +18,11 @@ public class SessionInterceptor implements HandlerInterceptor {
         Cookie[] cookies = request.getCookies();
         String auth_token = null;
 
-        System.out.println("SessionInterceptor: Checking session...");
+        //get current page URL
+        String currentPage = request.getRequestURI();
+
+        String[] excludedPages = {"/home", "/login", "/register", "/css/**", "/js/**"};
+
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("auth_token".equals(cookie.getName())) {
@@ -27,16 +31,21 @@ public class SessionInterceptor implements HandlerInterceptor {
                 }
             }
         }
-
-        System.out.println("SessionInterceptor: auth_token = " + auth_token);
-
+        
         if (auth_token != null && isValid(auth_token)) { 
             String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "username");
             request.setAttribute("username", username);
             return true;
         }
 
-        response.sendRedirect("/login"); // Block access
+        // Check if the current page is in the excluded pages
+        for (String page : excludedPages) {
+            if (currentPage.matches(page.replace("**", ".*"))) {
+                return true;
+            }
+        }
+        
+        response.sendRedirect("/login");
         return false;
     }
 
