@@ -20,17 +20,13 @@ public class RegisterController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestParam String username, @RequestParam String password,
+    public String registerUser(@RequestParam String display_name, @RequestParam String username, @RequestParam String password,
             @RequestParam String confirmPassword, Model model) {
-        System.out.println("registering user...");
-        // Validate username and password
-        System.out.println("Username: " + username);
-        System.out.println("Password: " + password);
-        System.out.println("Confirm Password: " + confirmPassword);
+
         if (username == null || username.isEmpty() || password == null || password.isEmpty()
                 || confirmPassword == null || confirmPassword.isEmpty()) {
             model.addAttribute("error", "Username and/or password cannot be empty.");
-            return "register"; // return to registration page with an error message
+            return "register";
         }
 
         if(!Pattern.compile("^(?!.*_.*_)[a-z_]{3,20}$").matcher(username).find()) {
@@ -44,7 +40,7 @@ public class RegisterController {
         }
 
 
-        String result = processRegistration(username, password, confirmPassword);
+        String result = processRegistration(display_name, username, password, confirmPassword);
 
         System.out.println("Registration result: " + result);
 
@@ -56,13 +52,10 @@ public class RegisterController {
     }
 
     // Example method to process registration
-    private String processRegistration(String username, String password, String confirmPassword) {
+    private String processRegistration(String display_name, String username, String password, String confirmPassword) {
         if (!userUtils.userExists(dbUtils.getConnection(), username) && password.equals(confirmPassword)) { 
-            System.out.println("Process Regis");
-            userUtils.createUser(dbUtils.getConnection(), username, password);
+            userUtils.createUser(dbUtils.getConnection(), display_name, username, password);
             return "registrationSuccess";
-        } else {
-            return "registrationFailed";
-        }
+        } else {return "registrationFailed";}
     }
 }
