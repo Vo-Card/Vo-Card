@@ -25,9 +25,7 @@ public class userUtils {
         try (PreparedStatement pstmt = db.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
+            if (rs.next()) {return rs.getInt(1) > 0;}
         } catch (SQLException e) {
             System.out.println("Error checking user existence: " + e.getMessage());
         }
