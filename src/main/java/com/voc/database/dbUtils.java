@@ -4,6 +4,11 @@ import java.sql.*;
 
 public class dbUtils {
 
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/";
+    private static final String DB_NAME = "vocard";
+    private static final String DB_USER = "test";
+    private static final String DB_PASSWORD = "test";
+
     private static Connection globalConnection = null;
 
     private static Connection createDatabase(String url, String dbName, String user, String password) {
@@ -58,10 +63,10 @@ public class dbUtils {
     }
 
     public static void checkDatabase() {
-        String url = "jdbc:mysql://localhost:3306/"; // start with the base URL for MySQL
-        String dbName = "vocard";
-        String user = "test";
-        String password = "test";
+        String url = DB_URL;
+        String dbName = DB_NAME;
+        String user = DB_USER;
+        String password = DB_PASSWORD;
         Connection connection = null;
 
         try {
