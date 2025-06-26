@@ -52,7 +52,7 @@
                     <ul class="menu">
                         <li class="menuItem">setting</li>
                         <li class="menuItem">log-out</li>
-                        <li class="menuItem">${username}</li>
+                        <li class="menuItem">Username : ${username}</li>
                     </ul>
                 </div>
 
