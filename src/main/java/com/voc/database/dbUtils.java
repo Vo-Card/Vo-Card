@@ -39,7 +39,7 @@ public class dbUtils {
             Statement statement = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "session VARCHAR(255), " +
+                    "token_id VARCHAR(255), " +
                     "username VARCHAR(255) NOT NULL UNIQUE, " +
                     "display_name VARCHAR(255)," +
                     "password VARCHAR(255) NOT NULL, " +
@@ -60,8 +60,8 @@ public class dbUtils {
     public static void checkDatabase() {
         String url = "jdbc:mysql://localhost:3306/"; // start with the base URL for MySQL
         String dbName = "vocard";
-        String user = "root";
-        String password = "CrimsonXD!1";
+        String user = "test";
+        String password = "test";
         Connection connection = null;
 
         try {

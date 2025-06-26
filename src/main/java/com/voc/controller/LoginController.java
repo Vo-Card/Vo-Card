@@ -1,13 +1,10 @@
 package com.voc.controller;
 
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 import com.voc.database.dbUtils;
 import com.voc.database.userUtils;
-import com.voc.security.tokenUtils;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +17,6 @@ public class LoginController {
     @GetMapping("/login")
     public String showLoginPage() {
         System.out.println("Database checked successfully.");
-        //test token
-        String token = tokenUtils.generateToken("Zartex", 1,"Zartex1234!");
-        System.out.println("Generated token: " + token);
-        System.out.println("Username from token: " + tokenUtils.getUsernameFromToken(token));
-        System.out.println("User ID from token: " + tokenUtils.getUserIdFromToken(token));
         return "login";
     }
 
@@ -32,30 +24,38 @@ public class LoginController {
     public String processLogin(
             @RequestParam String username,
             @RequestParam String password,
-            HttpSession session,
+            HttpServletResponse response,
             Model model) {
-        
-            // username conditions ^(?!.*_.*_)[a-z_]{1,20}$
-        if(!Pattern.compile("^(?!.*_.*_)[a-z_]{3,20}$")
-               .matcher(username)
-               .find()) {
-            model.addAttribute("error", "Username must be 3-20 characters long, contain only lowercase letters and underscores, and cannot contain consecutive underscores.");
-            return "login";
+        System.out.println("Processing login for user: " + username);
+        // Validate username and password
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            model.addAttribute("error", "Username and/or password cannot be empty.");
+            return "login"; // return to login page with an error message
         }
-        // password conditions
-        if(Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
-               .matcher(password)
-               .find()) {
-            model.addAttribute("error", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.");
-            return "login";
-        }
-        return "login";
 
+        if (userUtils.validateUser(dbUtils.getConnection(), username, password)) {
+            // Generate token
+            String token = userUtils.getUserTokenID(dbUtils.getConnection(), username);
+            Cookie authCookie = new Cookie("auth_token", token);
+
+            authCookie.setHttpOnly(true);
+            authCookie.setPath("/");
+
+            response.addCookie(authCookie);
+
+            return "redirect:/";
+        } else {
+            model.addAttribute("error", "Invalid username or password.");
+            return "login";
+        }
     }
 
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate(); // clear session
+    public String logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("auth_token", "");
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Expire immediately
+        response.addCookie(cookie);
         return "redirect:/login";
     }
 }
