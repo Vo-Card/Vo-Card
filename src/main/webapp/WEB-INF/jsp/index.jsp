@@ -20,7 +20,7 @@
                     <ul class="menu">
                         <li class="menuItem">
                             <a href="#" class=" flex gap-2">
-                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture"></div>
+                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture" height="20px"></div>
                                 <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
                             </a>
                         </li>
@@ -52,6 +52,7 @@
                     <ul class="menu">
                         <li class="menuItem">setting</li>
                         <li class="menuItem">log-out</li>
+                        <li class="menuItem">${username}</li>
                     </ul>
                 </div>
 

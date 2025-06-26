@@ -30,7 +30,7 @@ public class LoginController {
         // Validate username and password
         if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
             model.addAttribute("error", "Username and/or password cannot be empty.");
-            return "login"; // return to login page with an error message
+            return "login";
         }
 
         if (userUtils.validateUser(dbUtils.getConnection(), username, password)) {

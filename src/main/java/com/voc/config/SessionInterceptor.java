@@ -7,6 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.voc.database.dbUtils;
+import com.voc.database.userUtils;
+
 @Configuration
 public class SessionInterceptor implements HandlerInterceptor {
 
@@ -16,7 +19,6 @@ public class SessionInterceptor implements HandlerInterceptor {
         String auth_token = null;
 
         System.out.println("SessionInterceptor: Checking session...");
-
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("auth_token".equals(cookie.getName())) {
@@ -26,7 +28,11 @@ public class SessionInterceptor implements HandlerInterceptor {
             }
         }
 
-        if (auth_token != null && isValid(auth_token)) {
+        System.out.println("SessionInterceptor: auth_token = " + auth_token);
+
+        if (auth_token != null && isValid(auth_token)) { 
+            String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "username");
+            request.setAttribute("username", username);
             return true;
         }
 
@@ -35,6 +41,6 @@ public class SessionInterceptor implements HandlerInterceptor {
     }
 
     private boolean isValid(String token) {
-        return true; // Replace with real check
+        return userUtils.validateTokenID(dbUtils.getConnection(), token);
     }
 }

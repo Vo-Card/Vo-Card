@@ -105,6 +105,20 @@ public class userUtils {
         }
     }
 
+    public static String searchByToken(Connection db, String token, String search) {
+        String sql = "SELECT " + search + " FROM users WHERE token_id = ?";
+        try (PreparedStatement pstmt = db.prepareStatement(sql)) {
+            pstmt.setString(1, token);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString(search);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error searching user by token: " + e.getMessage());
+        }
+        return null; // Return null if user not found
+    }
+
     public static int getUserId(Connection db, String username) {
         String sql = "SELECT id FROM users WHERE username = ?";
         try (PreparedStatement pstmt = db.prepareStatement(sql)) {
@@ -137,26 +151,23 @@ public class userUtils {
     }
 
     public static boolean validateTokenID(Connection db, String token) {
-        String sql = "SELECT token_id FROM users WHERE username = ? AND id = ?";
+        String sql = "SELECT username, token_id FROM users WHERE username = ? AND id = ?";
         try (PreparedStatement pstmt = db.prepareStatement(sql)) {
-            pstmt.setString(1, tokenUtils.getUsernameFromToken(token));
-            pstmt.setInt(2, tokenUtils.getUserIdFromToken(token));
+
+            String username = tokenUtils.getUsernameFromToken(token);
+            int userId = tokenUtils.getUserIdFromToken(token);
+
+            pstmt.setString(1, username);
+            pstmt.setInt(2, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                String username = rs.getString("username");
-                String password = getUserPassword(db, username);
+                String usr = rs.getString("username");
+                String password = getUserPassword(db, usr);
                 return tokenUtils.validateToken(token, password);
             }
         } catch (SQLException e) {
             System.out.println("Error validating token: " + e.getMessage());
         }
-        String username = tokenUtils.getUsernameFromToken(token);
-        if (username != null && userExists(db, username)) {
-            String password = getUserPassword(db, username);
-            return tokenUtils.validateToken(token, password);
-        } else {
-            System.out.println("Invalid token or user not found.");
-        }
-        return false; // Return false if session is invalid or user not found
+        return false;
     }
 }
