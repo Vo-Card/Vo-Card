@@ -58,15 +58,8 @@ public class tokenUtils {
         return base64Decode(parts[0]);
     }
 
-    private static String base64Encode(String data) {
-        return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
-    }
+    private static String base64Encode(String data) {return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));}
+    private static String base64Decode(String base64) {return new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);}
 
-    private static String base64Decode(String base64) {
-        return new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
-    }
-
-    private static String sign(String data, String key) {
-        return new HmacUtils("HmacSHA256", key).hmacHex(data);
-    }
+    private static String sign(String data, String key) {return new HmacUtils("HmacSHA256", key).hmacHex(data);}
 }
