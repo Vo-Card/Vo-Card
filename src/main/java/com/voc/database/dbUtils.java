@@ -3,7 +3,7 @@ package com.voc.database;
 import java.sql.*;
 
 public class dbUtils {
-    
+
     private static Connection globalConnection = null;
 
     private static Connection createDatabase(String url, String dbName, String user, String password) {
@@ -20,7 +20,7 @@ public class dbUtils {
             connection.close();
 
             connection = DriverManager.getConnection(url + dbName, user, password);
-            System.out.println("Connected to the database: " + dbName);            
+            System.out.println("Connected to the database: " + dbName);
         } catch (SQLException e) {
             System.out.println("Error creating database: " + e.getMessage());
         }
@@ -41,7 +41,7 @@ public class dbUtils {
                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
                     "session VARCHAR(255), " +
                     "username VARCHAR(255) NOT NULL UNIQUE, " +
-                    "display_name VARCHAR(255)" +
+                    "display_name VARCHAR(255)," +
                     "password VARCHAR(255) NOT NULL, " +
                     "finished_words TEXT, " +
                     "settings TEXT, " +
@@ -60,8 +60,8 @@ public class dbUtils {
     public static void checkDatabase() {
         String url = "jdbc:mysql://localhost:3306/"; // start with the base URL for MySQL
         String dbName = "vocard";
-        String user = "test";
-        String password = "test";
+        String user = "root";
+        String password = "CrimsonXD!1";
         Connection connection = null;
 
         try {
