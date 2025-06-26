@@ -49,7 +49,6 @@ public class LoginController {
             model.addAttribute("error", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character.");
             return "login";
         }
-        // Give the client a session id as a cookie
         return "login";
 
     }
