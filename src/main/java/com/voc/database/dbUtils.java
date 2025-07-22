@@ -6,8 +6,8 @@ public class dbUtils {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/";
     private static final String DB_NAME = "vocard";
-    private static final String DB_USER = "test";
-    private static final String DB_PASSWORD = "test";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "CrimsonXD!1";
 
     private static Connection globalConnection = null;
 
