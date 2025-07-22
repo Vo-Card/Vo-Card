@@ -3,76 +3,73 @@
 
     <head>
         <title>Home</title>
-
         <link rel="stylesheet" type="text/css" href="/css/style.css">
+
         <style>
-            li {
+            .header {
+                background-color: rgb(39, 39, 39);
+                padding-left: 50px;
+                padding-right: 50px;
+                padding-top: 20px;
+                padding-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+
+            .leftContainer {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+            }
+
+            .inner {
+                display: flex;
+                gap: 25px;
+                flex-direction: row;
+                list-style-type: none;
+                text-align: center;
                 color: white;
+            }
+
+            .mainContentOne {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
             }
         </style>
     </head>
 
     <body>
-        <div class="spitPage">
-
-            <div class="slideBar">
-                <div class="username p-2">
-                    <ul class="menu">
-                        <li class="menuItem">
-                            <a href="#" class=" flex gap-2">
-                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture" height="20px"></div>
-                                <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="home p-2">
-                    <ul class="menu">
-                        <li class="menuItem">Home</li>
-                        <li class="menuItem">Dashboard</li>
-                        <li class="menuItem">Inbox</li>
-                        <li class="menuItem">Stat</li>
-                    </ul>
-                </div>
-
-                <div class="deckSelection p-2">
-                    <div class="deck">Deck</div>
-
-                    <div class="historyDeck p-2">
-                        <!-- {viewed deck} example-->
-                        <ul class="menu">
-                            <li class="menuItem">A1</li>
-                            <li class="menuItem">A2</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="slideBottom p-2">
-                    <ul class="menu">
-                        <li class="menuItem">setting</li>
-                        <li class="menuItem">log-out</li>
-                        <li class="menuItem">Username : ${username}</li>
-                    </ul>
-                </div>
-
+        <div class="header">
+            <div class="leftContainer">
+                <div class="picture"><img src="/resources/profileTemplate.png" alt="" style="width: 20px;"></div>
+                <div class="text" style="color: white;">Vo-Card</div>
             </div>
 
-            <header class="namePage flex p-2" style="background-color: rgb(40, 40, 40);">
-                <div class="">
-                    <ul class="topBar">
-                        <button>
-                            <li>sub</li>
-                        </button>
-                        <!-- {Current Page name} -->
-                        <li style="color: white;">Home</li>
+            <div class="rightContainer">
+                <div>
+                    <ul class="inner">
+                        <li>Explore</li>
+                        <li>Product</li>
+                        <li>Sign in</li>
+                        <li>Log in</li>
                     </ul>
                 </div>
-
-            </header>
+            </div>
         </div>
 
+        <div class="mainContentOne">
+            <div class="cards"></div>
+            <div class="exploreContainer">
+                <div class="exploreInner">
+                    <div>
+                        <h1>ello</h1>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </body>
 
     </html>
