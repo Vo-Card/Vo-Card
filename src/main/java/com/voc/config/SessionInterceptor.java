@@ -22,7 +22,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         // get current page URL
         String currentPage = request.getRequestURI();
 
-        String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**" };
+        String[] excludedPages = {"/home", "/login", "/register", "/css/**", "/js/**"};
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -32,8 +32,8 @@ public class SessionInterceptor implements HandlerInterceptor {
                 }
             }
         }
-
-        if (auth_token != null && isValid(auth_token)) {
+        
+        if (auth_token != null && isValid(auth_token)) { 
             String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "username");
             request.setAttribute("username", username);
             return true;

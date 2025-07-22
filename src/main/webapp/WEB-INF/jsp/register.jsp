@@ -8,6 +8,7 @@
 <body>
     <h2>Register</h2>
     <form action="register" method="post">
+        DisplayName: <input name="display_name" type="text" required/><br/>
         Username: <input name="username" type="text" required/><br/>
         Password: <input name="password" type="password" required/><br/>
         Confirm Password: <input name="confirmPassword" type="password" required/><br/>

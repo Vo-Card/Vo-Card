@@ -5,16 +5,16 @@ import com.voc.security.tokenUtils;
 
 public class userUtils {
 
-    public static void createUser(Connection db, String username, String password) {
-        String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+    public static void createUser(Connection db, String display_name,String username, String password) {
+        String sql = "INSERT INTO users (display_name, username, password) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = db.prepareStatement(sql)) {
-            pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(1, display_name);
+            pstmt.setString(2, username);
+            pstmt.setString(3, password);
             pstmt.executeUpdate();
 
             createNewToken(db, username, password);
 
-            System.out.println("User created successfully: " + username);
         } catch (SQLException e) {
             System.out.println("Error creating user: " + e.getMessage());
         }
