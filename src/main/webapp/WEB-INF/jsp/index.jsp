@@ -36,7 +36,7 @@
     <div class="container">
         <div class="slogan">
             <h1 style="color: white;">Turn your <span style="color: #dd4949;">English</span> goals into reality <br> discover the power of smart <span style="color: #4d6dd8;">flashcards</span></h1>
-            <p style="color: #999999;">Flashcard description place holder</p>
+            <p style="color: #999999; text-align: center;">A flashcard platform that helps users create, organize, and study digital flashcards. Ideal for students, teachers, and independent learners. <br>Supports custom decks, smart review features, and cross-device syncing.</p>
         </div>
     </div>
 </body>

@@ -43,9 +43,11 @@ nav ul {
 nav ul.right li a{
     display: flex;
     font-weight: bold;
+    min-width: 75px;
     background: white;
     text-align: center;
     align-items: center;
+    justify-content: center;
     padding: 10px;
     border-radius: 10px;
     color: black;
