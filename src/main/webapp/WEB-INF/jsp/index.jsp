@@ -1,78 +1,43 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-    <html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <script src="/js/bg_update_correction.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <ul class="left">
+            <div class="icon"></div>
+            <li><a href="/home" style="font-size: 25px; border-right: solid white 2px; padding-right: 20px;">Vo-Card</a></li>
+            <li><a href="/explore">Explore</a></li>
+            <li><a href="/products">Products</a></li>
+            <li><a href="/aboutus">About Us</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/support">Support</a></li>
+        </ul>
+        <ul class="right">
+             <c:choose>
+                <c:when test="${not empty username}">
+                    <li><a href="/u/dashboard" class="opeb_btn">Open Vo-Card</a></li>
+                </c:when>
+                <c:otherwise>
+                    <li><a href="/login" class="lgn_btn">Login</a></li>
+                    <li><a href="/register" class="reg_btn">Register</a></li>
+                </c:otherwise>
+            </c:choose>
+        </ul>
+    </nav>
 
-    <head>
-        <title>Home</title>
-
-        <link rel="stylesheet" type="text/css" href="/css/style.css">
-        <style>
-            li {
-                color: white;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="spitPage">
-
-            <div class="slideBar">
-                <div class="username p-2">
-                    <ul class="menu">
-                        <li class="menuItem">
-                            <a href="#" class=" flex gap-2">
-                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture" height="20px"></div>
-                                <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="home p-2">
-                    <ul class="menu">
-                        <li class="menuItem">Home</li>
-                        <li class="menuItem">Dashboard</li>
-                        <li class="menuItem">Inbox</li>
-                        <li class="menuItem">Stat</li>
-                    </ul>
-                </div>
-
-                <div class="deckSelection p-2">
-                    <div class="deck">Deck</div>
-
-                    <div class="historyDeck p-2">
-                        <!-- {viewed deck} example-->
-                        <ul class="menu">
-                            <li class="menuItem">A1</li>
-                            <li class="menuItem">A2</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="slideBottom p-2">
-                    <ul class="menu">
-                        <li class="menuItem">setting</li>
-                        <li class="menuItem">log-out</li>
-                        <li class="menuItem">Username : ${username}</li>
-                    </ul>
-                </div>
-
-            </div>
-
-            <header class="namePage flex p-2" style="background-color: rgb(40, 40, 40);">
-                <div class="">
-                    <ul class="topBar">
-                        <button>
-                            <li>sub</li>
-                        </button>
-                        <!-- {Current Page name} -->
-                        <li style="color: white;">Home</li>
-                    </ul>
-                </div>
-
-            </header>
+    <div class="container">
+        <div class="slogan">
+            <h1 style="color: white;">Turn your <span style="color: #dd4949;">English</span> goals into reality <br> discover the power of smart <span style="color: #4d6dd8;">flashcards</span></h1>
+            <p style="color: #999999;">Flashcard description place holder</p>
         </div>
-
-        </div>
-    </body>
-
-    </html>
+    </div>
+</body>
+</html>

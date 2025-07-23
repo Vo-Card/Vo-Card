@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap');
+
 * {
     margin: 0;
     padding: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 a {
@@ -8,92 +11,81 @@ a {
     color: white;
 }
 
-body {
-    background-image: radial-gradient(white 1px , transparent 0);
-    background-size: 50px 50px;
-    background-position: -25px -25px;
-    background-color: rgb(27, 29, 36);
-}
-
-.menu {
+nav {
     display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    min-width: 0;
-    width: 100%;
-    list-style-type: none;
-}
-
-.menuItem {
-    position: relative;
-}
-
-.flex {
-    display: flex;
-}
-
-.gap-2 {
-    gap: .5rem;
-}
-
-.p-2 {
-    padding: .5rem;
-}
-
-.topBar {
-    display: flex;
-    flex-direction: row;
-    list-style-type: none;
-    gap: .5rem;
-}
-
-.username {
-    height: 2.5rem;
-    display: flex;
+    justify-content: space-between;
     align-items: center;
-}
-
-.namePage {
-    padding-left: .5rem;
-    width: 100%;
-    height: 2.5rem;
-    align-items: center;
-    gap: .5rem;
-}
-
-.spitPage {
-    display: flex;
-    min-height: 100svh;
-    width: 100%;
-    height: 100%;
-    position: relative;
-
-}
-
-.slideBar {
-    background-color: hsl(0deg, 0%, 5%);
-    width: 180px;
-    height: 100%;
-    z-index: 9999;
-}
-
-.slideBottom {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-}
-
-.profileName {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.profilePicture {
-    height: 20px;
-    width: 20px;
-    border-radius: 2px;
-}
-
-.deck {
+    background-color: rgba(147, 165, 182, 0.308);
+    backdrop-filter: blur(2px);
+    height: 50px;
+    width: 60%;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px;
+    margin-top: 10px;
+    z-index: 1000;
+    border-radius: 12px;
+    border: 2px solid rgba(159, 165, 192, 0.473);
+    font-size: 20px;
     color: white;
+}
+nav ul {
+    display: flex;
+    list-style: none;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    height: 100%;
+}
+
+nav ul.right li a{
+    display: flex;
+    font-weight: bold;
+    background: white;
+    text-align: center;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    color: black;
+}
+
+.icon {
+    background-color: white;
+    -webkit-mask: url(/resources/icon.svg) no-repeat center;
+    mask: url(/resources/icon.svg) no-repeat center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    width: 50px;
+    height: 50px;
+    margin-right: -12px;
+}
+
+.container{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 200px;
+}
+
+.slogan{
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.slogan h1, .slogan h1 span{
+    font-family: "Sansita", sans-serif;
+    font-size: 3.5vw;
+    text-align: center;
+    width: fit-content;
+}
+.slogan p{
+    font-size: 1vw;
 }
