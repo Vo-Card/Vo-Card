@@ -14,14 +14,15 @@ import com.voc.database.userUtils;
 public class SessionInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         Cookie[] cookies = request.getCookies();
         String auth_token = null;
 
-        //get current page URL
+        // get current page URL
         String currentPage = request.getRequestURI();
 
-        String[] excludedPages = {"/home", "/login", "/register", "/css/**", "/js/**", "/resources/**", "/error/**"};
+        String[] excludedPages = {"/home", "/login", "/register", "/css/**", "/js/**"};
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -33,7 +34,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         }
         
         if (auth_token != null && isValid(auth_token)) { 
-            String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "display_name");
+            String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "username");
             request.setAttribute("username", username);
             return true;
         }
@@ -44,7 +45,7 @@ public class SessionInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-        
+
         response.sendRedirect("/login");
         return false;
     }
