@@ -56,6 +56,6 @@ public class LoginController {
         cookie.setPath("/");
         cookie.setMaxAge(0); // Expire immediately
         response.addCookie(cookie);
-        return "redirect:/login";
+        return "redirect:/home";
     }
 }

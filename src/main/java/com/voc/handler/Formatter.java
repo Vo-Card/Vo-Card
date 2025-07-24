@@ -25,7 +25,7 @@ public class Formatter {
             }
             ObjectMapper mapper = new ObjectMapper();
             defaultDeck = mapper.readValue(input, HashMap.class);
-            System.out.println("✅ Default dataset loaded.");
+            System.out.println("Default dataset loaded.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,13 +40,13 @@ public class Formatter {
         try {
             ObjectMapper mapper = new ObjectMapper();
             formattedDeck = mapper.readValue(data, HashMap.class);
-            System.out.println("✅ Deck formatted successfully.");
+            System.out.println("Deck formatted successfully.");
         } catch (IOException e) {
-            System.err.println("❌ Error formatting deck: " + e.getMessage());
+            System.err.println("Error formatting deck: " + e.getMessage());
         }
         return formattedDeck;
     }
-
+ 
     public void printDeck(HashMap<String, Object> deck, int depth) {
         if (deck == null || deck.isEmpty()) {
             deck = new HashMap<>(defaultDeck);
