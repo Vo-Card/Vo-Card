@@ -1,6 +1,11 @@
 package com.voc.database;
 
+import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class dbUtils {
 
@@ -10,6 +15,26 @@ public class dbUtils {
     private static final String DB_PASSWORD = "CrimsonXD!1";
 
     private static Connection globalConnection = null;
+
+    static {
+        System.out.println("Loading default dataset at class load...");
+
+        try (InputStream input = dbUtils.class.getClassLoader().getResourceAsStream("config/database.json")) {
+            if (input == null) {
+                throw new RuntimeException("database.json not found or haven't config. Please check the config folder in resources file.");
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String,String> data = mapper.readValue(input, HashMap.class);
+            
+            DB_URL = data.get("DB_URL");
+            DB_NAME = data.get("DB_NAME");
+            DB_USER = data.get("DB_USER");
+            DB_PASSWORD = data.get("DB_PASSWORD");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private static Connection createDatabase(String url, String dbName, String user, String password) {
         Connection connection = null;
