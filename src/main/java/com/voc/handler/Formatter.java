@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,12 +87,15 @@ public class Formatter {
             System.out.println("Using default deck as provided deck is empty or null.");
             deck = new HashMap<>(defaultDeck);
         }
-
+        List<String> category = new ArrayList<>();
         for (Map.Entry<String, Object> entry : deck.entrySet()) {
-            System.out.println(entry.getKey() + ":");
-            String key = entry.getKey();
-            System.out.println(key);
+            if (entry.getValue() instanceof Map<?, ?> nestedMap) {
+                System.out.println("Categories: " + nestedMap.keySet());
+                category.addAll(nestedMap.keySet().stream().map(Object::toString).toList());
+            }
         }
+        Collections.shuffle(category);
+        System.out.println("Randomized categories: " + category);
         System.out.println("Cards randomized successfully.");
     }
 }
