@@ -16,9 +16,8 @@ public class dbUtils {
 
     private static Connection globalConnection = null;
 
+    // Class initializer
     static {
-        System.out.println("Loading default dataset at class load...");
-
         try (InputStream input = dbUtils.class.getClassLoader().getResourceAsStream("config/database.json")) {
             if (input == null) {
                 throw new RuntimeException(
@@ -49,20 +48,11 @@ public class dbUtils {
             statement.close();
             connection.close();
 
-            System.out.println("Database created successfully.");
+            System.out.println("Database initizialized successfully.");
             connection = DriverManager.getConnection(url + dbName, user, password);
         } catch (SQLException e) {
             System.out.println("Error creating database: " + e.getMessage());
         }
-
-        if (connection != null) {
-            createTables(connection);
-        }
-
-        else {
-            System.out.println("Failed to establish a connection to the database.");
-        }
-
         return connection;
     }
 
@@ -91,17 +81,14 @@ public class dbUtils {
     }
 
     public static void checkDatabase() {
-        String url = DB_URL;
-        String dbName = DB_NAME;
-        String user = DB_USER;
-        String password = DB_PASSWORD;
         Connection connection = null;
 
         try {
-            connection = DriverManager.getConnection(url + dbName, user, password);
+            connection = DriverManager.getConnection(DB_URL + DB_NAME, DB_USER, DB_PASSWORD);
         } catch (SQLException e) {
-            System.out.println("Database " + dbName + " does not exist. Creating database...");
-            connection = createDatabase(url, dbName, user, password);
+            System.out.println("Database " + DB_NAME + " does not exist. Creating database...");
+            connection = createDatabase(DB_URL, DB_NAME, DB_USER, DB_PASSWORD);
+            createTables(connection);
         }
 
         if (connection != null) {
