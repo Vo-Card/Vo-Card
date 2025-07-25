@@ -31,6 +31,7 @@ public class dbUtils {
             DB_NAME = data.get("DB_NAME");
             DB_USER = data.get("DB_USER");
             DB_PASSWORD = data.get("DB_PASSWORD");
+            checkDatabase();
         } catch (Exception e) {
             e.printStackTrace();
         }
