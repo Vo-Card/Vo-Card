@@ -19,7 +19,8 @@ public class Formatter {
         // This block runs when the class is loaded
         System.out.println("Loading default dataset at class load...");
 
-        try (InputStream input = Formatter.class.getClassLoader().getResourceAsStream("datasets/default_deck_sample.json")) {
+        try (InputStream input = Formatter.class.getClassLoader()
+                .getResourceAsStream("datasets/default_deck_sample.json")) {
             if (input == null) {
                 throw new RuntimeException("default_deck_sample.json not found!");
             }
@@ -35,7 +36,7 @@ public class Formatter {
         return obj.keySet();
     }
 
-    public static HashMap<String, Object> formatDeck(String data){
+    public static HashMap<String, Object> formatDeck(String data) {
         HashMap<String, Object> formattedDeck = new HashMap<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -46,13 +47,13 @@ public class Formatter {
         }
         return formattedDeck;
     }
- 
+
     public void printDeck(HashMap<String, Object> deck, int depth) {
         if (deck == null || deck.isEmpty()) {
             deck = new HashMap<>(defaultDeck);
             System.out.println("Using default deck as provided deck is empty or null.");
         }
-        
+
         for (Map.Entry<String, Object> entry : deck.entrySet()) {
             System.out.println(" ".repeat(depth * 2) + entry.getKey() + ":");
             if (entry.getValue() instanceof Map) {
@@ -77,8 +78,5 @@ public class Formatter {
             customDeck = new HashMap<>(defaultDeck);
         }
 
-
-
-        
     }
 }
