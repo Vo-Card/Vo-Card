@@ -4,7 +4,7 @@ const bgBox = document.body;
 
 const bgLayers = {
     dots: {
-        value: 'radial-gradient(rgb(255,255,255) 1px, transparent 0)',
+        value: 'radial-gradient(rgb(255,255,255) 2px, transparent 0)',
         position: '-25px -25px',
         size: '50px 50px',
         repeat: 'repeat',
