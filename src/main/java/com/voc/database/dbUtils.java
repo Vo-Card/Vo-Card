@@ -19,7 +19,7 @@ public class dbUtils {
     static {
         System.out.println("Loading default dataset at class load...");
 
-        try (InputStream input = dbUtils.class.getClassLoader().getResourceAsStream("resources/config/database.json")) {
+        try (InputStream input = dbUtils.class.getClassLoader().getResourceAsStream("config/database.json")) {
             if (input == null) {
                 throw new RuntimeException(
                         "database.json not found or haven't config. Please check the config folder in resources file.");
