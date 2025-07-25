@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class dbUtils {
 
-    private static String DB_URL = "jdbc:mysql://localhost:3306/";
-    private static String DB_NAME = "YOUR_TABLE_NAME";
-    private static String DB_USER = "YOUR_DATABASE_USERNAME";
-    private static String DB_PASSWORD = "YOUR_DATABASE_PASSWORD";
+    private static String DB_URL;
+    private static String DB_NAME;
+    private static String DB_USER;
+    private static String DB_PASSWORD;
 
     private static Connection globalConnection = null;
 
