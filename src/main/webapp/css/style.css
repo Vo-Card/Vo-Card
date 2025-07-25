@@ -6,7 +6,7 @@
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-body{
+body {
     background-blend-mode: normal, normal, normal, overlay, normal, normal;
 }
 
@@ -35,6 +35,7 @@ nav {
     font-size: 20px;
     color: white;
 }
+
 nav ul {
     display: flex;
     list-style: none;
@@ -44,7 +45,7 @@ nav ul {
     height: 100%;
 }
 
-nav ul.right li a{
+nav ul.right li a {
     display: flex;
     font-weight: bold;
     min-width: 75px;
@@ -68,7 +69,7 @@ nav ul.right li a{
     margin-right: -12px;
 }
 
-.container{
+.container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -78,7 +79,7 @@ nav ul.right li a{
     gap: 150px;
 }
 
-.slogan{
+.slogan {
     width: 80%;
     display: flex;
     flex-direction: column;
@@ -87,13 +88,15 @@ nav ul.right li a{
     gap: 20px;
 }
 
-.slogan h1, .slogan h1 span{
+.slogan h1,
+.slogan h1 span {
     font-family: "Sansita", sans-serif;
     font-size: 3.5vw;
     text-align: center;
     width: fit-content;
 }
-.slogan p{
+
+.slogan p {
     font-size: 1vw;
 }
 
@@ -109,10 +112,10 @@ nav ul.right li a{
     position: relative;
 }
 
-.deck{
+.deck {
     width: 200px;
     height: 300px;
-    display:flex;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -124,18 +127,18 @@ nav ul.right li a{
     overflow: hidden;
 }
 
-.deck .category{
+.deck .category {
     font-size: 25px;
     text-shadow: 0 0 20px white;
 }
 
-.deck .word{
+.deck .word {
     position: absolute;
     font-size: 24px;
     text-align: center;
 }
 
-.deck .background{
+.deck .background {
     width: 100%;
     height: 100%;
     display: flex;
@@ -143,14 +146,14 @@ nav ul.right li a{
     justify-content: space-between;
 }
 
-.deck .background .decorations{
+.deck .background .decorations {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.default::before{
+.default::before {
     content: "";
     position: absolute;
     z-index: -1;
@@ -160,32 +163,32 @@ nav ul.right li a{
 }
 
 .a1::before {
-    background:radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
-    radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #395B8E 100%),
-    #395B8E;
+    background: radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
+        radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #395B8E 100%),
+        #395B8E;
     background-blend-mode: overlay, normal, normal;
 }
 
 .a2::before {
-    background:radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
-    radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #26226B 100%);
+    background: radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
+        radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #26226B 100%);
     background-blend-mode: overlay, normal;
 }
 
 .b1::before {
-    background:radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
-    radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #6B1D42 100%);
+    background: radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
+        radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #6B1D42 100%);
     background-blend-mode: overlay, normal;
 }
 
 .b2::before {
-    background:radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
-    radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #AF3935 100%);
+    background: radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
+        radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #AF3935 100%);
     background-blend-mode: overlay, normal;
 }
 
 .c1::before {
-    background:radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
-    radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #6CA233 100%);
+    background: radial-gradient(rgba(255, 255, 255, 0.7) 3px, transparent 0) -25px -25px / 40px 40px repeat,
+        radial-gradient(ellipse 150% 40%, rgb(0, 0, 0) 0%, #6CA233 100%);
     background-blend-mode: overlay, normal;
 }
