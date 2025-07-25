@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,22 +83,33 @@ public class Formatter {
 
     }
 
-    public void randomizeWordsFromeDeck(HashMap<String, Object> deck) {
-        if (deck == null || deck.isEmpty()) {
+
+    private static String randomArray(ArrayList<String> arr) {
+        return arr.get((int) (Math.random() * arr.size()));
+    }
+
+    public void randomizeWordsFromeDeck(HashMap<String, Object> stack) {
+        if (stack == null || stack.isEmpty()) {
             System.out.println("Using default deck as provided deck is empty or null.");
-            deck = new HashMap<>(defaultDeck);
+            stack = new HashMap<>(defaultDeck);
         }
 
-        // Randomize categories
-        List<String> category = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : deck.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                category = new ArrayList<>(getKeysFromObject((Map<String, Object>) entry.getValue())); 
-            }
-        }
-        String randomed_category = category.get((int) (Math.random() * category.size()));
+        HashMap<String, Object> currentDepth = stack;
 
-        System.out.println("Randomized categories: " + randomed_category);
+        // Randomize decks
+        ArrayList<String> decks = new ArrayList<>(getKeysFromObject(currentDepth));
+        currentDepth = (HashMap<String, Object>) currentDepth.get(randomArray(decks));
+
+        ArrayList<String> categories = new ArrayList<>(getKeysFromObject(currentDepth));
+        currentDepth = (HashMap<String, Object>) currentDepth.get(randomArray(categories));
+
+        ArrayList<String> words = new ArrayList<>(getKeysFromObject(currentDepth));
+        String rWord = randomArray(words);
+        currentDepth = (HashMap<String, Object>) currentDepth.get(rWord);
+
+
+        System.out.println("Randomized word: " + rWord);
+        System.out.println("Current Depth: " + currentDepth);
         System.out.println("Cards randomized successfully.");
     }
 }
