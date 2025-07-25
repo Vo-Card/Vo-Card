@@ -92,12 +92,21 @@ public class Formatter {
         List<String> category = new ArrayList<>();
         for (Map.Entry<String, Object> entry : deck.entrySet()) {
             if (entry.getValue() instanceof Map) {
-                category = new ArrayList<>(getKeysFromObject((Map<String, Object>) entry.getValue())); 
+                category = new ArrayList<>(getKeysFromObject((Map<String, Object>) entry.getValue()));
+                System.out.println(category);
             }
         }
         String randomed_category = category.get((int) (Math.random() * category.size()));
 
         System.out.println("Randomized categories: " + randomed_category);
+        for (Map.Entry<String, Object> entry : deck.entrySet()) {
+            if (entry.getValue() instanceof Map) {
+                Map<String, Object> subDeck = (Map<String, Object>) entry.getValue();
+                List<String> words = new ArrayList<>(subDeck.keySet());
+                Collections.shuffle(words);
+                System.out.println("Randomized words in category '" + entry.getKey() + "': " + words);
+            }
+        }
         System.out.println("Cards randomized successfully.");
     }
 }
