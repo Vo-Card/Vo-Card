@@ -72,11 +72,25 @@ public class Formatter {
         }
     }
 
-    public static void getDefinition(String word, String deck, HashMap<String, Object> customDeck) {
+    public void getDefinition(String word, String deck, HashMap<String, Object> customDeck) {
         if (customDeck == null || customDeck.isEmpty()) {
             System.out.println("Using default deck as custom deck is empty or null.");
             customDeck = new HashMap<>(defaultDeck);
         }
 
+    }
+
+    public void randomizeCards(HashMap<String, Object> deck) {
+        if (deck == null || deck.isEmpty()) {
+            System.out.println("Using default deck as provided deck is empty or null.");
+            deck = new HashMap<>(defaultDeck);
+        }
+
+        for (Map.Entry<String, Object> entry : deck.entrySet()) {
+            System.out.println(entry.getKey() + ":");
+            String key = entry.getKey();
+            System.out.println(key);
+        }
+        System.out.println("Cards randomized successfully.");
     }
 }

@@ -12,7 +12,8 @@ public class HomeController {
     @GetMapping("/home")
     public String homePage(Model model) {
         Formatter formatter = new Formatter();
-        formatter.printDeck(null, 0);
+        // formatter.printDeck(null, 0);
+        formatter.randomizeCards(null);
         return "index";
     }
 
