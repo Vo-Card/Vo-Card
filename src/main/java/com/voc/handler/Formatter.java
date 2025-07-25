@@ -82,20 +82,22 @@ public class Formatter {
 
     }
 
-    public void randomizeCards(HashMap<String, Object> deck) {
+    public void randomizeWordsFromeDeck(HashMap<String, Object> deck) {
         if (deck == null || deck.isEmpty()) {
             System.out.println("Using default deck as provided deck is empty or null.");
             deck = new HashMap<>(defaultDeck);
         }
+
+        // Randomize categories
         List<String> category = new ArrayList<>();
         for (Map.Entry<String, Object> entry : deck.entrySet()) {
-            if (entry.getValue() instanceof Map<?, ?> nestedMap) {
-                System.out.println("Categories: " + nestedMap.keySet());
-                category.addAll(nestedMap.keySet().stream().map(Object::toString).toList());
+            if (entry.getValue() instanceof Map) {
+                category = new ArrayList<>(getKeysFromObject((Map<String, Object>) entry.getValue())); 
             }
         }
-        Collections.shuffle(category);
-        System.out.println("Randomized categories: " + category);
+        String randomed_category = category.get((int) (Math.random() * category.size()));
+
+        System.out.println("Randomized categories: " + randomed_category);
         System.out.println("Cards randomized successfully.");
     }
 }

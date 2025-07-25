@@ -13,7 +13,7 @@ public class HomeController {
     public String homePage(Model model) {
         Formatter formatter = new Formatter();
         // formatter.printDeck(null, 0);
-        formatter.randomizeCards(null);
+        formatter.randomizeWordsFromeDeck(null);
         return "index";
     }
 
