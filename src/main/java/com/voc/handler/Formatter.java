@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,31 +83,49 @@ public class Formatter {
 
     }
 
-    public void randomizeWordsFromeDeck(HashMap<String, Object> deck) {
-        if (deck == null || deck.isEmpty()) {
+    private static String randomArray(ArrayList<String> arr) {
+        return arr.get((int) (Math.random() * arr.size()));
+    }
+
+    public void randomizeWordsFromeDeck(HashMap<String, Object> stack) {
+        if (stack == null || stack.isEmpty()) {
             System.out.println("Using default deck as provided deck is empty or null.");
-            deck = new HashMap<>(defaultDeck);
+            stack = new HashMap<>(defaultDeck);
         }
 
-        // Randomize categories
-        List<String> category = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : deck.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                category = new ArrayList<>(getKeysFromObject((Map<String, Object>) entry.getValue()));
-                System.out.println(category);
-            }
-        }
-        String randomed_category = category.get((int) (Math.random() * category.size()));
+        HashMap<String, Object> currentDepth = stack;
 
-        System.out.println("Randomized categories: " + randomed_category);
-        for (Map.Entry<String, Object> entry : deck.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                Map<String, Object> subDeck = (Map<String, Object>) entry.getValue();
-                List<String> words = new ArrayList<>(subDeck.keySet());
-                Collections.shuffle(words);
-                System.out.println("Randomized words in category '" + entry.getKey() + "': " + words);
-            }
+        // Randomize decks
+        ArrayList<String> decks = new ArrayList<>(getKeysFromObject(currentDepth));
+        currentDepth = (HashMap<String, Object>) currentDepth.get(randomArray(decks));
+
+        ArrayList<String> categories = new ArrayList<>(getKeysFromObject(currentDepth));
+        String innerCategories = randomArray(categories);
+        currentDepth = (HashMap<String, Object>) currentDepth.get(innerCategories);
+
+        // get categories
+        // random words in categories
+        // definetion of words
+
+        ArrayList<String> words = new ArrayList<>(getKeysFromObject(currentDepth));
+        String rWord = randomArray(words);
+        currentDepth = (HashMap<String, Object>) currentDepth.get(rWord);
+
+        ArrayList<String> perp = new ArrayList<>(getKeysFromObject(currentDepth));
+
+        ArrayList<String> define = (ArrayList<String>) currentDepth.get(perp.get(0));
+
+        System.out.println("Has category: " + categories);
+        System.out.println("Random category: " + innerCategories);
+        System.out.println("Randomized word: " + rWord);
+        System.out.println("perp : " + perp);
+        for (int i = 0; i < define.size(); i++) {
+            System.out.println("Definition: " + define.get(i));
         }
+        // for (String item : ) {
+        // System.out.println("Definetion: " + item);
+        // }
+
         System.out.println("Cards randomized successfully.");
     }
 }
