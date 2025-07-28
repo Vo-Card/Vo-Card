@@ -114,13 +114,15 @@ public class Formatter {
         System.out.println("Random category: " + innerCategories);
         System.out.println("Randomized word: " + rWord);
         System.out.println("perp : " + perp);
-        for (int i = 0; i < define.size(); i++) {
-            System.out.println("Definition: " + define.get(i));
+        for (int i = 0; i < perp.size(); i++) {
+            System.out.println("part of speech: " + perp.get(i));
+            for (int j = 0; j < define.size(); j++) {
+                System.out.println("Definition " + ": " + define.get(j));
+            }
         }
         // for (String item : ) {
         // System.out.println("Definetion: " + item);
         // }
-
         System.out.println("Cards randomized successfully.");
     }
 }
