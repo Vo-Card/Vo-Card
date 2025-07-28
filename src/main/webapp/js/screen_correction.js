@@ -16,16 +16,16 @@ const bgLayers = {
         repeat: 'no-repeat',
     },
     glow2: {
-        value: 'radial-gradient(ellipse 150% 50%, rgba(27, 29, 36, 1) 65%, #d38c2aff 85%)',
+        value: 'radial-gradient(ellipse 150% 50%, var(--primary-color) 65%, var(--theme-color) 85%)',
         position: 'center -50vh',
         size: '100vw 500vh',
         repeat: 'no-repeat',
     },
     glow2_mask: {
-        value: 'radial-gradient(ellipse 150% 50%, rgba(27, 29, 36, 1) 60%, rgba(255, 149, 10, 0) 75%)',
+        value: 'radial-gradient(ellipse 150% 50%, var(--primary-color) 60%, transparent 75%)',
         repeat: 'no-repeat',
     },
-    gradient: 'linear-gradient(transparent 750px, rgb(27, 29, 36) 1000px)',
+    gradient: 'linear-gradient(transparent 750px, var(--primary-color) 1000px)',
     color: 'rgb(27, 29, 36)'
 };
 
@@ -35,6 +35,10 @@ function updateBackground() {
     const glow2 = `${bgLayers.glow2.value} ${bgLayers.glow2.position} / ${bgLayers.glow2.size} ${bgLayers.glow2.repeat}`;
     const glow2_mask = `${bgLayers.glow2_mask.value} ${bgLayers.glow2.position} / ${bgLayers.glow2.size} ${bgLayers.glow2.repeat}`;
     document.body.style.background = `${glow}, ${bgLayers.gradient}, ${glow2_mask}, ${dot}, ${glow2}, ${bgLayers.color}`;
+    var card_preview = document.getElementById('card_preview');
+    var width = window.innerWidth;
+    var scale = width / 1080 / 2.5;
+    card_preview.style.scale = scale;
 }
 
 // Initial background setup
@@ -63,3 +67,5 @@ document.addEventListener('mousemove', function(event) {
     updateBackground();
 });
 
+//Fix screen scaling
+window.addEventListener('resize', updateBackground);

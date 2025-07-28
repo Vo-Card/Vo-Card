@@ -5,7 +5,7 @@
     <title>Vo Card</title>
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <script src="/js/bg_update_correction.js" defer></script>
+    <script src="/js/screen_correction.js" defer></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,8 +40,8 @@
             <h1 style="color: white;">Turn your <span style="color: #dd4949;">English</span> goals into reality <br> discover the power of smart <span style="color: #4d6dd8;">flashcards</span></h1>
             <p style="color: #999999; text-align: center;">A flashcard platform that helps users create, organize, and study digital flashcards. Ideal for students, teachers, and independent learners. <br>Supports custom decks, smart review features, and cross-device syncing.</p>
         </div>
-        <div class="preview">
-            <div class="deck default a1" style="transform:rotate(-30deg) translate(100px,40px); z-index: 1;">
+        <div class="preview" id="card_preview">
+            <div class="deck default a1" style="transform:rotate(-30deg) translate(100px,140px); z-index: 1;">
                 <div class="background">
                     <p class="category">A1</p>
                     <div class="decorations">
@@ -55,7 +55,7 @@
                 </div>
                 <p class="word">Something</p>
             </div>
-            <div class="deck default a2" style="transform:rotate(-10deg) translate(50px,-100px); z-index: 2;">
+            <div class="deck default a2" style="transform:rotate(-10deg) translate(50px,0px); z-index: 2;">
                 <div class="background">
                     <p class="category">A2</p>
                     <div class="decorations">
@@ -69,7 +69,7 @@
                 </div>
                 <p class="word">Something</p>
             </div>
-            <div class="deck default b1" style="transform:rotate(0deg) translate(0,-150px); z-index: 3;">
+            <div class="deck default b1" style="transform:rotate(0deg) translate(0,-50px); z-index: 3;">
                 <div class="background">
                     <p class="category">B1</p>
                     <div class="decorations">
@@ -83,7 +83,7 @@
                 </div>
                 <p class="word">Something</p>
             </div>
-            <div class="deck default b2" style="transform:rotate(10deg) translate(-50px,-100px); z-index: 2;">
+            <div class="deck default b2" style="transform:rotate(10deg) translate(-50px,0px); z-index: 2;">
                 <div class="background">
                     <p class="category">B2</p>
                     <div class="decorations">
@@ -97,7 +97,7 @@
                 </div>
                 <p class="word">Something</p>
             </div>
-            <div class="deck default c1" style="transform:rotate(30deg) translate(-100px,40px); z-index: 1;">
+            <div class="deck default c1" style="transform:rotate(30deg) translate(-100px,140px); z-index: 1;">
                 <div class="background">
                     <p class="category">C1</p>
                     <div class="decorations">
