@@ -20,7 +20,7 @@
                     <ul class="menu">
                         <li class="menuItem">
                             <a href="#" class=" flex gap-2">
-                                <div><img src="/resources/profileTemplate.png" alt="" class="profilePicture"
+                                <div><img src="/imgs/profileTemplate.png" alt="" class="profilePicture"
                                         height="20px"></div>
                                 <div class="profileName">{hdiosahsahdsaihiaodshsda}</div>
                             </a>
