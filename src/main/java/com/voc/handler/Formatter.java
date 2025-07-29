@@ -108,14 +108,13 @@ public class Formatter {
 
         ArrayList<String> perp = new ArrayList<>(getKeysFromObject(currentDepth));
 
-        ArrayList<String> define = (ArrayList<String>) currentDepth.get(perp.get(0));
-
         System.out.println("Has category: " + categories);
         System.out.println("Random category: " + innerCategories);
         System.out.println("Randomized word: " + rWord);
         System.out.println("perp : " + perp);
         for (int i = 0; i < perp.size(); i++) {
             System.out.println("part of speech: " + perp.get(i));
+            ArrayList<String> define = (ArrayList<String>) currentDepth.get(perp.get(i));
             for (int j = 0; j < define.size(); j++) {
                 System.out.println("Definition " + ": " + define.get(j));
             }
