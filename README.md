@@ -10,6 +10,7 @@ Vo-card is a website that allow you to practice your English by using flashcards
 
 ## SQL Setup
 The project itself will automatically set the database up for you **if** you use `root` or any account that has permission to create databases and tables.
-If you wish to not let the program set up automatically, you can proceed the manual setup.
+
+If you wish to not let the program set up automatically, you can proceed the manual setup right below here.
 ### Manual SQL setup
-`On our current project file are not yethave a proper SQL structure please use root user for now`
+`On our current project file are not yet have a proper SQL structure please use root user for now`
