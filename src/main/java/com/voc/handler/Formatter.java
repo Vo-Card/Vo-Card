@@ -1,5 +1,9 @@
 package com.voc.handler;
 
+import com.voc.handler.deckConfig;
+
+import java.util.Scanner; // temporary
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -98,20 +102,29 @@ public class Formatter {
         String innerCategories = randomArray(categories);
         currentDepth = (HashMap<String, Object>) currentDepth.get(innerCategories);
 
-        // get categories
-        // random words in categories
-        // definetion of words
-
         ArrayList<String> words = new ArrayList<>(getKeysFromObject(currentDepth));
         String rWord = randomArray(words);
         currentDepth = (HashMap<String, Object>) currentDepth.get(rWord);
 
         ArrayList<String> perp = new ArrayList<>(getKeysFromObject(currentDepth));
 
-        System.out.println("Has category: " + categories);
-        System.out.println("Random category: " + innerCategories);
-        System.out.println("Randomized word: " + rWord);
-        System.out.println("perp : " + perp);
+        // creating usr tool
+        Scanner sc = new Scanner(System.in);
+        timer usrTimer = new timer();
+        Thread thread = new Thread(usrTimer);
+        thread.setDaemon(true);
+
+        System.out.println("You have " + usrTimer.getTimer() + " to answer");
+        thread.start();
+
+        System.out.println("---------- " + rWord + " ----------");
+        System.out.println("Enter text : ");
+        String text = sc.nextLine(); // del later
+        sc.close();
+        // System.out.println("Has category: " + categories);
+        // System.out.println("Random category: " + innerCategories);
+        // System.out.println("Randomized word: " + rWord);
+        // System.out.println("perp : " + perp);
         for (int i = 0; i < perp.size(); i++) {
             System.out.println("part of speech: " + perp.get(i));
             ArrayList<String> define = (ArrayList<String>) currentDepth.get(perp.get(i));
@@ -119,9 +132,39 @@ public class Formatter {
                 System.out.println("Definition " + ": " + define.get(j));
             }
         }
-        // for (String item : ) {
-        // System.out.println("Definetion: " + item);
-        // }
-        System.out.println("Cards randomized successfully.");
+        // System.out.println("Cards randomized successfully.");
+    }
+
+}
+
+class timer implements Runnable {
+    private int timer;
+
+    timer() {
+        this.timer = 5;
+    }
+
+    timer(int time) {
+        this.timer = time;
+    }
+
+    public int getTimer() {
+        return this.timer;
+    }
+
+    @Override
+    public void run() {
+        for (int i = timer; i >= 0; i--) {
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.out.println("Thread was interrupted");
+            }
+            if (i == 0) {
+                System.out.println("Time out");
+                continue;
+            }
+        }
     }
 }

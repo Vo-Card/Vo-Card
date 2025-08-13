@@ -14,8 +14,6 @@ public class HomeController {
     public String homePage(Model model) {
         Formatter formatter = new Formatter();
         formatter.randomizeWordsFromeDeck(null);
-        deckConfig config = new deckConfig();
-        config.timer(false, 5);
         return "index";
     }
 
