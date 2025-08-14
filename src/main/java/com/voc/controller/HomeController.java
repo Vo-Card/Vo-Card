@@ -13,12 +13,16 @@ public class HomeController {
     @GetMapping("/home")
     public String homePage(Model model) {
         Formatter formatter = new Formatter();
-        formatter.randomizeWordsFromeDeck(null);
         return "index";
     }
 
     @RequestMapping("/helloworld")
     public String helloworld() {
         return "helloworld";
+    }
+
+    @RequestMapping("/welcome")
+    public String welcome() {
+        return "welcome";
     }
 }
