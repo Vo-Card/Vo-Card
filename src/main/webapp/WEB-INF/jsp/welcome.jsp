@@ -8,138 +8,181 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Homepage</title>
             <link rel="stylesheet" type="text/css" href="/css/style.css">
+            <link rel="stylesheet" type="text/css" href="/css/commonUse.css">
 
             <!-- temp -->
             <style>
-                .d-block {
-                    display: block;
-                }
-
-                .d-flex {
-                    display: flex;
-                }
-
-                .gap-10 {
-                    gap: 10px;
-                }
-
-                .voCardMain {
+                .cover {
+                    background-color: #242424;
+                    width: 100%;
+                    min-height: 100svh;
                     color: white;
                 }
 
-                .sideBar {
-                    width: 180px;
-                    overflow: hidden;
-                    background-color: #242424;
-                    align-items: center;
-                    padding: 5px;
+                .hamburger-button {
+                    letter-spacing: 0;
+                    font-weight: 500;
+                    font-size: .875rem;
+                    line-height: 1.25rem;
+                    border-radius: .25rem;
+                    white-space: nowarp;
+                    white-space-collapse: collapse;
+                    text-wrap-mode: nowrap;
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    background-color: rgba(0, 0, 0, 0%);
+                    letter-spacing: 0;
                 }
 
-                .voCardHead {
-                    background-color: #242424;
-                    padding: 5px;
-                    justify-content: space-between;
+                .usr-prof {
+                    width: fit-content;
+                    height: 2.5rem;
                 }
 
-                .mainTopBar {
-                    background-color: #242424;
-                    width: 100%;
-                    padding: 5px;
-                    justify-content: space-between;
+                .slide-bar {
+                    background-color: #1F1F1F;
+                    width: 160px;
                 }
 
-                .topBarPage {
-                    padding: 5px;
+                .compo-color {
+
+                    background-color: #1F1F1F;
                 }
 
-                .user {
-                    gap: 10px;
-                    padding: 5px;
-                }
-
-                .slideOpener {
-                    width: 5px;
-                    height: 100vh;
+                .window {
                     background-color: red;
+                    width: 5px;
                 }
 
-                .sideItem {
-                    padding: 7px;
-                    gap: 10px;
-                }
 
                 .fakeIcon {
-                    width: 18px;
-                    height: 18px;
+                    height: 24px;
+                    width: 24px;
                     background-color: white;
                 }
 
-                .deckList {
-                    padding: 5px;
+                ul {
+                    list-style: none;
                 }
             </style>
         </head>
 
         <body>
-            <!-- Component silde bar -->
-            <div class="voCardMain d-flex">
-                <div class="sideBar hidden">
-
-                    <div class="d-block">
-                        <div class="gap-10 d-flex voCardHead">
-                            <div class="voCardHeadItems d-flex gap-10">
-                                <div style="width: 20px; height: 20px; background-color: white;" class="sideImg"></div>
-                                <div style="text-align: center;">Vo-Card</div>
-                            </div>
-
-                            <div class="hideButton"><img src="/imgs/whiteHamburger.png" alt="" width="24" height="24">
-                            </div>
+            <div class="d-flex cover">
+                <!-- slidebar -->
+                <div class="d-block hiddable slide-bar px-2">
+                    <div class="d-flex p-2 gap-3 align-items-center">
+                        <div class=""><img src="/imgs/icon.svg" alt="" style="width: 28px; height: 28px; color: white;">
                         </div>
+                        <div class="" style="font-size: 16px;">Vo-Card</div>
+                    </div>
 
-                        <ul class="homeList">
-                            <li class="sideItem d-flex">
-                                <div class="fakeIcon"></div>
-                                <div>Home</div>
+                    <div class="p-2 d-flex flex-column w-full min-w-0 relative gap-2">
+                        <div class="px-2 align-items-center d-flex">Home</div>
+
+                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
+                            <li class="d-flex gap-2 align-items-center">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Home</span>
+                                </a>
                             </li>
-                            <li class="sideItem d-flex">
-                                <div class="fakeIcon"></div>
-                                <div>Dashboard</div>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Stat</span>
+                                </a>
                             </li>
-                            <li class="sideItem d-flex">
-                                <div class="fakeIcon"></div>
-                                <div>Stat</div>
-                            </li>
-                            <li class="sideItem d-flex">
-                                <div class="fakeIcon"></div>
-                                <div>Learn</div>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Learn</span>
+                                </a>
                             </li>
                         </ul>
 
-                        <div class="deckList">
-                            <p>Decks</p>
-                            <div class="historyDeck">
+                        <div class="px-2 align-items-center d-flex">Deck</div>
 
-                                <ul class="historyMenu">
-                                    <li class="history">A1</li>
-                                    <li class="history">A2</li>
-                                </ul>
+                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex">
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Decks</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="align-items-center d-flex">recently reviewed</div>
+                        <ul class="gap-1 w-full flex-column min-w-0 w-full d-flex py-2">
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <span>A1</span>
+                                </a>
+                            </li>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <span>A2</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class=" align-items-center d-flex">Setting</div>
+                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
+                            <li class="d-flex gap-2 ">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Setting</span>
+                                </a>
+                            </li>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>About me</span>
+                                </a>
+                            </li>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Contact</span>
+                                </a>
+                            </li>
+
+                            <li class="d-flex gap-2">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                    <div class="fakeIcon"></div>
+                                    <span>Log-out</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+                <div class="window"></div>
+
+                <div class="d-flex w-full flex-column min-h-svh flex-1 relative">
+                    <header class="w-full d-flex align-items-center gap-2 shrink-0 top-0 sticky compo-color">
+                        <div class="d-flex align-items-center gap-2 px-4">
+                            <button class="hamburger-button justify-content-center d-inline -ml-1">
+                                <img src="/imgs/white-hamburger.png" alt="" style="width: 24px; height: 24px;">
+                            </button>
+                        </div>
+
+                        <div class="ml-auto d-flex align-items-center justify-content-center gap-1">
+                            <div class="usr-prof d-flex justify-content-center align-items-center gap-2 px-2">
+                                <div class=""><img src="/imgs/profileTemplate.png" alt=""
+                                        style="width: 24px; height: 24px;">
+                                </div>
+                                <div>${username}</div>
                             </div>
                         </div>
-                    </div>
-
-                </div>
-                <div class="slideOpener"></div>
-                <!-- Slide bar line end -->
-
-                <div class="mainTopBar d-flex">
-                    <div class="topBarPage">{currentPage}</div>
-                    <div class="user d-flex">
-                        <div><img src="/imgs/profileTemplate.png" alt="" class="profilePicture" height="20px"></div>
-                        <div>${username}</div>
-                    </div>
+                    </header>
                 </div>
             </div>
-
         </body>
 
         </html>
