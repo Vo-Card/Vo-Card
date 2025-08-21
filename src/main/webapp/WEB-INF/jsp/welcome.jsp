@@ -8,6 +8,7 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Homepage</title>
             <link rel="stylesheet" type="text/css" href="/css/style.css">
+            <link rel="stylesheet" type="text/css" href="/css/card_theme.css">
             <link rel="stylesheet" type="text/css" href="/css/commonUse.css">
 
             <!-- temp -->
@@ -32,6 +33,11 @@
                     height: 2.5rem;
                     background-color: rgba(0, 0, 0, 0%);
                     letter-spacing: 0;
+                    border: 0;
+                }
+
+                .hamburger-button:hover {
+                    background-color: rgba(152, 152, 152, 0.25);
                 }
 
                 .usr-prof {
@@ -41,11 +47,9 @@
 
                 .slide-bar {
                     background-color: #1F1F1F;
-                    width: 160px;
                 }
 
                 .compo-color {
-
                     background-color: #1F1F1F;
                 }
 
@@ -64,96 +68,119 @@
                 ul {
                     list-style: none;
                 }
+
+                .grid-container {
+                    display: grid;
+                    grid-template-columns: repeat(12, minmax(0, 1fr));
+                    min-height: calc(100vh - 2rem);
+                    gap: 1.5rem;
+                }
+
+                .item1 {
+                    grid-column: 2 / 6 span;
+                    background-color: #0D0D0D;
+
+                }
+
+                .item2 {
+                    grid-column: 9 / 3 span;
+                    background-color: #0D0D0D;
+
+                }
+
+                .font-fixed {
+                    font-size: 28px;
+                }
             </style>
         </head>
 
         <body>
             <div class="d-flex cover">
                 <!-- slidebar -->
-                <div class="d-block hiddable slide-bar px-2">
+                <div class="d-block hiddable slide-bar px-2 z-9999">
                     <div class="d-flex p-2 gap-3 align-items-center">
                         <div class=""><img src="/imgs/icon.svg" alt="" style="width: 28px; height: 28px; color: white;">
                         </div>
                         <div class="" style="font-size: 16px;">Vo-Card</div>
                     </div>
 
-                    <div class="p-2 d-flex flex-column w-full min-w-0 relative gap-2">
-                        <div class="px-2 align-items-center d-flex">Home</div>
+                    <div class="p-2 d-flex flex-column w-full min-w-0 relative gap-1">
+                        <div class="p-2 align-items-center d-flex">Home</div>
 
                         <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
                             <li class="d-flex gap-2 align-items-center">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Home</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Stat</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Learn</span>
                                 </a>
                             </li>
                         </ul>
 
-                        <div class="px-2 align-items-center d-flex">Deck</div>
+                        <div class="px-2 align-items-center d-flex p-2">Deck</div>
 
                         <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex">
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Decks</span>
                                 </a>
                             </li>
                         </ul>
 
-                        <div class="align-items-center d-flex">recently reviewed</div>
+                        <div class="align-items-center d-flex p-2">recently reviewed</div>
                         <ul class="gap-1 w-full flex-column min-w-0 w-full d-flex py-2">
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <span>A1</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <span>A2</span>
                                 </a>
                             </li>
                         </ul>
 
-                        <div class=" align-items-center d-flex">Setting</div>
+                        <div class=" align-items-center d-flex p-2">Setting</div>
                         <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
                             <li class="d-flex gap-2 ">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Setting</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>About me</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Contact</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-2 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Log-out</span>
                                 </a>
@@ -170,6 +197,7 @@
                             <button class="hamburger-button justify-content-center d-inline -ml-1">
                                 <img src="/imgs/white-hamburger.png" alt="" style="width: 24px; height: 24px;">
                             </button>
+                            <div class="d-flex align-items-center py-1">{current_page}</div>
                         </div>
 
                         <div class="ml-auto d-flex align-items-center justify-content-center gap-1">
@@ -181,7 +209,42 @@
                             </div>
                         </div>
                     </header>
+
+                    <main class="relative z-0 sm-pb-0 pb-8 px-2 someting">
+                        <div class="grid-container my-4 mx-auto w-full">
+                            <div class="item1">
+                                <div class="pt-4 px-3 pb-2">
+                                    <p class="font-fixed">{daily_welcome_message}, {username}!</p>
+                                </div>
+                                <div class="pb-2 px-2">
+                                    <p>Create your own flashcard decks, review with spaced repetition, and track your
+                                        progess .</p>
+                                </div>
+                                <div class="px-2 pb-2">
+                                    <div class="d-flex gap-2">
+                                        <a href="#">
+                                            <p>Get Started</p>
+                                        </a>
+                                        <a href="#">
+                                            <p>Create your own deck</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="item2 gap-2 align-items-center">
+                                <div class="pt-4 px-3 pb-2 ">
+                                    <p class="font-fixed">Your Today Card</p>
+                                </div>
+
+                                <div class="deck default a1"></div>
+                            </div>
+
+                        </div>
+                    </main>
                 </div>
+
+
             </div>
         </body>
 
