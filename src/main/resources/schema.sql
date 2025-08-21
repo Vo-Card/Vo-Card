@@ -16,12 +16,12 @@ CREATE TABLE `usertb` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `join_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `permission_level_FK` tinyint DEFAULT NULL,
+  `display_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`user_id_PK`),
   UNIQUE KEY `usertb_unique` (`username`),
   KEY `usertb_permissiontb_FK` (`permission_level_FK`),
   CONSTRAINT `usertb_permissiontb_FK` FOREIGN KEY (`permission_level_FK`) REFERENCES `permissiontb` (`permission_level_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- vocard.`session` definition
 
