@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * (e.g. UserTable, DeckTable, Setting, ect.)
  * 
  * @author  ZartexV <zartexvertagen@proton.me>
- * @version 0.0.1a (GIT: ${git.commit.id.abbrev})
+ * @version 0.0.1a
  * @since   2025-08-21
  */
 public class DatabaseUtils {
