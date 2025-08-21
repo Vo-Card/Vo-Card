@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.voc.database.dbUtils;
-import com.voc.database.userUtils;
+import com.voc.database.DatabaseUtils;
+import com.voc.database.Security;
 
 @Controller
 public class RegisterController {
@@ -53,8 +53,8 @@ public class RegisterController {
 
     // Example method to process registration
     private String processRegistration(String display_name, String username, String password, String confirmPassword) {
-        if (!userUtils.userExists(dbUtils.getConnection(), username) && password.equals(confirmPassword)) { 
-            userUtils.createUser(dbUtils.getConnection(), display_name, username, password);
+        if (!Security.userExists(DatabaseUtils.getConnection(), username) && password.equals(confirmPassword)) { 
+            Security.createUser(DatabaseUtils.getConnection(), display_name, username, password);
             return "registrationSuccess";
         } else {return "registrationFailed";}
     }
