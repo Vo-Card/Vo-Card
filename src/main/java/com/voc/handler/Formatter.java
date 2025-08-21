@@ -1,7 +1,5 @@
 package com.voc.handler;
 
-import com.voc.handler.deckConfig;
-
 import java.util.Scanner; // temporary
 
 import java.io.IOException;
