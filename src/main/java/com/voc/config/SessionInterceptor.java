@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.voc.database.dbUtils;
-import com.voc.database.userUtils;
+import com.voc.database.DatabaseUtils;
+import com.voc.database.Security;
 
 @Configuration
 public class SessionInterceptor implements HandlerInterceptor {
@@ -34,7 +34,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         }
 
         if (auth_token != null && isValid(auth_token)) {
-            String username = userUtils.searchByToken(dbUtils.getConnection(), auth_token, "username");
+            String username = Security.searchByToken(DatabaseUtils.getConnection(), auth_token, "username");
             request.setAttribute("username", username);
             return true;
         }
@@ -51,6 +51,6 @@ public class SessionInterceptor implements HandlerInterceptor {
     }
 
     private boolean isValid(String token) {
-        return userUtils.validateTokenID(dbUtils.getConnection(), token);
+        return Security.validateTokenID(DatabaseUtils.getConnection(), token);
     }
 }

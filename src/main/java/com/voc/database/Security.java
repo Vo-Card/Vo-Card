@@ -3,7 +3,16 @@ package com.voc.database;
 import java.sql.*;
 import com.voc.security.tokenUtils;
 
-public class userUtils {
+/**
+ * <h1>Database security handler</h1>
+ * The Security class is use to validate, manage
+ * and interact with the database tables.
+ * 
+ * @author Zartex <zartexvertagen@proton.me>
+ * @since  
+ */
+
+public class Security {
 
     public static void createUser(Connection db, String display_name,String username, String password) {
         String sql = "INSERT INTO users (display_name, username, password) VALUES (?, ?, ?)";
