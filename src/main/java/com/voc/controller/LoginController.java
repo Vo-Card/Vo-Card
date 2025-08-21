@@ -1,10 +1,12 @@
 package com.voc.controller;
 
+import java.sql.Connection;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import com.voc.database.dbUtils;
-import com.voc.database.userUtils;
+import com.voc.database.DatabaseUtils;
+import com.voc.database.Security;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ public class LoginController {
 
     @GetMapping("/login")
     public String showLoginPage() {
+        DatabaseUtils.checkDatabase();
         System.out.println("Database checked successfully.");
         return "login";
     }
@@ -33,9 +36,9 @@ public class LoginController {
             return "login";
         }
 
-        if (userUtils.validateUser(dbUtils.getConnection(), username, password)) {
+        if (Security.validateUser(DatabaseUtils.getConnection(), username, password)) {
             // Generate token
-            String token = userUtils.getUserTokenID(dbUtils.getConnection(), username);
+            String token = Security.getUserTokenID(DatabaseUtils.getConnection(), username);
             Cookie authCookie = new Cookie("auth_token", token);
 
             authCookie.setHttpOnly(true);
