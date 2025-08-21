@@ -22,7 +22,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         // get current page URL
         String currentPage = request.getRequestURI();
 
-        String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**", "/welcome" };
+        String[] excludedPages = { "/home", "/welcome", "/login", "/register", "/css/**", "/js/**", "/resources/**", "/welcome" };
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
