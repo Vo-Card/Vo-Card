@@ -1,7 +1,5 @@
 package com.voc.controller;
 
-import java.sql.Connection;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
