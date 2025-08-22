@@ -1,6 +1,7 @@
 package com.voc.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.voc.database.DatabaseUtils;
@@ -25,37 +26,36 @@ public class LoginController {
     public String processLogin(
             @RequestParam String username,
             @RequestParam String password,
+            HttpServletRequest request,
             HttpServletResponse response,
             Model model) {
-        System.out.println("Processing login for user: " + username);
         // Validate username and password
-        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+        if (username == null || username.isEmpty() ||
+            password == null || password.isEmpty()) {
             model.addAttribute("error", "Username and/or password cannot be empty.");
             return "login";
         }
 
-        if (Security.validateUser(DatabaseUtils.getConnection(), username, password)) {
-            // Generate token
-            String token = Security.getUserTokenID(DatabaseUtils.getConnection(), username);
-            Cookie authCookie = new Cookie("auth_token", token);
-
-            authCookie.setHttpOnly(true);
-            authCookie.setPath("/");
-
-            response.addCookie(authCookie);
-
-            return "redirect:/";
-        } else {
+        String session_id = Security.loginUser(username, password, request.getHeader("X-Forwarded-For"), request.getHeader("User-Agent"));
+        
+        if(session_id == null){
             model.addAttribute("error", "Invalid username or password.");
             return "login";
         }
+
+        Cookie cookie = new Cookie("session_id", session_id);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("auth_token", "");
+        Cookie cookie = new Cookie("session_id", ""); // match login cookie name
         cookie.setPath("/");
-        cookie.setMaxAge(0); // Expire immediately
+        cookie.setMaxAge(0); // expire immediately
+        cookie.setHttpOnly(true);
         response.addCookie(cookie);
         return "redirect:/home";
     }
