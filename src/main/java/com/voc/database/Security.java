@@ -3,9 +3,7 @@ package com.voc.database;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -14,11 +12,21 @@ import com.voc.helper.Row;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
- * <h1>Database security handler</h1>
- * The Security class is use to validate, manage
- * and interact with the database tables.
+ * Security provides user authentication, password hashing, 
+ * and session management utilities for database interactions.
+ * <p>
+ * It handles user registration, login, session validation, and password encryption.
+ * All methods use {@link DatabaseUtils} to interact with the database safely.
+ * </p>
  * 
- * @author  Zartex <zartexvertagen@proton.me>
+ * <p>Example usage:</p>
+ * <pre>
+ * boolean success = Security.registerUser("John Doe", "johnd", "password123");
+ * String sessionId = Security.loginUser("johnd", "password123", "127.0.0.1", "Chrome/116");
+ * Row userData = Security.validateUserSession(sessionId);
+ * </pre>
+ * 
+ * @author  Zartex
  * @version 0.0.1a
  * @since   2025-08-22
  */
@@ -29,37 +37,39 @@ public class Security {
     //------------------------------------------//
 
     /**
-     * <h2>Register User</h2>
-     * This method validate and adding the user into the corresponding data table.
-     * @param  displayName Get user's displayname
-     * @param  username Get user's username
-     * @param  password Get user's password
-     * @param  confirmedPassword Use to confirm user password
-     * @return true if user successfully register and false if they're not.
+     * Registers a new user in the database.
+     * <p>
+     * The method checks if the username already exists, 
+     * encrypts the password with bcrypt, and inserts the user into the table.
+     * </p>
+     *
+     * @param displayName The user's display name.
+     * @param username The user's chosen username.
+     * @param password The user's chosen password (plaintext).
+     * @return true if registration succeeds; false if the username already exists.
      */
-    public static boolean registerUser(
-        String displayName, 
-        String username, 
-        String password) {
+    public static boolean registerUser(String displayName, String username, String password) {
         if (!isUserExist(username)) {
             String encryptedPassword = generateSecretKey(password);
             String sql = "INSERT INTO usertb (display_name, username, password) VALUES (?, ?, ?)";
-            sqlPrepareStatement(sql, displayName, username, encryptedPassword);
+            DatabaseUtils.sqlPrepareStatement(sql, displayName, username, encryptedPassword);
             return true;
         }
         return false;
     }
 
     /**
-     * This method validate user and give the user
-     * session_id as a cookie which will be using for 
-     * keeping the user always logged in.
-     * @param username
-     * @param password
-     * @param browser_ip
-     * @param browser_meta_data
-     * @return Session key or null
-     * @throws SQLException
+     * Authenticates a user and generates a session token.
+     * <p>
+     * The method verifies the password, generates a session ID,
+     * and stores it in the database. Returns null if login fails.
+     * </p>
+     *
+     * @param username The user's username.
+     * @param password The user's plaintext password.
+     * @param browser_ip The IP address of the user's browser.
+     * @param browser_meta_data Metadata about the user's browser.
+     * @return The session token if login succeeds; null otherwise.
      */
     public static String loginUser(
         String username,
@@ -69,7 +79,7 @@ public class Security {
 
         // Fetch user row
         String sql = "SELECT user_id_PK, password FROM usertb WHERE username = ?";
-        Row user = getOneRow(sql, username);
+        Row user = DatabaseUtils.sqlSingleRowStatement(sql, username);
 
         // Return null if user doesn't exist
         if (user == null) return null;
@@ -84,7 +94,7 @@ public class Security {
         try {
             String sessionId = generateUserSessionToken(userId, username, storedPassword);
             sql = "INSERT INTO sessiontb (session_id_PK, session_login_ip, session_browser_info, user_id_FK) VALUES (?, ?, ?, ?)";
-            sqlPrepareStatement(sql, sessionId, browser_ip, browser_meta_data, userId);
+            DatabaseUtils.sqlPrepareStatement(sql, sessionId, browser_ip, browser_meta_data, userId);
             return sessionId;
         } catch (Exception e) {
             System.out.println("Encryption error: " + e.getMessage());
@@ -92,16 +102,25 @@ public class Security {
         }
     }
 
-    // TODO: add a proper commentation
-    public static Row validateUserSession(String session_id){
+    /**
+     * Validates a user's session token.
+     * <p>
+     * Checks if the session exists, decrypts the token, and verifies that it matches
+     * the user ID and username. Returns user data if valid, otherwise null.
+     * </p>
+     *
+     * @param session_id The session token to validate.
+     * @return A {@link Row} containing user data if valid; null if invalid.
+     */
+    public static Row validateUserSession(String session_id) {
         Row user_data = getUserDataFromSessionID(session_id);
-        
-        if (user_data != null){
+
+        if (user_data != null) {
             Long user_id = ((Number) user_data.get("user_id_PK")).longValue();
             String username = (String) user_data.get("username");
             String storedPassword = (String) user_data.get("password");
 
-            String decrypted_session = null;
+            String decrypted_session;
             try {
                 decrypted_session = decryptUserSessionToken(session_id, storedPassword);
             } catch (Exception e) {
@@ -110,7 +129,6 @@ public class Security {
             }
 
             String[] decrypted_data = decrypted_session.split(":");
-
             if (decrypted_data.length < 2) return null;
 
             Long session_user_id = Long.parseLong(decrypted_data[0]);
@@ -125,60 +143,75 @@ public class Security {
         return null;
     }
 
+    /**
+     * Verifies a plaintext password against a stored bcrypt hash.
+     *
+     * @param unencrypted The plaintext password.
+     * @param hashed The stored bcrypt hash.
+     * @return True if the password matches; false otherwise.
+     */
+    public static boolean verifyPassword(String unencrypted, String hashed) {
+        return BCrypt.checkpw(unencrypted, hashed);
+    }
+
     //-------------------------------------------//
     //------------- PRIVATE METHODS -------------//
     //-------------------------------------------//
 
     /**
-     * Fetch user data associated with a session ID.
-     * @param session_id the session ID to look up
-     * @return Row containing user_id_PK, username, password; or null if session not found
+     * Fetches user data associated with a session ID.
+     *
+     * @param session_id The session ID to look up.
+     * @return A {@link Row} containing user_id_PK, username, password; or null if not found.
      */
     private static Row getUserDataFromSessionID(String session_id) {
         String sql = "SELECT u.user_id_PK, u.username, u.password " +
-                    "FROM sessiontb s " +
-                    "JOIN usertb u ON s.user_id_FK = u.user_id_PK " +
-                    "WHERE s.session_id_PK = ?";
+                     "FROM sessiontb s " +
+                     "JOIN usertb u ON s.user_id_FK = u.user_id_PK " +
+                     "WHERE s.session_id_PK = ?";
 
-        Row userData = getOneRow(sql, session_id);
-        return userData;
+        return DatabaseUtils.sqlSingleRowStatement(sql, session_id);
     }
 
     /**
-     * <h3>Generate User Session Token</h3>
-     * <p>private static String generateUserSessionToken(Long user_id, String username, String password) throws Exception</p>
-     * <p>Returns a complete encrypted session ID as a String.</p>
-     * @param user_id Get user's id
-     * @param username
-     * @param password
-     * @return 
-     * @throws Exception
+     * Generates an encrypted session token for a user.
+     * <p>
+     * Combines user ID, username, and a random component,
+     * then encrypts with AES using the user's password as the key.
+     * </p>
+     *
+     * @param user_id The user's ID.
+     * @param username The user's username.
+     * @param password The user's stored password.
+     * @return Encrypted session token as a string.
+     * @throws Exception If encryption fails.
      */
     private static String generateUserSessionToken(Long user_id, String username, String password) throws Exception {
-        // Derive key from password (SHA-256)
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         byte[] keyBytes = sha.digest(password.getBytes());
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
 
-        // Generate random session component
         byte[] randomBytes = new byte[32];
         new SecureRandom().nextBytes(randomBytes);
         String sessionRandom = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
 
-        // Create compound string
         String compound = user_id + ":" + username + ":" + sessionRandom;
 
-        // Encrypt with AES
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding"); // simpler than GCM for per-user key
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] encrypted = cipher.doFinal(compound.getBytes());
 
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
     }
 
-
-    // TODO: add a proper comment
-    // Decrypt session token
+    /**
+     * Decrypts a session token to retrieve user information.
+     *
+     * @param token The encrypted session token.
+     * @param password The user's stored password.
+     * @return A string containing "userId:username:sessionRandom".
+     * @throws Exception If decryption fails.
+     */
     private static String decryptUserSessionToken(String token, String password) throws Exception {
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         byte[] keyBytes = sha.digest(password.getBytes());
@@ -190,96 +223,35 @@ public class Security {
         byte[] decoded = Base64.getUrlDecoder().decode(token);
         byte[] decrypted = cipher.doFinal(decoded);
 
-        return new String(decrypted); // returns "userId:username:sessionRandom"
+        return new String(decrypted);
     }
 
     /**
-     * Generate a secure bcrypt hash from a plaintext password.
-     * @param unencrypted The plaintext password
-     * @return The hashed password (60 characters long)
+     * Generates a secure bcrypt hash from a plaintext password.
+     *
+     * @param unencrypted The plaintext password.
+     * @return The hashed password (60 characters long).
      */
-    private static String generateSecretKey(String unencrypted){
+    private static String generateSecretKey(String unencrypted) {
         return BCrypt.hashpw(unencrypted, BCrypt.gensalt(12));
     }
 
     /**
-     * This method use to check if
-     * the user exist or not.
-     * @param username Check username
-     * @return True if user exist
+     * Checks if a username already exists in the database.
+     *
+     * @param username The username to check.
+     * @return True if the username exists; false otherwise.
      */
-    private static boolean isUserExist(String username){
+    private static boolean isUserExist(String username) {
         String sql = "SELECT COUNT(*) AS total FROM usertb WHERE username = ?";
-        Row result = getOneRow(sql, username);
+        Row result = DatabaseUtils.sqlSingleRowStatement(sql, username);
 
-        if (result != null){
+        if (result != null) {
             Number countNum = (Number) result.get("total");
             if (countNum != null) {
                 return countNum.longValue() > 0;
             }
         }
-
         return false;
-    }
-
-    /**
-     * Verify a plaintext password against the stored bcrypt hash.
-     * @param unencrypted The plaintext password
-     * @param hashed The stored bcrypt hash
-     * @return True if the password matches
-     */
-    public static boolean verifyPassword(String unencrypted, String hashed) {
-        return BCrypt.checkpw(unencrypted, hashed);
-    }
-
-    /**
-     * <h3>SQL Prepare Statement Helper</h3>
-     * <p>private static ResultSet sqlPrepareStatement(String sql, Object... args)</p>
-     * 
-     * This method is a helper to handle the SQL execution and also handle the {@code SQLException}
-     * @param sql SQL execution script.
-     * @param args Arguments that need to be fill in order.
-     * @return The result of the execution or null if executeUpdate
-     */
-    private static List<Row> sqlPrepareStatement(String sql, Object... args) {
-        List<Row> resultList = new ArrayList<>();
-
-        try (
-            Connection connection = DatabaseUtils.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(sql);
-        ) {
-            // Bind parameters
-            if (args != null) {
-                for (int i = 0; i < args.length; i++) {
-                    pstmt.setObject(i + 1, args[i]);
-                }
-            }
-
-            if (sql.trim().toUpperCase().startsWith("SELECT")) {
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    ResultSetMetaData meta = rs.getMetaData();
-                    int columnCount = meta.getColumnCount();
-
-                    while (rs.next()) {
-                        Row row = new Row();
-                        for (int i = 1; i <= columnCount; i++) {
-                            row.put(meta.getColumnName(i), rs.getObject(i));
-                        }
-                        resultList.add(row);
-                    }
-                }
-            } else {
-                pstmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            System.out.println("SQL error: " + e.getMessage());
-        }
-
-        return resultList;
-    }
-
-    private static Row getOneRow(String sql, Object... args) {
-        List<Row> rows = sqlPrepareStatement(sql, args);
-        return rows.isEmpty() ? null : rows.get(0);
     }
 }
