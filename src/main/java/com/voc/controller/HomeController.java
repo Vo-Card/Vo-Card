@@ -20,8 +20,8 @@ public class HomeController {
         return "helloworld";
     }
 
-    @RequestMapping("/welcome")
+    @RequestMapping("/u/welcome")
     public String welcome() {
-        return "welcome";
+        return "/u/welcome";
     }
 }
