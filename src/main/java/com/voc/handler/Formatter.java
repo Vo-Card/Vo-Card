@@ -119,10 +119,6 @@ public class Formatter {
         System.out.println("Enter text : ");
         String text = sc.nextLine(); // del later
         sc.close();
-        // System.out.println("Has category: " + categories);
-        // System.out.println("Random category: " + innerCategories);
-        // System.out.println("Randomized word: " + rWord);
-        // System.out.println("perp : " + perp);
         for (int i = 0; i < perp.size(); i++) {
             System.out.println("part of speech: " + perp.get(i));
             ArrayList<String> define = (ArrayList<String>) currentDepth.get(perp.get(i));
@@ -130,7 +126,6 @@ public class Formatter {
                 System.out.println("Definition " + ": " + define.get(j));
             }
         }
-        // System.out.println("Cards randomized successfully.");
     }
 
 }
