@@ -14,12 +14,16 @@ import com.voc.helper.Row;
 /**
  * SessionInterceptor ensures that HTTP requests have a valid user session.
  * <p>
- * Requests without a valid session will be redirected to the login page, 
- * except for a defined list of excluded pages (public pages, static resources, etc.).
+ * Requests without a valid session will be redirected to the login page,
+ * except for a defined list of excluded pages (public pages, static resources,
+ * etc.).
  * </p>
  * 
- * <p>This interceptor automatically injects the username into the request attributes 
- * when a valid session is found.</p>
+ * <p>
+ * This interceptor automatically injects the username into the request
+ * attributes
+ * when a valid session is found.
+ * </p>
  * 
  * @author Zartex
  * @version 0.0.1a
@@ -30,7 +34,8 @@ public class SessionInterceptor implements HandlerInterceptor {
 
     /**
      * Pre-handle method invoked before controller methods.
-     * Checks for a valid session cookie and redirects to login if session is missing or invalid.
+     * Checks for a valid session cookie and redirects to login if session is
+     * missing or invalid.
      *
      * @param request  The HTTP request
      * @param response The HTTP response
@@ -40,11 +45,9 @@ public class SessionInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(
-        @NonNull HttpServletRequest request, 
-        @NonNull HttpServletResponse response, 
-        @NonNull Object handler
-        ) throws Exception {
-
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull Object handler) throws Exception {
         Cookie[] cookies = request.getCookies();
         String sessionToken = null;
 

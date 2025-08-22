@@ -21,7 +21,7 @@ public class PasswordUtils {
      * Verifies a plaintext password against a bcrypt hash.
      * 
      * @param plaintext Plaintext password
-     * @param hash Stored bcrypt hash
+     * @param hash      Stored bcrypt hash
      * @return true if password matches, false otherwise
      */
     public static boolean verifyPassword(String plaintext, String hash) {

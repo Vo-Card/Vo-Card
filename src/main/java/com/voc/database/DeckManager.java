@@ -7,7 +7,10 @@ package com.voc.database;
  * Currently unfinished. Implementation will be added later.
  * </p>
  * 
- * <p>Example usage (future):</p>
+ * <p>
+ * Example usage (future):
+ * </p>
+ * 
  * <pre>
  * DeckManager.createDeck("My First Deck");
  * List<Card> cards = DeckManager.getDeckCards(deckId);
