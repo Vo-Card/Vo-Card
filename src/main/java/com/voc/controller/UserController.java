@@ -8,6 +8,6 @@ public class UserController {
     
     @GetMapping("/u/dashboard")
     public String dashboard() {
-        return "dashboard";
+        return "/u/dashboard";
     }
 }
