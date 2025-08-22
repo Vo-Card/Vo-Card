@@ -17,7 +17,7 @@ public class SessionManager {
     /**
      * Generates an encrypted session token for a user.
      * 
-     * @param userId User ID
+     * @param userId   User ID
      * @param username Username
      * @param password User password
      * @return Encrypted session token
@@ -44,7 +44,7 @@ public class SessionManager {
     /**
      * Decrypts a session token using the user's password.
      * 
-     * @param token Encrypted session token
+     * @param token    Encrypted session token
      * @param password User password
      * @return Decrypted string in the form "userId:username:random"
      * @throws Exception Decryption errors
@@ -71,9 +71,9 @@ public class SessionManager {
      */
     public static Row getUserDataFromSessionID(String sessionId) {
         String sql = "SELECT u.user_id_PK, u.username, u.password " +
-                     "FROM sessiontb s " +
-                     "JOIN usertb u ON s.user_id_FK = u.user_id_PK " +
-                     "WHERE s.session_id_PK = ?";
+                "FROM sessiontb s " +
+                "JOIN usertb u ON s.user_id_FK = u.user_id_PK " +
+                "WHERE s.session_id_PK = ?";
         return DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
     }
 }

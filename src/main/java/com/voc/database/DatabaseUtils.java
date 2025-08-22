@@ -15,19 +15,24 @@ import com.voc.helper.Row;
 
 /**
  * <p>
- * DatabaseUtils provides essential SQL execution utilities and database initialization for your application.
- * It handles SQL exceptions gracefully by printing errors instead of throwing stack traces.
+ * DatabaseUtils provides essential SQL execution utilities and database
+ * initialization for your application.
+ * It handles SQL exceptions gracefully by printing errors instead of throwing
+ * stack traces.
  * </p>
  *
  * <p>
- * <b>Note:</b> If your database account does not have permission to create or edit the database, 
+ * <b>Note:</b> If your database account does not have permission to create or
+ * edit the database,
  * manual intervention is required.
  * </p>
  *
  * <p>
- * DatabaseUtils loads your database configuration from 
- * {@code src/main/resources/config/database.json}. If the file does not exist, create one using this template:
+ * DatabaseUtils loads your database configuration from
+ * {@code src/main/resources/config/database.json}. If the file does not exist,
+ * create one using this template:
  * </p>
+ * 
  * <pre>
  * {
  *     "DB_URL" : "jdbc:mysql://localhost:3306/",
@@ -39,13 +44,14 @@ import com.voc.helper.Row;
  * </pre>
  *
  * <p>
- * SQL error handlers in DatabaseUtils return {@code null} for failed connections or queries, 
+ * SQL error handlers in DatabaseUtils return {@code null} for failed
+ * connections or queries,
  * while printing relevant error messages to the console.
  * </p>
  *
- * @author  Zartex
+ * @author Zartex
  * @version 0.0.1a
- * @since   2025-08-21
+ * @since 2025-08-21
  */
 public class DatabaseUtils {
 
@@ -62,14 +68,14 @@ public class DatabaseUtils {
                 .getResourceAsStream("config/database.json")) {
             if (input == null) {
                 throw new RuntimeException(
-                    "database.json not found or not configured. Please check the resources/config folder."
-                );
+                        "database.json not found or not configured. Please check the resources/config folder.");
             }
 
             // Parse JSON into a Map
             ObjectMapper mapper = new ObjectMapper();
             Map<String, String> data = mapper.readValue(input,
-                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {
+                    });
 
             DB_URL = data.get("DB_URL");
             DB_NAME = data.get("DB_NAME");
@@ -94,7 +100,8 @@ public class DatabaseUtils {
      * and the method returns {@code null}.
      * </p>
      *
-     * @return A Connection object if successful, or {@code null} if connection fails.
+     * @return A Connection object if successful, or {@code null} if connection
+     *         fails.
      */
     public static Connection getConnection() {
         try {
@@ -128,7 +135,7 @@ public class DatabaseUtils {
      */
     private static void initializeDatabase() {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             Statement stmt = connection.createStatement()) {
+                Statement stmt = connection.createStatement()) {
 
             stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
             System.out.println("Database initialized successfully.");
@@ -151,9 +158,9 @@ public class DatabaseUtils {
      */
     public static void initialTables() {
         try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             InputStream inputStream = DatabaseUtils.class.getClassLoader().getResourceAsStream("schema.sql");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                Statement statement = connection.createStatement();
+                InputStream inputStream = DatabaseUtils.class.getClassLoader().getResourceAsStream("schema.sql");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             if (inputStream == null) {
                 throw new FileNotFoundException("schema.sql not found in resources folder.");
@@ -212,7 +219,10 @@ public class DatabaseUtils {
      * connections are closed automatically.
      * </p>
      *
-     * <p>Example usage:</p>
+     * <p>
+     * Example usage:
+     * </p>
+     * 
      * <pre>
      * String sql;
      * List&lt;Row&gt; result;
@@ -232,7 +242,8 @@ public class DatabaseUtils {
      *
      * @param sql  The SQL statement to execute.
      * @param args Arguments to bind to the SQL statement placeholders, in order.
-     * @return A List of Row objects containing the results of the query, or an empty list if no results.
+     * @return A List of Row objects containing the results of the query, or an
+     *         empty list if no results.
      * @see com.voc.helper.Row
      * @see #sqlSingleRowStatement(String, Object...)
      */
@@ -240,7 +251,7 @@ public class DatabaseUtils {
         List<Row> resultList = new ArrayList<>();
 
         try (Connection connection = getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             // Bind parameters
             if (args != null) {
