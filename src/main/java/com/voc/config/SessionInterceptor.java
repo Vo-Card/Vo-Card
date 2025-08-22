@@ -5,48 +5,82 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.voc.database.Security;
+import com.voc.security.AuthManager;
 import com.voc.helper.Row;
 
+/**
+ * SessionInterceptor ensures that HTTP requests have a valid user session.
+ * <p>
+ * Requests without a valid session will be redirected to the login page, 
+ * except for a defined list of excluded pages (public pages, static resources, etc.).
+ * </p>
+ * 
+ * <p>This interceptor automatically injects the username into the request attributes 
+ * when a valid session is found.</p>
+ * 
+ * @author Zartex
+ * @version 0.0.1a
+ * @since 2025-08-23
+ */
 @Configuration
 public class SessionInterceptor implements HandlerInterceptor {
 
+    /**
+     * Pre-handle method invoked before controller methods.
+     * Checks for a valid session cookie and redirects to login if session is missing or invalid.
+     *
+     * @param request  The HTTP request
+     * @param response The HTTP response
+     * @param handler  The handler object
+     * @return true if request should proceed, false if redirected
+     * @throws Exception in case of unexpected errors
+     */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
+    public boolean preHandle(
+        @NonNull HttpServletRequest request, 
+        @NonNull HttpServletResponse response, 
+        @NonNull Object handler
+        ) throws Exception {
+
         Cookie[] cookies = request.getCookies();
-        String session_token = null;
-        // get current page URL
+        String sessionToken = null;
+
+        // Get the current page URL
         String currentPage = request.getRequestURI();
 
-        String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**"};
+        // Pages that don't require authentication
+        String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**" };
 
+        // Look for session cookie
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("session_id".equals(cookie.getName())) {
-                    session_token = cookie.getValue();
+                    sessionToken = cookie.getValue();
                     break;
                 }
             }
         }
 
-        if (session_token != null) {
-            Row user_data = Security.validateUserSession(session_token);
-            if (user_data != null){
-                request.setAttribute("username", (String) user_data.get("username"));
+        // Validate session token if present
+        if (sessionToken != null) {
+            Row userData = AuthManager.validateUserSession(sessionToken);
+            if (userData != null) {
+                request.setAttribute("username", (String) userData.get("username"));
+                return true;
             }
-            return true;
         }
-        
-        // Check if the current page is in the excluded pages
+
+        // Allow access to excluded/public pages
         for (String page : excludedPages) {
             if (currentPage.matches(page.replace("**", ".*"))) {
                 return true;
             }
         }
 
+        // Redirect to login if session is missing/invalid
         response.sendRedirect("/login");
         return false;
     }
