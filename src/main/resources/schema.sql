@@ -7,33 +7,35 @@ CREATE TABLE `permissiontb` (
   PRIMARY KEY (`permission_level_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO permissiontb (permission_name) VALUES ("Normal");
+INSERT INTO permissiontb (permission_name) VALUES ("Admin");
 
 -- vocard.usertb definition
 
 CREATE TABLE `usertb` (
   `user_id_PK` int unsigned NOT NULL AUTO_INCREMENT,
+  `display_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `join_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `permission_level_FK` tinyint DEFAULT NULL,
-  `display_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`user_id_PK`),
   UNIQUE KEY `usertb_unique` (`username`),
   KEY `usertb_permissiontb_FK` (`permission_level_FK`),
   CONSTRAINT `usertb_permissiontb_FK` FOREIGN KEY (`permission_level_FK`) REFERENCES `permissiontb` (`permission_level_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- vocard.`session` definition
+-- vocard.`sessiontb` definition
 
-CREATE TABLE `session` (
+CREATE TABLE `sessiontb` (
   `session_id_PK` varchar(255) NOT NULL,
   `session_last_login` datetime DEFAULT CURRENT_TIMESTAMP,
-  `session_login_info` varchar(255) DEFAULT NULL,
-  `session_browser_id` varchar(255) DEFAULT NULL,
-  `user_id_PK` int unsigned DEFAULT NULL,
+  `session_login_ip` varchar(255) DEFAULT NULL,
+  `session_browser_info` varchar(255) DEFAULT NULL,
+  `user_id_FK` int unsigned DEFAULT NULL,
   PRIMARY KEY (`session_id_PK`),
-  KEY `session_usertb_FK` (`user_id_PK`),
-  CONSTRAINT `session_usertb_FK` FOREIGN KEY (`user_id_PK`) REFERENCES `usertb` (`user_id_PK`)
+  KEY `session_usertb_FK` (`user_id_FK`),
+  CONSTRAINT `session_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

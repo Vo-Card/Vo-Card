@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.voc.database.DatabaseUtils;
 import com.voc.database.Security;
 
 @Controller
@@ -20,12 +19,27 @@ public class RegisterController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestParam String display_name, @RequestParam String username, @RequestParam String password,
-            @RequestParam String confirmPassword, Model model) {
+    public String registerUser(
+        @RequestParam String display_name, 
+        @RequestParam String username, 
+        @RequestParam String password,
+        @RequestParam String confirmPassword, 
+        Model model) {
 
-        if (username == null || username.isEmpty() || password == null || password.isEmpty()
-                || confirmPassword == null || confirmPassword.isEmpty()) {
+        username = username.trim();
+        display_name = display_name.trim();
+        password = password.trim();
+        confirmPassword = confirmPassword.trim();
+
+        if (username == null || username.isEmpty() 
+            || password == null || password.isEmpty()
+            || confirmPassword == null || confirmPassword.isEmpty()) {
             model.addAttribute("error", "Username and/or password cannot be empty.");
+            return "register";
+        }
+
+        if (!password.equals(confirmPassword)){
+            model.addAttribute("error", "Your password is not matched.");
             return "register";
         }
 
@@ -39,23 +53,12 @@ public class RegisterController {
             return "register";
         }
 
-
-        String result = processRegistration(display_name, username, password, confirmPassword);
-
-        System.out.println("Registration result: " + result);
-
-        if ("registrationSuccess".equals(result)) {
+        if (Security.registerUser(display_name, username, password)) {
+            System.out.println("Registeration successful");
             return "redirect:/login";
         } else {
+            model.addAttribute("error", "Username already exists.");
             return "register"; // return to registration page with an error message
         }
-    }
-
-    // Example method to process registration
-    private String processRegistration(String display_name, String username, String password, String confirmPassword) {
-        if (!Security.userExists(DatabaseUtils.getConnection(), username) && password.equals(confirmPassword)) { 
-            Security.createUser(DatabaseUtils.getConnection(), display_name, username, password);
-            return "registrationSuccess";
-        } else {return "registrationFailed";}
     }
 }
