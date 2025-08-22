@@ -69,15 +69,16 @@
                     list-style: none;
                 }
 
+
+
                 .grid-container {
                     display: grid;
                     grid-template-columns: repeat(12, minmax(0, 1fr));
-                    min-height: calc(100vh - 2rem);
                     gap: 1.5rem;
                 }
 
                 .item1 {
-                    grid-column: 2 / 6 span;
+                    grid-column: 2 / 7 span;
                     background-color: #0D0D0D;
 
                 }
@@ -88,8 +89,21 @@
 
                 }
 
+                .item3 {
+                    grid-column: 2 / 10 span;
+                    background-color: #0D0D0D;
+                }
+
                 .font-fixed {
                     font-size: 28px;
+                }
+
+                .h-fit {
+                    height: fit-content;
+                }
+
+                .card-wel {
+                    transform: scale(0.7);
                 }
             </style>
         </head>
@@ -192,7 +206,7 @@
                 <div class="window"></div>
 
                 <div class="d-flex w-full flex-column min-h-svh flex-1 relative">
-                    <header class="w-full d-flex align-items-center gap-2 shrink-0 top-0 sticky compo-color">
+                    <header class="w-full d-flex align-items-center gap-2 shrink-0 top-0 sticky compo-color z-9999">
                         <div class="d-flex align-items-center gap-2 px-4">
                             <button class="hamburger-button justify-content-center d-inline -ml-1">
                                 <img src="/imgs/white-hamburger.png" alt="" style="width: 24px; height: 24px;">
@@ -205,22 +219,22 @@
                                 <div class=""><img src="/imgs/profileTemplate.png" alt=""
                                         style="width: 24px; height: 24px;">
                                 </div>
-                                <div>${username}</div>
+                                <div>{username}</div>
                             </div>
                         </div>
                     </header>
 
-                    <main class="relative z-0 sm-pb-0 pb-8 px-2 someting">
-                        <div class="grid-container my-4 mx-auto w-full">
+                    <main class="relative z-0 sm-pb-0 pb-8 px-2">
+                        <div class="something grid-container my-4 mx-auto w-full">
                             <div class="item1">
                                 <div class="pt-4 px-3 pb-2">
                                     <p class="font-fixed">{daily_welcome_message}, {username}!</p>
                                 </div>
-                                <div class="pb-2 px-2">
+                                <div class="pb-2 px-3">
                                     <p>Create your own flashcard decks, review with spaced repetition, and track your
                                         progess .</p>
                                 </div>
-                                <div class="px-2 pb-2">
+                                <div class="px-3 pb-2">
                                     <div class="d-flex gap-2">
                                         <a href="#">
                                             <p>Get Started</p>
@@ -232,13 +246,44 @@
                                 </div>
                             </div>
 
-                            <div class="item2 gap-2 align-items-center">
-                                <div class="pt-4 px-3 pb-2 ">
+                            <div class="item2 gap-2 ">
+                                <div class="pt-4 px-3 pb-2">
                                     <p class="font-fixed">Your Today Card</p>
                                 </div>
 
-                                <div class="deck default a1"></div>
+                                <div class="preview card-wel" id="card_preview">
+                                    <div class="deck default a1" style="z-index: 1;">
+                                        <div class="background">
+                                            <p class="category">A1</p>
+                                            <div class="decorations">
+                                                <div>
+                                                    <span
+                                                        style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;"></span>
+                                                    <span
+                                                        style="background-color: white; width: 70px; height: 2px; display: block; position: relative; top :10px;"></span>
+                                                    <span
+                                                        style="background-color: white; width: 2px; height: 100px; display: block; position: relative; bottom :12px; left: 50px;"></span>
+                                                </div>
+                                                <span
+                                                    style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;">
+                                            </div>
+                                        </div>
+                                        <p class="word">Something</p>
+                                    </div>
+                                </div>
                             </div>
+
+
+                            <section class="item3 h-full p-2">
+                                <div class="p-2">
+                                    <p class="font-fixed">Stat</p>
+                                </div>
+                                <div class="p-2">
+                                    <p>Showing your stat recently 7 days</p>
+                                </div>
+
+                                <div class="charts" style="width: 100%; height: 100%; min-width: 0;"></div>
+                            </section>
 
                         </div>
                     </main>
