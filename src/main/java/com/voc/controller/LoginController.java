@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.voc.database.DatabaseUtils;
-import com.voc.database.Security;
+import com.voc.security.AuthManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +36,7 @@ public class LoginController {
             return "login";
         }
 
-        String session_id = Security.loginUser(username, password, request.getHeader("X-Forwarded-For"), request.getHeader("User-Agent"));
+        String session_id = AuthManager.loginUser(username, password, request.getHeader("X-Forwarded-For"), request.getHeader("User-Agent"));
         
         if(session_id == null){
             model.addAttribute("error", "Invalid username or password.");

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.voc.database.Security;
+import com.voc.security.AuthManager;;
 
 @Controller
 public class RegisterController {
@@ -53,7 +53,7 @@ public class RegisterController {
             return "register";
         }
 
-        if (Security.registerUser(display_name, username, password)) {
+        if (AuthManager.registerUser(display_name, username, password)) {
             System.out.println("Registeration successful");
             return "redirect:/login";
         } else {
