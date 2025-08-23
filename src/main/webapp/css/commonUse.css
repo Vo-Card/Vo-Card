@@ -70,6 +70,8 @@
 .my-4 { margin-top: var(--sp-4) !important; margin-bottom: var(--sp-4) !important; }
 .my-5 { margin-top: var(--sp-5) !important; margin-bottom: var(--sp-5) !important; }
 .my-7 { margin-top: var(--sp-7) !important; margin-bottom: var(--sp-7) !important; }
+.my-auto { margin-top: auto !important; margin-bottom: auto !important; }
+
 
 .ml-auto{ margin-left: auto;}
 
