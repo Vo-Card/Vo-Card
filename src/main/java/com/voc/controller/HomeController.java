@@ -12,8 +12,7 @@ public class HomeController {
 
     @GetMapping("/home")
     public String homePage(Model model) {
-        DeckManager.forceDefaultDeck();
-        DeckManager.createCard(null);
+        DeckManager test = new DeckManager();
         return "index";
     }
 
