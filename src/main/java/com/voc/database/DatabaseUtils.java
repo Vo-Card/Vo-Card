@@ -156,7 +156,7 @@ public class DatabaseUtils {
      * and executes them sequentially.
      * </p>
      */
-    public static void initialTables() {
+    private static void initialTables() {
         try (Connection connection = getConnection();
                 Statement statement = connection.createStatement();
                 InputStream inputStream = DatabaseUtils.class.getClassLoader().getResourceAsStream("schema.sql");

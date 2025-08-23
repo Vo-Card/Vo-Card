@@ -103,7 +103,7 @@
                 }
 
                 .card-wel {
-                    transform: scale(0.7);
+                    transform: scale(0.8);
                 }
             </style>
         </head>
@@ -113,7 +113,7 @@
                 <!-- slidebar -->
                 <div class="d-block hiddable slide-bar px-2 z-9999">
                     <div class="d-flex p-2 gap-3 align-items-center">
-                        <div class=""><img src="/imgs/icon.svg" alt="" style="width: 28px; height: 28px; color: white;">
+                        <div class="icon" style="width: 28px; height: 28px; color: white;">
                         </div>
                         <div class="" style="font-size: 16px;">Vo-Card</div>
                     </div>
@@ -246,7 +246,7 @@
                                 </div>
                             </div>
 
-                            <div class="item2 gap-2 ">
+                            <div class="item2 gap-2">
                                 <div class="pt-4 px-3 pb-2">
                                     <p class="font-fixed">Your Today Card</p>
                                 </div>
