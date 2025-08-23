@@ -247,7 +247,18 @@ public class DatabaseUtils {
             initializeDatabase();
             connection = getConnection();
         }
-        return connection != null;
+
+        boolean isConnected = connection != null;;
+
+        try {
+            if (connection != null){
+                connection.close();
+            }
+        } catch (Exception e) {
+            System.err.println("Error closing connection in checkDatabase: " + e.getMessage());
+        }
+
+        return isConnected;
     }
 
     /**
