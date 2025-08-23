@@ -1,4 +1,6 @@
 target/
 .vscode/
 .settings/
+.classpath
+.project
 /src/main/resources/config/database.json
