@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voc.helper.Row;
+import com.voc.security.AuthManager;
 
 /**
  * <p>
@@ -62,6 +63,9 @@ public class DatabaseUtils {
     private static String DB_PASSWORD;
     private static String CHECK_DATABASE;
 
+    private static String ROOT_USERNAME;
+    private static String ROOT_DISPLAYNAME;
+
     static {
         // Load database configuration from JSON file
         try (InputStream input = DatabaseUtils.class.getClassLoader()
@@ -82,15 +86,49 @@ public class DatabaseUtils {
             DB_USER = data.get("DB_USER");
             DB_PASSWORD = data.get("DB_PASSWORD");
             CHECK_DATABASE = data.get("CHECK_DATABASE");
+            ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
+            ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
 
             // Check and initialize database if configured
             if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
-                checkDatabase();
+                if (checkDatabase()){
+                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?",  ROOT_USERNAME) != null){
+                        initializeAdministrator();
+                    }
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Initializes the administrator (root) user for the system.
+     * <p>
+     * This method generates a secure random password for the root user and 
+     * registers the account in the authentication system. The root password 
+     * is generated only once immediately after the database is created and 
+     * will not be displayed again.
+     * </p>
+     * <p>
+     * The generated credentials are printed to the console for the developer 
+     * or system administrator to record. It is the caller's responsibility 
+     * to store this password in a safe location.
+     * </p>
+     *
+     * @implNote This method should only be called during the initial database 
+     *           setup process. Repeated calls will overwrite the root user's 
+     *           credentials.
+     */
+    private static void initializeAdministrator() {
+        String rootPassword = PasswordGenerator.generatePassword(32);
+        System.out.println("Root user has been initialize for this project.");
+        System.out.println("Root Username: " + ROOT_USERNAME);
+        System.out.println("Root Password: " + rootPassword);
+        System.out.println("Please keep this password in a secure location.");
+        System.out.println("The password will show only once.");
+        AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
     }
 
     /**
