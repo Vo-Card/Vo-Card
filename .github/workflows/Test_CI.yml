@@ -86,4 +86,4 @@ jobs:
 
       # 11. Stop Tomcat
       - name: Stop Tomcat
-        run: mvn tomcat9:stop
+        run: pkill -f 'org.apache.catalina.startup.Bootstrap' || true
