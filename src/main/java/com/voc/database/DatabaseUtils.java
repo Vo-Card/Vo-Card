@@ -92,7 +92,7 @@ public class DatabaseUtils {
             // Check and initialize database if configured
             if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
                 if (checkDatabase()){
-                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?",  ROOT_USERNAME) != null){
+                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?",  ROOT_USERNAME) == null){
                         initializeAdministrator();
                     }
                 }
@@ -271,7 +271,7 @@ public class DatabaseUtils {
      * <p>
      * Example usage:
      * </p>
-     * 
+     * ~
      * <pre>
      * String sql;
      * List&lt;Row&gt; result;
