@@ -28,20 +28,18 @@
             }
 
             div input {
-                background-color: rgba(125, 125, 125, 0);
+                background-color: rgb(62, 62, 62);
                 border-style: none;
                 border-radius: 5px;
                 padding: 5px;
                 cursor: pointer;
+                transition: ease-in 0.35s;
             }
 
-            .dumb {
-                background-color: #5a5a5a;
+            .register div input:hover:not(input[type="submit"]) {
+                background-color: rgb(116, 116, 116);
             }
 
-            .dumb :hover {
-                background-color: red;
-            }
 
             input::placeholder {
                 color: white;
@@ -50,10 +48,6 @@
 
             input {
                 width: 100%;
-            }
-
-            .dumb :hover {
-                background-color: red;
             }
 
             @media (min-width: 768px) {
@@ -67,7 +61,13 @@
             }
 
             input[type="submit"] {
-                color: black;
+                color: white;
+                background-color: #3b3b79;
+            }
+
+            input[type="submit"]:hover {
+                color: white;
+                background-color: #5050a1;
             }
 
             p {
@@ -86,7 +86,8 @@
                 background-blend-mode: normal, overlay, normal, normal;
                 background-image: radial-gradient(farthest-corner at left -30px,
                         rgba(93, 93, 93, 0.126) 20%,
-                        rgba(192, 192, 192, 0.119) 35%,
+                        rgba(165, 173, 196, 0.119) 30%,
+                        rgba(167, 173, 190, 0.119) 35%,
                         rgba(0, 0, 0, 0.408) 65%,
                         rgba(0, 0, 0, 0.4) 65%);
                 width: 100%;
@@ -96,12 +97,6 @@
     </head>
 
     <body>
-
-        <header class="w-full d-flex align-items-center gap-2 shrink-0 top-0 sticky">
-            <div class="d-flex align-items-center gap-2 px-4">
-                <div class="d-flex align-items-center py-1">{current_page}</div>
-            </div>
-        </header>
 
         <!-- register zone -->
         <div class="light"></div>
@@ -113,21 +108,23 @@
                 <form action="register" method="post">
                     <div>
                         <p>Display Name:</p>
-                        <input name="display_name" class="dumb" type="text" placeholder="Display name" required /><br />
+                        <input name="display_name" class="transpa" type="text" placeholder="Display name"
+                            required /><br />
                     </div>
                     <div>
                         <p class="py-1">Username:</p>
-                        <input name="username" type="text" placeholder="Username" required /><br />
+                        <input name="username" class="transpa" type="text" placeholder="Username" required /><br />
                     </div>
                     <div>
                         <p class="py-1">Password:</p>
-                        <input name="password" type="password" placeholder="Password" required /><br />
+                        <input name="password" class="transpa" type="password" placeholder="Password" required /><br />
                     </div>
                     <div>
                         <p class="py-1">Confirm Password:</p>
-                        <input name="confirmPassword" type="password" placeholder="Confirm Password" required /><br />
+                        <input name="confirmPassword" class="transpa" type="password" placeholder="Confirm Password"
+                            required /><br />
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3 transpa">
                         <input type="submit" value="Register" />
                     </div>
                 </form>
