@@ -18,6 +18,29 @@
 
             <!-- temp -->
             <style>
+                :root {
+                    --theme-color: #1b1d24;
+                    --primary-color: rgba(23, 23, 23, 0.2);
+                    --alert: #ff8989;
+                }
+
+                body {
+                    background-color: #494949;
+                }
+
+                ul {
+                    list-style-type: none;
+                }
+
+                a {
+                    text-decoration: none;
+                    color: white;
+                }
+
+                div {
+                    color: white;
+                }
+
                 .cover {
                     background-color: #242424;
                     width: 100%;
@@ -52,6 +75,7 @@
 
                 .slide-bar {
                     background-color: #1F1F1F;
+                    width: 260px;
                 }
 
                 .compo-color {
@@ -63,18 +87,11 @@
                     width: 5px;
                 }
 
-
                 .fakeIcon {
                     height: 24px;
                     width: 24px;
                     background-color: white;
                 }
-
-                ul {
-                    list-style: none;
-                }
-
-
 
                 .grid-container {
                     display: grid;
@@ -103,46 +120,46 @@
                     font-size: 28px;
                 }
 
-                .h-fit {
-                    height: fit-content;
-                }
-
                 .card-wel {
-                    transform: scale(0.8);
+                    transform: scale(1);
                 }
             </style>
         </head>
 
         <body>
-            <div class="d-flex cover">
-                <!-- slidebar -->
-                <div class="d-block hiddable slide-bar px-2 z-9999">
-                    <div class="d-flex p-2 gap-3 align-items-center">
+            <div class="d-flex h-100">
+                <!-- slidebar component
+                FIXME: <it's not sticky> 
+                -->
+                <div class="d-block hiddable slide-bar h-100 px-2 z-5">
+                    <div class=" d-flex p-2 mx-2 gap-3 align-items-center">
                         <div class="icon" style="width: 28px; height: 28px; color: white;">
                         </div>
                         <div class="" style="font-size: 16px;">Vo-Card</div>
                     </div>
 
-                    <div class="p-2 d-flex flex-column w-full min-w-0 relative gap-1">
-                        <div class="p-2 align-items-center d-flex">Home</div>
+                    <div class="ps-1 d-flex flex-column overflow-auto w-100 min-w-0 position-relative gap-1"
+                        style="flex: 1 1 0%;">
+                        <div class="p-1 align-items-center d-flex">Home</div>
 
-                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
-                            <li class="d-flex gap-2 align-items-center">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                        <ul class="gap-3 w-100 flex-column min-w-0 w-100 d-flex ps-1 mb-1">
+                            <li class="d-flex  gap-2 align-items-center">
+                                <a href="#"
+                                    class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0 w-100">
                                     <div class="fakeIcon"></div>
                                     <span>Home</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Stat</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Learn</span>
                                 </a>
@@ -151,9 +168,9 @@
 
                         <div class="px-2 align-items-center d-flex p-2">Deck</div>
 
-                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex">
+                        <ul class="gap-3 flex-column min-w-0 ps-1 w-100 d-flex">
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Decks</span>
                                 </a>
@@ -161,45 +178,47 @@
                         </ul>
 
                         <div class="align-items-center d-flex p-2">recently reviewed</div>
-                        <ul class="gap-1 w-full flex-column min-w-0 w-full d-flex py-2">
+                        <ul class="gap-1 flex-column min-w-0 ps-1 w-100 d-flex py-2">
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#"
+                                    class="d-flex gap-2 position-position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <span>A1</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#"
+                                    class="d-flex gap-2 position-position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <span>A2</span>
                                 </a>
                             </li>
                         </ul>
 
                         <div class=" align-items-center d-flex p-2">Setting</div>
-                        <ul class="gap-2 w-full flex-column min-w-0 w-full d-flex ">
+                        <ul class="gap-3 ps-1 flex-column min-w-0 w-100 d-flex ">
                             <li class="d-flex gap-2 ">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Setting</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>About me</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Contact</span>
                                 </a>
                             </li>
 
                             <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 relative overflow-hidden p-1 w-full min-w-0">
+                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
                                     <div class="fakeIcon"></div>
                                     <span>Log-out</span>
                                 </a>
@@ -210,26 +229,28 @@
                 </div>
                 <div class="window"></div>
 
-                <div class="d-flex w-full flex-column min-h-svh flex-1 relative">
-                    <header class="w-full d-flex align-items-center gap-2 shrink-0 top-0 sticky compo-color z-9999">
+                <div class="d-flex w-100 flex-column min-h-svh flex-1 position-relative">
+                    <header
+                        class="w-100 d-flex align-items-center gap-2 shrink-0 top-0 sticky-top compo-color justify-content-between z-5">
                         <div class="d-flex align-items-center gap-2 px-4">
-                            <button class="hamburger-button justify-content-center d-inline -ml-1">
+                            <button class="hamburger-button justify-content-between d-inline -ml-1">
                                 <img src="/imgs/white-hamburger.png" alt="" style="width: 24px; height: 24px;">
                             </button>
                             <div class="d-flex align-items-center py-1">{current_page}</div>
                         </div>
 
-                        <div class="ml-auto d-flex align-items-center justify-content-center gap-1">
-                            <div class="usr-prof d-flex justify-content-center align-items-center gap-2 px-2">
+                        <div class="ml-auto d-flex align-items-center justify-content-between gap-1">
+                            <div class="usr-prof d-flex justify-content-between align-items-center gap-2 px-3">
                                 <div class=""><img src="/imgs/profileTemplate.png" alt=""
                                         style="width: 24px; height: 24px;">
                                 </div>
-                                <div>{username}</div>
+                                <div>${username}</div>
                             </div>
                         </div>
                     </header>
+                    <!-- end silder -->
 
-                    <main class="relative z-0 sm-pb-0 pb-8 px-2">
+                    <main class="position-relative z-0 sm-pb-0 pb-8 px-2">
                         <div class="something grid-container my-4 mx-auto w-full">
                             <div class="item1">
                                 <div class="pt-4 px-3 pb-2">
@@ -278,22 +299,26 @@
                                 </div>
                             </div>
 
-
-                            <section class="item3 h-full p-2">
+                            <!-- chart recently 7 days -->
+                            <section class="item3 h-100 p-2">
                                 <div class="p-2">
                                     <p class="font-fixed">Stat</p>
                                 </div>
                                 <div class="p-2">
                                     <p>Showing your stat recently 7 days</p>
                                 </div>
-
-                                <div class="charts" style="width: 100%; height: 100%; min-width: 0;"></div>
+                                <!-- TODO: <Create chartzs> -->
+                                <div class="p-4 px-2 justify-conten-between w-100 h-100"
+                                    style="height: 250px; min-width: 0;">
+                                    <div class="chartz">
+                                        <canvas id="recent-chartz"></canvas>
+                                    </div>
+                                </div>
                             </section>
 
                         </div>
                     </main>
                 </div>
-
 
             </div>
         </body>
