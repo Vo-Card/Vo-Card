@@ -58,10 +58,11 @@ public class DeckManager {
      * Initialize the defaultdeck to the root user of the project.
      */
     private static void initializeDeckTable() {
-        Long rootUserID  = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                        "SELECT user_id_PK FROM usertb WHERE username = ?", "vocard").get("user_id_PK")).longValue();
+        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                "SELECT user_id_PK FROM usertb WHERE username = ?", "vocard").get("user_id_PK")).longValue();
 
-        Row rootDefaultDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ?", rootUserID);
+        Row rootDefaultDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ?",
+                rootUserID);
 
         if (rootDefaultDeck == null) {
             DatabaseUtils.sqlSingleRowStatement(
@@ -69,42 +70,42 @@ public class DeckManager {
                     "Default", 1, 1);
             System.out.println("Create Deck complete");
             ObjectMapper mapper = new ObjectMapper();
-    
-            //Get data from the defaultdeck json
+
+            // Get data from the defaultdeck json
             try (InputStream input = DeckManager.class.getClassLoader()
                     .getResourceAsStream("datasets/default_deck_sample.json")) {
-    
-                if (input == null) throw new RuntimeException("File not found!");
-    
-                Map<String, Map<String, Map<String, Map<String, List<String>>>>> rootJson =
-                        mapper.readValue(input, new TypeReference<>() {});
-    
+
+                if (input == null)
+                    throw new RuntimeException("File not found!");
+
+                Map<String, Map<String, Map<String, Map<String, List<String>>>>> rootJson = mapper.readValue(input,
+                        new TypeReference<>() {
+                        });
+
                 Map<String, Map<String, Map<String, List<String>>>> defaultDeck = rootJson.get("default");
-                
+
                 int weight = 1;
-    
+
                 for (Map.Entry<String, Map<String, Map<String, List<String>>>> entry : defaultDeck.entrySet()) {
                     String level = entry.getKey();
                     Map<String, Map<String, List<String>>> levelData = entry.getValue();
                     DatabaseUtils.sqlPrepareStatement(
-                        "INSERT INTO card_leveltb (level_weight, level_name, deck_id_FK) VALUES (?, ?, ?)",
-                        weight, level, 1
-                    );
-                    Long level_id  = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                        "SELECT level_id_PK FROM card_leveltb WHERE level_weight = ? AND level_name = ?", 
-                        weight, level).get("level_id_PK")).longValue();
+                            "INSERT INTO card_leveltb (level_weight, level_name, deck_id_FK) VALUES (?, ?, ?)",
+                            weight, level, 1);
+                    Long level_id = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                            "SELECT level_id_PK FROM card_leveltb WHERE level_weight = ? AND level_name = ?",
+                            weight, level).get("level_id_PK")).longValue();
                     weight = weight + 1;
-    
-    
-                    for (Map.Entry<String, Map<String, List<String>>> wordData : levelData.entrySet()){
+
+                    for (Map.Entry<String, Map<String, List<String>>> wordData : levelData.entrySet()) {
                         String word = wordData.getKey();
                         Map<String, List<String>> wordContent = wordData.getValue();
-    
+
                         String wordContentJSON = mapper.writeValueAsString(wordContent);
-                        
+
                         DatabaseUtils.sqlPrepareStatement(
-                            "INSERT INTO cardtb (card_word, card_content, level_id_FK, deck_id_FK) VALUES (?, ?, ?, ?)", 
-                            word, wordContentJSON, level_id, 1);
+                                "INSERT INTO cardtb (card_word, card_content, level_id_FK, deck_id_FK) VALUES (?, ?, ?, ?)",
+                                word, wordContentJSON, level_id, 1);
                     }
                 }
             } catch (Exception e) {

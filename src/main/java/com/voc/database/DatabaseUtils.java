@@ -91,8 +91,8 @@ public class DatabaseUtils {
 
             // Check and initialize database if configured
             if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
-                if (checkDatabase()){
-                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?",  ROOT_USERNAME) == null){
+                if (checkDatabase()) {
+                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
                         initializeAdministrator();
                     }
                 }
@@ -106,19 +106,19 @@ public class DatabaseUtils {
     /**
      * Initializes the administrator (root) user for the system.
      * <p>
-     * This method generates a secure random password for the root user and 
-     * registers the account in the authentication system. The root password 
-     * is generated only once immediately after the database is created and 
+     * This method generates a secure random password for the root user and
+     * registers the account in the authentication system. The root password
+     * is generated only once immediately after the database is created and
      * will not be displayed again.
      * </p>
      * <p>
-     * The generated credentials are printed to the console for the developer 
-     * or system administrator to record. It is the caller's responsibility 
+     * The generated credentials are printed to the console for the developer
+     * or system administrator to record. It is the caller's responsibility
      * to store this password in a safe location.
      * </p>
      *
-     * @implNote This method should only be called during the initial database 
-     *           setup process. Repeated calls will overwrite the root user's 
+     * @implNote This method should only be called during the initial database
+     *           setup process. Repeated calls will overwrite the root user's
      *           credentials.
      */
     private static void initializeAdministrator() {
@@ -248,10 +248,11 @@ public class DatabaseUtils {
             connection = getConnection();
         }
 
-        boolean isConnected = connection != null;;
+        boolean isConnected = connection != null;
+        ;
 
         try {
-            if (connection != null){
+            if (connection != null) {
                 connection.close();
             }
         } catch (Exception e) {
@@ -272,6 +273,7 @@ public class DatabaseUtils {
      * Example usage:
      * </p>
      * ~
+     * 
      * <pre>
      * String sql;
      * List&lt;Row&gt; result;
