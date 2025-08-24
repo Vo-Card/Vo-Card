@@ -1,0 +1,90 @@
+name: Java CI with Tomcat and MySQL
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Cache Maven packages
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      # 4. Prepare database.json from example
+      - name: Prepare database.json
+        run: |
+          mkdir -p src/main/resources/config
+          cp src/main/resources/config/database.json-example src/main/resources/config/database.json
+          sed -i 's/YOUR_DATABASE_NAME/testdb/' src/main/resources/config/database.json
+          sed -i 's/YOUR_DATABASE_USERNAME/testuser/' src/main/resources/config/database.json
+          sed -i 's/YOUR_DATABASE_PASSWORD/testpass/' src/main/resources/config/database.json
+          sed -i 's|jdbc:mysql://localhost:3306/|jdbc:mysql://127.0.0.1:3306/|' src/main/resources/config/database.json
+
+      # 5. Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h "127.0.0.1" -u testuser -ptestpass --silent; do
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
+
+      # 6. Build and compile
+      - name: Build & compile
+        run: mvn clean install compile
+
+      # 7. Run unit tests
+      - name: Run tests
+        run: mvn test
+
+      # 8. Start Tomcat for integration tests (optional)
+      - name: Start Tomcat
+        run: mvn tomcat9:run &
+      
+      # 9. Wait for Tomcat to be ready
+      - name: Wait for Tomcat
+        run: sleep 15
+      
+      # 10. Run integration tests (optional)
+      - name: Run integration tests
+        run: mvn verify
+
+      # 11. Stop Tomcat
+      - name: Stop Tomcat
+        run: |
+          pkill -f 'org.apache.catalina.startup.Bootstrap'
