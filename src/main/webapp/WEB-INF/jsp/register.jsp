@@ -27,8 +27,33 @@
                 width: 250px;
             }
 
+            div input {
+                background-color: rgba(125, 125, 125, 0);
+                border-style: none;
+                border-radius: 5px;
+                padding: 5px;
+                cursor: pointer;
+            }
+
+            .dumb {
+                background-color: #5a5a5a;
+            }
+
+            .dumb :hover {
+                background-color: red;
+            }
+
+            input::placeholder {
+                color: white;
+                opacity: 50%;
+            }
+
             input {
                 width: 100%;
+            }
+
+            .dumb :hover {
+                background-color: red;
             }
 
             @media (min-width: 768px) {
@@ -58,10 +83,12 @@
 
             .light {
                 position: absolute;
+                background-blend-mode: normal, overlay, normal, normal;
                 background-image: radial-gradient(farthest-corner at left -30px,
-                        rgba(93, 93, 93, 0.126) 5%,
-                        rgba(192, 192, 192, 0.119) 15%,
-                        rgba(0, 0, 0, 0.408) 100%);
+                        rgba(93, 93, 93, 0.126) 20%,
+                        rgba(192, 192, 192, 0.119) 35%,
+                        rgba(0, 0, 0, 0.408) 65%,
+                        rgba(0, 0, 0, 0.4) 65%);
                 width: 100%;
                 height: 100%;
             }
@@ -84,10 +111,22 @@
                 <h2 style="color: white;">Register</h2>
 
                 <form action="register" method="post">
-                    <p>Display Name:</p><input name="display_name" type="text" required /><br />
-                    <p class="py-1">Username:</p><input name="username" type="text" required /><br />
-                    <p class="py-1">Password:</p><input name="password" type="password" required /><br />
-                    <p class="py-1">Confirm Password:</p><input name="confirmPassword" type="password" required /><br />
+                    <div>
+                        <p>Display Name:</p>
+                        <input name="display_name" class="dumb" type="text" placeholder="Display name" required /><br />
+                    </div>
+                    <div>
+                        <p class="py-1">Username:</p>
+                        <input name="username" type="text" placeholder="Username" required /><br />
+                    </div>
+                    <div>
+                        <p class="py-1">Password:</p>
+                        <input name="password" type="password" placeholder="Password" required /><br />
+                    </div>
+                    <div>
+                        <p class="py-1">Confirm Password:</p>
+                        <input name="confirmPassword" type="password" placeholder="Confirm Password" required /><br />
+                    </div>
                     <div class="mt-3">
                         <input type="submit" value="Register" />
                     </div>
