@@ -59,7 +59,7 @@ public class DeckManager {
      */
     private static void initializeDeckTable() {
         Long rootUserID  = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                        "SELECT user_id_PK FROM usertb WHERE username = ?", "vocard").get("level_id_PK")).longValue();
+                        "SELECT user_id_PK FROM usertb WHERE username = ?", "vocard").get("user_id_PK")).longValue();
 
         Row rootDefaultDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ?", rootUserID);
 
