@@ -34,6 +34,7 @@
                 padding: 5px;
                 cursor: pointer;
                 transition: ease-in 0.35s;
+                color: white;
             }
 
             .register div input:hover:not(input[type="submit"]) {
@@ -73,6 +74,7 @@
             p {
                 margin-bottom: 0.5rem;
                 color: white;
+                user-select: none;
             }
 
             .register {
@@ -105,34 +107,33 @@
             <div class="mx-auto my-auto p-5 register">
                 <h2 style="color: white;">Register</h2>
 
-                <form action="register" method="post">
+                <form action="register" method="post" autocomplete="off">
                     <div>
                         <p>Display Name:</p>
-                        <input name="display_name" class="transpa" type="text" placeholder="Display name"
-                            required /><br />
+                        <input name="display_name" type="text" placeholder="Display name" required /><br />
                     </div>
                     <div>
                         <p class="py-1">Username:</p>
-                        <input name="username" class="transpa" type="text" placeholder="Username" required /><br />
+                        <input name="username" type="text" placeholder="Username" required /><br />
                     </div>
                     <div>
                         <p class="py-1">Password:</p>
-                        <input name="password" class="transpa" type="password" placeholder="Password" required /><br />
+                        <input name="password" type="password" placeholder="Password" required /><br />
                     </div>
                     <div>
                         <p class="py-1">Confirm Password:</p>
-                        <input name="confirmPassword" class="transpa" type="password" placeholder="Confirm Password"
-                            required /><br />
+                        <input name="confirmPassword" type="password" placeholder="Confirm Password" required /><br />
+                        <c:if test="${not empty error}">
+                            <p style="color:red">${error}</p>
+                        </c:if>
                     </div>
-                    <div class="mt-3 transpa">
+                    <div class="mt-3 ">
                         <input type="submit" value="Register" />
                     </div>
                 </form>
             </div>
         </div>
-        <c:if test="${not empty error}">
-            <p style="color:red">${error}</p>
-        </c:if>
+
     </body>
 
     </html>
