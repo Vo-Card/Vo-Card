@@ -26,6 +26,10 @@
                     --alert: #ff8989;
                 }
 
+                p {
+                    margin: 0px;
+                }
+
                 body {
                     background-color: #494949;
                 }
@@ -70,7 +74,12 @@
 
                 .slide-bar {
                     background-color: #1F1F1F;
-                    width: 260px;
+                    width: 200px;
+                }
+
+                .slide-bar li:hover {
+                    background-color: #5a5a5a;
+
                 }
 
                 .compo-color {
@@ -95,20 +104,24 @@
                 }
 
                 .item1 {
-                    grid-column: 2 / 7 span;
-                    background-color: #0D0D0D;
-
+                    grid-column: 4 / 5 span;
+                    background-color: #18191b;
+                    border-radius: 18px;
+                    filter: drop-shadow(5px 5px 2px #1c1c1e);
                 }
 
                 .item2 {
                     grid-column: 9 / 3 span;
-                    background-color: #0D0D0D;
-
+                    background-color: #18191b;
+                    border-radius: 18px;
+                    filter: drop-shadow(5px 5px 2px #1c1c1e);
                 }
 
                 .item3 {
-                    grid-column: 2 / 10 span;
-                    background-color: #0D0D0D;
+                    grid-column: 4 / 8 span;
+                    background-color: #18191b;
+                    border-radius: 18px;
+                    filter: drop-shadow(20px 15px 5px #1c1c1e);
                 }
 
                 .font-fixed {
@@ -118,114 +131,107 @@
                 .card-wel {
                     transform: scale(1);
                 }
+
+                .z-9999 {
+                    z-index: 9999;
+                }
             </style>
         </head>
 
         <body>
-            <div class="d-flex h-100">
+            <div class="d-flex w-full h-100 ">
                 <!-- slidebar component
                 FIXME: <it's not sticky> 
                 -->
-                <div class="d-block hiddable slide-bar h-100 px-2 z-5">
-                    <div class=" d-flex p-2 mx-2 gap-3 align-items-center">
-                        <div class="icon" style="width: 28px; height: 28px; color: white;">
+                <div class=" d-block ">
+                    <div class=" hiddable slide-bar h-100 px-2 position-fixed z-9999">
+                        <div class=" d-flex p-2 mx-2 gap-3 align-items-center ">
+                            <div class="icon" style="width: 28px; height: 28px; color: white;">
+                            </div>
+                            <div class="" style="font-size: 16px;">Vo-Card</div>
                         </div>
-                        <div class="" style="font-size: 16px;">Vo-Card</div>
-                    </div>
 
-                    <div class="ps-1 d-flex flex-column overflow-auto w-100 min-w-0 position-relative gap-1">
-                        <div class=" p-1 align-items-center d-flex">Home</div>
+                        <div class="ps-1 d-flex flex-column overflow-auto w-100 min-w-0 position-relative ">
+                            <div class="ps-2 p-1 align-items-center d-flex">Home</div>
 
-                        <ul class="gap-3 w-100 flex-column min-w-0 w-100 d-flex ps-1 mb-1">
-                            <li class="d-flex  gap-2 align-items-center">
-                                <a href="#"
-                                    class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0 w-100">
-                                    <div class="fakeIcon"></div>
-                                    <span>Home</span>
-                                </a>
-                            </li>
+                            <ul class="gap-3 w-100 flex-column min-w-0 w-100 d-flex ps-1 mb-1">
+                                <li class="d-flex p-1 gap-2 align-items-center">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0 w-100">
+                                        <div class="fakeIcon"></div>
+                                        <span>Home</span>
+                                    </a>
+                                </li>
 
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Stat</span>
-                                </a>
-                            </li>
+                                <li class="d-flex p-1 gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Stat</span>
+                                    </a>
+                                </li>
 
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Learn</span>
-                                </a>
-                            </li>
-                        </ul>
+                                <li class="d-flex p-1 gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Learn</span>
+                                    </a>
+                                </li>
+                                <li class="d-flex p-1 gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Decks</span>
+                                    </a>
+                                </li>
+                            </ul>
 
+                        </div>
+                        <div class="h-100 w-100">
+                            <div class=" align-items-center d-flex p-2">Setting</div>
+                            <ul class="gap-3 ps-1 flex-column min-w-0 w-100 d-flex ">
+                                <li class="d-flex gap-2 ">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Setting</span>
+                                    </a>
+                                </li>
 
-                        <div class="px-2 align-items-center d-flex p-2">Deck</div>
+                                <li class="d-flex gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>About me</span>
+                                    </a>
+                                </li>
 
-                        <ul class="gap-3 flex-column min-w-0 ps-1 w-100 d-flex">
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Decks</span>
-                                </a>
-                            </li>
-                        </ul>
+                                <li class="d-flex gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Contact</span>
+                                    </a>
+                                </li>
 
-                        <div class="align-items-center d-flex p-2">recently reviewed</div>
-                        <ul class="gap-1 flex-column min-w-0 ps-1 w-100 d-flex py-2">
-                            <li class="d-flex gap-2">
-                                <a href="#"
-                                    class="d-flex gap-2 position-position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <span>A1</span>
-                                </a>
-                            </li>
-
-                            <li class="d-flex gap-2">
-                                <a href="#"
-                                    class="d-flex gap-2 position-position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <span>A2</span>
-                                </a>
-                            </li>
-                        </ul>
-
-                        <div class=" align-items-center d-flex p-2">Setting</div>
-                        <ul class="gap-3 ps-1 flex-column min-w-0 w-100 d-flex ">
-                            <li class="d-flex gap-2 ">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Setting</span>
-                                </a>
-                            </li>
-
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>About me</span>
-                                </a>
-                            </li>
-
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Contact</span>
-                                </a>
-                            </li>
-
-                            <li class="d-flex gap-2">
-                                <a href="#" class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
-                                    <div class="fakeIcon"></div>
-                                    <span>Log-out</span>
-                                </a>
-                            </li>
-                        </ul>
+                                <li class="d-flex gap-2">
+                                    <a href="#"
+                                        class="d-flex gap-2 position-relative overflow-hidden p-1 w-100 min-w-0">
+                                        <div class="fakeIcon"></div>
+                                        <span>Log-out</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
+
                 <div class="window"></div>
 
-                <div class="d-flex w-100 flex-column min-h-svh flex-1 position-relative">
+                <div class="d-flex w-100 flex-column flex-1 position-relative">
                     <header
-                        class="w-100 d-flex align-items-center gap-2 shrink-0 top-0 sticky-top compo-color justify-content-between z-5">
+                        class="w-100 d-flex align-items-center gap-2 shrink-0 top-0 sticky-top compo-color justify-content-between ">
                         <div class="d-flex align-items-center gap-2 px-4">
                             <button class="hamburger-button justify-content-between d-inline -ml-1">
                                 <img src="/imgs/white-hamburger.png" alt="" style="width: 24px; height: 24px;">
@@ -243,32 +249,32 @@
                         </div>
                     </header>
                     <!-- end silder -->
-
-                    <main class="position-relative z-0 sm-pb-0 pb-8 px-2">
-                        <div class="something grid-container my-4 mx-auto w-full">
+                    <main class="position-relative z-0 sm-pb-0 pb-8 px-2 mx-auto">
+                        <div class="something grid-container my-4 w-full">
                             <div class="item1">
                                 <div class="pt-4 px-3 pb-2">
                                     <p class="font-fixed">{daily_welcome_message}, {username}!</p>
                                 </div>
                                 <div class="pb-2 px-3">
-                                    <p>Create your own flashcard decks, review with spaced repetition, and track your
+                                    <p>Create your own flashcard decks, review with spaced repetition, and track
+                                        your
                                         progess .</p>
                                 </div>
                                 <div class="px-3 pb-2">
                                     <div class="d-flex gap-2">
                                         <a href="#">
-                                            <p>Get Started</p>
+                                            <p>[ Get Started ]</p>
                                         </a>
                                         <a href="#">
-                                            <p>Create your own deck</p>
+                                            <p>[ Create your own deck ]</p>
                                         </a>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="item2 gap-2">
-                                <div class="pt-4 px-3 pb-2">
-                                    <p class="font-fixed">Your Today Card</p>
+                            <div class="item2 gap-2 ">
+                                <div class="pt-4  pb-2">
+                                    <p class="font-fixed text-center">Your Today Card</p>
                                 </div>
 
                                 <div class="preview card-wel" id="card_preview">
@@ -295,10 +301,11 @@
 
                             <!-- chart recently 7 days -->
                             <section class="item3 h-100 p-2">
-                                <div class="p-2">
+                                <div class="light"></div>
+                                <div class="p-2 pt-3 ps-2">
                                     <p class="font-fixed">Stat</p>
                                 </div>
-                                <div class="p-2">
+                                <div class="p-2 ps-3">
                                     <p>Showing your stat recently 7 days</p>
                                 </div>
                                 <!-- TODO: <Create charts> -->
