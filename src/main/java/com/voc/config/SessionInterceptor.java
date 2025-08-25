@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.voc.security.AuthManager;
-import com.voc.helper.Row;
+import com.voc.utils.Row;
 
 /**
  * SessionInterceptor ensures that HTTP requests have a valid user session.
