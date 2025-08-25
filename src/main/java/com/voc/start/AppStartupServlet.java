@@ -32,22 +32,49 @@ public class AppStartupServlet extends HttpServlet {
         super.init(config);
         System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] App Startup Initializing...");
 
-        // Load database configuration from JSON file
+        Map<String, String> data = null;
+
+        // Try JSON config first
         try (InputStream input = DatabaseUtils.class.getClassLoader()
                 .getResourceAsStream("config/database.json")) {
-            if (input == null) {
-                throw new RuntimeException("database.json not found or not configured.");
+            if (input != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                data = mapper.readValue(input, new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Loaded config from database.json");
             }
+        } catch (Exception e) {
+            System.err.println("[" + BOLD + YELLOW + "VO-CARD" + RESET + "] Failed to load database.json, will try ENV.");
+        }
 
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> data = mapper.readValue(input, new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+        // Fallback to ENV if JSON not found
+        if (data == null) {
+            try {
+                data = Map.of(
+                    "DB_URL", System.getenv("DB_URL"),
+                    "DB_NAME", System.getenv("DB_NAME"),
+                    "DB_USER", System.getenv("DB_USER"),
+                    "DB_PASSWORD", System.getenv("DB_PASSWORD"),
+                    "CHECK_DATABASE", System.getenv("CHECK_DATABASE"),
+                    "ROOT_USERNAME", System.getenv("ROOT_USERNAME"),
+                    "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME")
+                );
 
-            DatabaseUtils.initDatabase(data); // Create a new init method in DatabaseUtils
+                if (data.values().stream().anyMatch(v -> v == null)) {
+                    throw new IllegalStateException("Missing ENV variables for database initialization.");
+                }
+
+                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Loaded config from ENV.");
+            } catch (Exception e) {
+                throw new ServletException("[" + BOLD + RED + "VO-CARD" + RESET + "] No valid config source (JSON or ENV).", e);
+            }
+        }
+
+        try {
+            DatabaseUtils.initDatabase(data);
             System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Database initialized successfully.");
 
             DeckManager.initializeDeckTable();
             System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Default deck ensured.");
-            
         } catch (Exception e) {
             e.printStackTrace();
             throw new ServletException("[" + BOLD + RED + "VO-CARD" + RESET + "] Failed to initialize default configuration.", e);
