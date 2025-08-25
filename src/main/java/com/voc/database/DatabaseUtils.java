@@ -239,22 +239,53 @@ public class DatabaseUtils {
     public static boolean checkDatabase() {
         Connection connection = getConnection();
         if (connection == null) {
+            System.err.println("Connection failed. Trying to initialize database...");
             initializeDatabase();
             connection = getConnection();
         }
 
         boolean isConnected = connection != null;
-        ;
+        boolean isEmpty = true;
 
-        try {
-            if (connection != null) {
-                connection.close();
+        if (isConnected) {
+            try {
+                // Check if database has any tables
+                Map<String, Object> result = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
+                );
+
+                if (result != null && result.get("table_count") != null) {
+                    isEmpty = ((Number) result.get("table_count")).longValue() == 0;
+                }
+
+                if (isEmpty) {
+                    System.out.println("Database is empty. Initializing...");
+                    initializeDatabase();
+
+                    // Re-check
+                    result = DatabaseUtils.sqlSingleRowStatement(
+                        "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
+                    );
+                    if (result != null && result.get("table_count") != null) {
+                        isEmpty = ((Number) result.get("table_count")).longValue() == 0;
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error checking database tables: " + e.getMessage());
+            } finally {
+                try {
+                    if (connection != null && !connection.isClosed()) {
+                        connection.close();
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error closing connection in checkDatabase: " + e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            System.err.println("Error closing connection in checkDatabase: " + e.getMessage());
         }
 
-        return isConnected;
+        System.out.println("Database connected: " + isConnected + ", Empty after init check: " + isEmpty);
+        return isConnected && !isEmpty;
     }
 
     /**
