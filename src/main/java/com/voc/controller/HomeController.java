@@ -22,4 +22,9 @@ public class HomeController {
     public String welcome() {
         return "/u/welcome";
     }
+
+    @RequestMapping("/u/your-deck")
+    public String yourDeck() {
+        return "/u/your-deck";
+    }
 }
