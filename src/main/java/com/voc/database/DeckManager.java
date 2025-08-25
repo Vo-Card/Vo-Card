@@ -1,5 +1,7 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.TAG_SUCCESS;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -58,14 +60,12 @@ public class DeckManager {
             DatabaseUtils.sqlSingleRowStatement(
                     "INSERT INTO decktb (deck_name, deck_is_public, user_id_FK) VALUES (?,?,?)",
                     "Default", 1, rootUserID);
-            System.out.println("Create Deck complete");
+            System.out.println(TAG_SUCCESS + "Create default complete");
 
             ObjectMapper mapper = new ObjectMapper();
 
-            // Get data from the defaultdeck json
             try (InputStream input = DeckManager.class.getClassLoader()
                     .getResourceAsStream("datasets/default_deck_sample.json")) {
-
                 if (input == null)
                     throw new RuntimeException("File not found!");
 
