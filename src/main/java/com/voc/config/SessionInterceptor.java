@@ -24,10 +24,6 @@ import com.voc.utils.Row;
  * attributes
  * when a valid session is found.
  * </p>
- * 
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-23
  */
 @Configuration
 public class SessionInterceptor implements HandlerInterceptor {

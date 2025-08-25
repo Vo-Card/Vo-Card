@@ -23,11 +23,6 @@ import com.voc.utils.Row;
  * DeckManager.createDeck("My First Deck");
  * List<Card> cards = DeckManager.getDeckCards(deckId);
  * </pre>
- * 
- * @author Zartex
- * @author Krittitee
- * @version 0.0.1a
- * @since 2025-08-23
  */
 public class DeckManager {
 

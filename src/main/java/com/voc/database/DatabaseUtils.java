@@ -51,10 +51,6 @@ import com.voc.utils.Row;
  * connections or queries,
  * while printing relevant error messages to the console.
  * </p>
- *
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-21
  */
 public class DatabaseUtils {
 
