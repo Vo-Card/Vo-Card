@@ -103,14 +103,16 @@
             <div class="mx-auto my-auto p-5 login">
 
                 <h2 style="color: white;">Login</h2>
-                <form action="login" method="post" autocomplete="off">
+                <form id="loginForm" method="post" autocomplete="off">
                     <div>
                         <p>Username:</p>
-                        <input name="username" type="text" placeholder="Username" /><br />
+                        <input name="username" id="username" type="text" placeholder="Username" /><br />
                     </div>
                     <div>
                         <p>Password:</p>
-                        <input name="password" type="password" placeholder="Password" /><br />
+                        <input name="password" id="password" type="password" placeholder="Password" /><br />
+                        <div id="message"></div>
+                        <p>Need an account? <a href="/register">Register</a></p>
                         <c:if test="${not empty error}">
                             <p style="color:red">${error}</p>
                         </c:if>
@@ -122,6 +124,7 @@
             </div>
 
         </div>
+        <script src="/js/auth/login.js" defer></script>
 
     </body>
 
