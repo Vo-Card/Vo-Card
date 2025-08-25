@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voc.security.AuthManager;
 import com.voc.security.PasswordGenerator;
 import com.voc.utils.Row;
