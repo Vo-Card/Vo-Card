@@ -78,7 +78,7 @@ public class DatabaseUtils {
      * @param data
      */
     public static void initDatabase(Map<String, String> data) {
-        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] Entering initDatabase"); System.out.flush();
+        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] Entering initDatabase");
 
         DB_URL = data.get("DB_URL");
         DB_NAME = data.get("DB_NAME");
@@ -87,25 +87,21 @@ public class DatabaseUtils {
         ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
         ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
 
-        System.out.println("[" + BOLD + CYAN + "VO-CARD" + RESET + "] Loaded DB config: URL=" + DB_URL + ", USER=" + DB_USER); System.out.flush();
-
         // Check and initialize database if configured
         boolean dbOk = checkDatabase();
-        System.out.println("[" + BOLD + YELLOW + "VO-CARD" + RESET + "] Database check result: " + dbOk); System.out.flush();
+        System.out.println(TAG_DEBUG + "Database check result: " + (dbOk ? "OK" : "FAILED"));
 
         if (dbOk) {
-            Object row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
-            System.out.println("[" + BOLD + MAGENTA + "VO-CARD" + RESET + "] Root user exists? " + (row != null)); System.out.flush();
+            Row row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
+            System.out.println(TAG_ALERT + "Root user exists? " + (row != null));
 
             if (row == null) {
                 initializeAdministrator();
-                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Root user initialized"); System.out.flush();
+                System.out.println(TAG_SUCCESS + "Root user initialized");
             }
         } else {
-            System.err.println("[" + BOLD + RED + "VO-CARD" + RESET + "] Database not ready or check failed"); System.err.flush();
+            System.err.println(TAG_ERROR + "Database not ready or check failed");
         }
-
-        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] initDatabase completed"); System.out.flush();
     }
 
     public static String getRootUsername() {
@@ -138,7 +134,7 @@ public class DatabaseUtils {
         System.out.println("Please keep this password in a secure location.");
         System.out.println("The password will show only once.");
         AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
-        System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Root user created successfully.");
+        System.out.println(TAG_SUCCESS + "Root user created successfully.");
     }
 
     /**
@@ -186,10 +182,10 @@ public class DatabaseUtils {
                 Statement stmt = connection.createStatement()) {
 
             stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
-            System.out.println("Database initialized successfully.");
+            System.out.println(TAG_SUCCESS + "Database initialized successfully.");
 
         } catch (SQLException e) {
-            System.err.println("Error creating database: " + e.getMessage());
+            System.err.println(TAG_ERROR + "Error creating database: " + e.getMessage());
             return;
         }
 
@@ -214,7 +210,7 @@ public class DatabaseUtils {
                 throw new FileNotFoundException("schema.sql not found in resources folder.");
             }
 
-            System.out.println("Connected to the database.");
+            System.out.println(TAG_INFO + "Loading and executing schema.sql...");
 
             // Read SQL file into a single script
             StringBuilder sqlScript = new StringBuilder();
@@ -231,7 +227,7 @@ public class DatabaseUtils {
                 }
             }
 
-            System.out.println("SQL file executed successfully.");
+            System.out.println(TAG_SUCCESS + "SQL file executed successfully.");
 
         } catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
@@ -254,7 +250,7 @@ public class DatabaseUtils {
     public static boolean checkDatabase() {
         Connection connection = getConnection();
         if (connection == null) {
-            System.err.println("Connection failed. Trying to initialize database...");
+            System.err.println(TAG_ERROR + "Connection failed. Trying to initialize database...");
             initializeDatabase();
             connection = getConnection();
         }
@@ -273,7 +269,7 @@ public class DatabaseUtils {
                 }
 
                 if (isEmpty) {
-                    System.out.println("Database is empty. Initializing...");
+                    System.out.println(TAG_INFO + "Database is empty. Initializing...");
                     initializeDatabase();
 
                     result = DatabaseUtils.sqlSingleRowStatement(
@@ -285,19 +281,18 @@ public class DatabaseUtils {
                 }
 
             } catch (Exception e) {
-                System.err.println("Error checking database tables: " + e.getMessage());
+                System.err.println(TAG_ERROR + "Error checking database tables: " + e.getMessage());
             } finally {
                 try {
                     if (connection != null && !connection.isClosed()) {
                         connection.close();
                     }
                 } catch (Exception e) {
-                    System.err.println("Error closing connection in checkDatabase: " + e.getMessage());
+                    System.err.println(TAG_ERROR + "Error closing connection in checkDatabase: " + e.getMessage());
                 }
             }
         }
 
-        System.out.println("Database connected: " + isConnected + ", Empty after init check: " + isEmpty);
         return isConnected && !isEmpty;
     }
 
