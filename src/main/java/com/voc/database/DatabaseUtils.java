@@ -78,6 +78,8 @@ public class DatabaseUtils {
      * @param data
      */
     public static void initDatabase(Map<String, String> data) {
+        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] Entering initDatabase"); System.out.flush();
+
         DB_URL = data.get("DB_URL");
         DB_NAME = data.get("DB_NAME");
         DB_USER = data.get("DB_USER");
@@ -85,12 +87,25 @@ public class DatabaseUtils {
         ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
         ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
 
+        System.out.println("[" + BOLD + CYAN + "VO-CARD" + RESET + "] Loaded DB config: URL=" + DB_URL + ", USER=" + DB_USER); System.out.flush();
+
         // Check and initialize database if configured
-        if (checkDatabase()) {
-            if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
+        boolean dbOk = checkDatabase();
+        System.out.println("[" + BOLD + YELLOW + "VO-CARD" + RESET + "] Database check result: " + dbOk); System.out.flush();
+
+        if (dbOk) {
+            Object row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
+            System.out.println("[" + BOLD + MAGENTA + "VO-CARD" + RESET + "] Root user exists? " + (row != null)); System.out.flush();
+
+            if (row == null) {
                 initializeAdministrator();
+                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Root user initialized"); System.out.flush();
             }
+        } else {
+            System.err.println("[" + BOLD + RED + "VO-CARD" + RESET + "] Database not ready or check failed"); System.err.flush();
         }
+
+        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] initDatabase completed"); System.out.flush();
     }
 
     public static String getRootUsername() {
@@ -249,8 +264,7 @@ public class DatabaseUtils {
 
         if (isConnected) {
             try {
-                // Check if database has any tables
-                Map<String, Object> result = DatabaseUtils.sqlSingleRowStatement(
+                Row result = DatabaseUtils.sqlSingleRowStatement(
                     "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
                 );
 
@@ -262,7 +276,6 @@ public class DatabaseUtils {
                     System.out.println("Database is empty. Initializing...");
                     initializeDatabase();
 
-                    // Re-check
                     result = DatabaseUtils.sqlSingleRowStatement(
                         "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
                     );
