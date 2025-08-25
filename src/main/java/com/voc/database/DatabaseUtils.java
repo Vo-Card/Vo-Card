@@ -59,7 +59,6 @@ public class DatabaseUtils {
     private static String DB_NAME;
     private static String DB_USER;
     private static String DB_PASSWORD;
-    private static String CHECK_DATABASE;
 
     private static String ROOT_USERNAME;
     private static String ROOT_DISPLAYNAME;
@@ -83,16 +82,13 @@ public class DatabaseUtils {
         DB_NAME = data.get("DB_NAME");
         DB_USER = data.get("DB_USER");
         DB_PASSWORD = data.get("DB_PASSWORD");
-        CHECK_DATABASE = data.get("CHECK_DATABASE");
         ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
         ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
 
         // Check and initialize database if configured
-        if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
-            if (checkDatabase()) {
-                if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
-                    initializeAdministrator();
-                }
+        if (checkDatabase()) {
+            if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
+                initializeAdministrator();
             }
         }
     }
