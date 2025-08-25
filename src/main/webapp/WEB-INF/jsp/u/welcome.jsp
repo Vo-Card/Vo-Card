@@ -9,13 +9,15 @@
             <title>Homepage</title>
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             <link rel="stylesheet" type="text/css" href="/css/card_theme.css">
+
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
                 crossorigin="anonymous">
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
                 crossorigin="anonymous"></script>
-
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+            <script src="/js/chartz.js" defer></script>
             <!-- temp -->
             <style>
                 :root {
@@ -38,13 +40,6 @@
                 }
 
                 div {
-                    color: white;
-                }
-
-                .cover {
-                    background-color: #242424;
-                    width: 100%;
-                    min-height: 100svh;
                     color: white;
                 }
 
@@ -138,9 +133,8 @@
                         <div class="" style="font-size: 16px;">Vo-Card</div>
                     </div>
 
-                    <div class="ps-1 d-flex flex-column overflow-auto w-100 min-w-0 position-relative gap-1"
-                        style="flex: 1 1 0%;">
-                        <div class="p-1 align-items-center d-flex">Home</div>
+                    <div class="ps-1 d-flex flex-column overflow-auto w-100 min-w-0 position-relative gap-1">
+                        <div class=" p-1 align-items-center d-flex">Home</div>
 
                         <ul class="gap-3 w-100 flex-column min-w-0 w-100 d-flex ps-1 mb-1">
                             <li class="d-flex  gap-2 align-items-center">
@@ -165,6 +159,7 @@
                                 </a>
                             </li>
                         </ul>
+
 
                         <div class="px-2 align-items-center d-flex p-2">Deck</div>
 
@@ -224,7 +219,6 @@
                                 </a>
                             </li>
                         </ul>
-
                     </div>
                 </div>
                 <div class="window"></div>
@@ -307,13 +301,8 @@
                                 <div class="p-2">
                                     <p>Showing your stat recently 7 days</p>
                                 </div>
-                                <!-- TODO: <Create chartzs> -->
-                                <div class="p-4 px-2 justify-conten-between w-100 h-100"
-                                    style="height: 250px; min-width: 0;">
-                                    <div class="chartz">
-                                        <canvas id="recent-chartz"></canvas>
-                                    </div>
-                                </div>
+                                <!-- TODO: <Create charts> -->
+                                <canvas class="p-3 px-2 w-100" id="chartz" style="height: 300px;"></canvas>
                             </section>
 
                         </div>
