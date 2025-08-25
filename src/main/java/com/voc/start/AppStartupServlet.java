@@ -40,10 +40,10 @@ public class AppStartupServlet extends HttpServlet {
             if (input != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 data = mapper.readValue(input, new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
-                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Loaded config from database.json");
+                System.out.println(TAG_SUCCESS + "Loaded config from database.json");
             }
         } catch (Exception e) {
-            System.err.println("[" + BOLD + YELLOW + "VO-CARD" + RESET + "] Failed to load database.json, will try ENV.");
+            System.err.println(TAG_WARNING + "Failed to load database.json, will try ENV.");
         }
 
         // Fallback to ENV if JSON not found
@@ -62,21 +62,23 @@ public class AppStartupServlet extends HttpServlet {
                     throw new IllegalStateException("Missing ENV variables for database initialization.");
                 }
 
-                System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Loaded config from ENV.");
+                System.out.println(TAG_SUCCESS + "Loaded config from ENV.");
             } catch (Exception e) {
-                throw new ServletException("[" + BOLD + RED + "VO-CARD" + RESET + "] No valid config source (JSON or ENV).", e);
+                throw new ServletException(TAG_ERROR + " No valid config source (JSON or ENV).", e);
             }
         }
 
         try {
             DatabaseUtils.initDatabase(data);
-            System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Database initialized successfully.");
+            System.out.println(TAG_SUCCESS + "Database initialized successfully.");
 
             DeckManager.initializeDeckTable();
-            System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Default deck ensured.");
+            System.out.println(TAG_SUCCESS + "Default deck ensured.");
+
+            System.out.flush();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ServletException("[" + BOLD + RED + "VO-CARD" + RESET + "] Failed to initialize default configuration.", e);
+            throw new ServletException(TAG_ERROR + "Failed to initialize default configuration.", e);
         }
     }
 }
