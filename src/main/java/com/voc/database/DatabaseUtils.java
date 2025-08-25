@@ -1,5 +1,7 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.*;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,8 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.voc.helper.Row;
 import com.voc.security.AuthManager;
+import com.voc.security.PasswordGenerator;
+import com.voc.utils.Row;
 
 /**
  * <p>
@@ -66,41 +69,41 @@ public class DatabaseUtils {
     private static String ROOT_USERNAME;
     private static String ROOT_DISPLAYNAME;
 
-    static {
-        // Load database configuration from JSON file
-        try (InputStream input = DatabaseUtils.class.getClassLoader()
-                .getResourceAsStream("config/database.json")) {
-            if (input == null) {
-                throw new RuntimeException(
-                        "database.json not found or not configured. Please check the resources/config folder.");
-            }
+    /**
+     * Initializes database configuration from a map of settings.
+     * <p>
+     * This method reads database connection parameters and the root user
+     * credentials from the provided map.
+     * If {@code CHECK_DATABASE} is set to {@code true}, it verifies the
+     * database connection and initializes the database if necessary.
+     * </p>
+     * <p>
+     * The root user is created only if it does not already exist in the
+     * database.
+     * </p>
+     * @param data
+     */
+    public static void initDatabase(Map<String, String> data) {
+        DB_URL = data.get("DB_URL");
+        DB_NAME = data.get("DB_NAME");
+        DB_USER = data.get("DB_USER");
+        DB_PASSWORD = data.get("DB_PASSWORD");
+        CHECK_DATABASE = data.get("CHECK_DATABASE");
+        ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
+        ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
 
-            // Parse JSON into a Map
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> data = mapper.readValue(input,
-                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {
-                    });
-
-            DB_URL = data.get("DB_URL");
-            DB_NAME = data.get("DB_NAME");
-            DB_USER = data.get("DB_USER");
-            DB_PASSWORD = data.get("DB_PASSWORD");
-            CHECK_DATABASE = data.get("CHECK_DATABASE");
-            ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
-            ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
-
-            // Check and initialize database if configured
-            if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
-                if (checkDatabase()) {
-                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
-                        initializeAdministrator();
-                    }
+        // Check and initialize database if configured
+        if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
+            if (checkDatabase()) {
+                if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
+                    initializeAdministrator();
                 }
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+    }
+
+    public static String getRootUsername() {
+        return ROOT_USERNAME;
     }
 
     /**
@@ -129,6 +132,7 @@ public class DatabaseUtils {
         System.out.println("Please keep this password in a secure location.");
         System.out.println("The password will show only once.");
         AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
+        System.out.println("[" + BOLD + GREEN + "VO-CARD" + RESET + "] Root user created successfully.");
     }
 
     /**
@@ -295,7 +299,7 @@ public class DatabaseUtils {
      * @param args Arguments to bind to the SQL statement placeholders, in order.
      * @return A List of Row objects containing the results of the query, or an
      *         empty list if no results.
-     * @see com.voc.helper.Row
+     * @see com.voc.utils.Row
      * @see #sqlSingleRowStatement(String, Object...)
      */
     public static List<Row> sqlPrepareStatement(String sql, Object... args) {
