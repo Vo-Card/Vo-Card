@@ -22,35 +22,6 @@ public class LoginController {
         return "login";
     }
 
-    @PostMapping("/login")
-    public String processLogin(
-            @RequestParam String username,
-            @RequestParam String password,
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Model model) {
-        // Validate username and password
-        if (username == null || username.isEmpty() ||
-                password == null || password.isEmpty()) {
-            model.addAttribute("error", "Username and/or password cannot be empty.");
-            return "login";
-        }
-
-        String session_id = AuthManager.loginUser(username, password, request.getHeader("X-Forwarded-For"),
-                request.getHeader("User-Agent"));
-
-        if (session_id == null) {
-            model.addAttribute("error", "Invalid username or password.");
-            return "login";
-        }
-
-        Cookie cookie = new Cookie("session_id", session_id);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-        return "redirect:/";
-    }
-
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("session_id", ""); // match login cookie name
