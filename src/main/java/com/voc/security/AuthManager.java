@@ -1,7 +1,7 @@
 package com.voc.security;
 
 import com.voc.database.DatabaseUtils;
-import com.voc.helper.Row;
+import com.voc.utils.Row;
 
 /**
  * AuthManager handles user authentication operations,

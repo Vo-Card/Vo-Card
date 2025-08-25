@@ -1,7 +1,8 @@
 package com.voc.security;
 
 import com.voc.database.DatabaseUtils;
-import com.voc.helper.Row;
+import com.voc.utils.Row;
+
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import javax.crypto.Cipher;
