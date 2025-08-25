@@ -31,4 +31,5 @@ public class AnsiColor {
     public static final String TAG_ERROR = "[" + BOLD + RED + "VO-CARD" + RESET + "] ";
     public static final String TAG_DEBUG = "[" + BOLD + MAGENTA + "VO-CARD" + RESET + "] ";
     public static final String TAG_ALERT = "[" + BOLD + ORANGE + "VO-CARD" + RESET + "] ";
+    public static final String TAG_IMPORTANT = "[" + BOLD + RED + "IMPORTANT" + RESET + "] ";
 }

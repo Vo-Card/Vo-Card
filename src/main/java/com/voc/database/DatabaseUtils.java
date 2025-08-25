@@ -1,13 +1,27 @@
 package com.voc.database;
 
-import static com.voc.utils.AnsiColor.*;
+import static com.voc.utils.AnsiColor.BLUE;
+import static com.voc.utils.AnsiColor.BOLD;
+import static com.voc.utils.AnsiColor.RESET;
+import static com.voc.utils.AnsiColor.TAG_ALERT;
+import static com.voc.utils.AnsiColor.TAG_DEBUG;
+import static com.voc.utils.AnsiColor.TAG_ERROR;
+import static com.voc.utils.AnsiColor.TAG_IMPORTANT;
+import static com.voc.utils.AnsiColor.TAG_INFO;
+import static com.voc.utils.AnsiColor.TAG_SUCCESS;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,13 +142,12 @@ public class DatabaseUtils {
      */
     private static void initializeAdministrator() {
         String rootPassword = PasswordGenerator.generatePassword(32);
-        System.out.println("Root user has been initialize for this project.");
-        System.out.println("Root Username: " + ROOT_USERNAME);
-        System.out.println("Root Password: " + rootPassword);
-        System.out.println("Please keep this password in a secure location.");
-        System.out.println("The password will show only once.");
+        System.out.println(TAG_IMPORTANT+"Root user has been initialize for this project.");
+        System.out.println(TAG_IMPORTANT+"Root Username: " + ROOT_USERNAME);
+        System.out.println(TAG_IMPORTANT+"Root Password: " + rootPassword);
+        System.out.println(TAG_IMPORTANT+"Please keep this password in a secure location.");
+        System.out.println(TAG_IMPORTANT+"The password will show only once.");
         AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
-        System.out.println(TAG_SUCCESS + "Root user created successfully.");
     }
 
     /**
