@@ -1,4 +1,4 @@
-package com.voc.database;
+package com.voc.security;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
