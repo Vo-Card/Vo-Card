@@ -1,0 +1,10 @@
+# This is a CODEOWNERS file.
+# Lines starting with '#' are comments.
+# Each line specifies a file pattern followed by one or more code owners.
+# Owners can be GitHub usernames (prefixed with @) or team names (@org/team-name).
+# Email addresses can also be used in some systems like Bitbucket.
+
+# Default owners for all files in the repository
+# This rule has the lowest precedence and applies if no other rule matches.
+* @ZartexVertagen
+* @K-Hongkaew
