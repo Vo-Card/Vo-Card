@@ -54,7 +54,6 @@ public class AppStartupServlet extends HttpServlet {
                     "DB_NAME", System.getenv("DB_NAME"),
                     "DB_USER", System.getenv("DB_USER"),
                     "DB_PASSWORD", System.getenv("DB_PASSWORD"),
-                    "CHECK_DATABASE", System.getenv("CHECK_DATABASE"),
                     "ROOT_USERNAME", System.getenv("ROOT_USERNAME"),
                     "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME")
                 );
