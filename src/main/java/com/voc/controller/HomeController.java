@@ -27,4 +27,14 @@ public class HomeController {
     public String yourDeck() {
         return "/u/your-deck";
     }
+
+    @RequestMapping("/about")
+    public String aboutUs() {
+        return "/about";
+    }
+
+    @RequestMapping("/contact")
+    public String contactPage() {
+        return "contact";
+    }
 }
