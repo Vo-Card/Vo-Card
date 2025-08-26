@@ -27,4 +27,9 @@ public class HomeController {
     public String yourDeck() {
         return "/u/your-deck";
     }
+
+    @RequestMapping("/not_found")
+    public String NotfoundPage() {
+        return "not_found";
+    }
 }
