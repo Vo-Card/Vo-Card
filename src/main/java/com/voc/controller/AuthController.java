@@ -3,23 +3,26 @@ package com.voc.controller;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import com.voc.database.DatabaseUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class LoginController {
+public class AuthController {
 
     @GetMapping("/login")
     public String showLoginPage() {
-        DatabaseUtils.checkDatabase();
-        System.out.println("Database checked successfully.");
         return "login";
+    }
+
+    @GetMapping("/register")
+    public String showRegistrationPage(Model model) {
+        return "register";
     }
 
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("session_id", ""); // match login cookie name
+        Cookie cookie = new Cookie("session_id", "");
         cookie.setPath("/");
         cookie.setMaxAge(0); // expire immediately
         cookie.setHttpOnly(true);
