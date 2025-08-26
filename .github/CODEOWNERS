@@ -6,5 +6,4 @@
 
 # Default owners for all files in the repository
 # This rule has the lowest precedence and applies if no other rule matches.
-* @ZartexVertagen
-* @K-Hongkaew
+* @ZartexVertagen @K-Hongkaew
