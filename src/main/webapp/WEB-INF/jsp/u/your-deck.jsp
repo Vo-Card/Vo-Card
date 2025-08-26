@@ -9,16 +9,23 @@
             <title>Document</title>
             <link rel="stylesheet" type="text/css" href="/css/card_theme.css">
             <link rel="stylesheet" type="text/css" href="/css/style.css">
+            <link rel="stylesheet" type="text/css" href="/css/main.css">
 
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
                 crossorigin="anonymous">
-
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK"
+                integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
                 crossorigin="anonymous"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 
             <style>
+                :root {
+                    --theme-color: #1b1d24;
+                    --primary-color: rgba(23, 23, 23, 0.2);
+                    --alert: #ff8989;
+                }
+
                 body {
                     background-color: #1b1d24;
                     color: white;
@@ -26,30 +33,28 @@
             </style>
         </head>
 
-        <body>
-            <div>
-                <div class="preview" id="card_preview">
-                    <div class="deck default a1" style="z-index: 1;">
-                        <div class="background">
-                            <p class="category">A1</p>
-                            <div class="decorations">
-                                <div>
-                                    <span
-                                        style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;"></span>
-                                    <span
-                                        style="background-color: white; width: 70px; height: 2px; display: block; position: relative; top :10px;"></span>
-                                    <span
-                                        style="background-color: white; width: 2px; height: 100px; display: block; position: relative; bottom :12px; left: 50px;"></span>
-                                </div>
-                                <span
-                                    style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;">
-                            </div>
+        <body style="background-color: var(--menu-primary-color);">
+
+            <jsp:include page="/components/menuHeader.jsp" />
+
+            <div class="window"></div>
+
+            <div class="workspace-container">
+                <jsp:include page="/components/menuBar.jsp" />
+
+                <div id="splitter">
+                    <div class="splitter-move-bar"></div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div id="content">
+                        <!-- main page -->
+                        <div class="">
+                            
                         </div>
-                        <p class="word">Something</p>
                     </div>
                 </div>
-            </div>
-            </div>
+                <script src="/js/menu-splitter.js"></script>
         </body>
 
         </html>
