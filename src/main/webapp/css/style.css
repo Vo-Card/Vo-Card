@@ -114,3 +114,22 @@ nav ul.right li a {
     align-items: center;
     scale: 0.8;
 }
+
+
+.btn-submit {
+    background-color: #555;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background-color: #d9534f;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
