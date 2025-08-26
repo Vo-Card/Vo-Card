@@ -51,16 +51,12 @@ public class SessionInterceptor implements HandlerInterceptor {
         String currentPage = request.getRequestURI();
 
         // Pages that don't require authentication
-<<<<<<< HEAD
-        String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**","/about","/contact","/dashboard", "/dashboard/.*" };
-=======
         String[] excludedPages = { 
             "/home", "/login",
             "/register", "/css/**",
             "/js/**", "/resources/**",
             "/api/auth/**"
          };
->>>>>>> main
 
         // Look for session cookie
         if (cookies != null) {
