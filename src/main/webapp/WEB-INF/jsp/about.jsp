@@ -19,7 +19,7 @@
             --primary-color: rgba(23, 23, 23, 0.2);
             --alert: #ff8989;
             --sidebar-bg: #1b1d24;
-            --text-color: #ffffff;
+            --text-color: #fbfbfb;
         }
 
         /* ===== Global ===== */
