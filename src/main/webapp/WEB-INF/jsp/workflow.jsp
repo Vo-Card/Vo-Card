@@ -36,12 +36,12 @@
 
         <body style="background-color: var(--menu-primary-color);">
                 
-                <jsp:include page="/components/menuHeader.jsp" />
+                <jsp:include page="/components/layout/workflow-header.jsp" />
 
                 <div class="window"></div>
                 
                 <div class="workspace-container">
-                    <jsp:include page="/components/menuBar.jsp" />
+                    <jsp:include page="/components/layout/workflow-sidebar.jsp" />
 
                     <div id="splitter">
                         <div class="splitter-move-bar"></div>
