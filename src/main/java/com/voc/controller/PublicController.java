@@ -1,15 +1,13 @@
 package com.voc.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-public class HomeController {
+public class PublicController {
 
-    @GetMapping("/home")
-    public String homePage(Model model) {
+    @RequestMapping("/home")
+    public String homePage() {
         return "index";
     }
 
