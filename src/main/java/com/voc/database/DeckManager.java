@@ -1,12 +1,14 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.TAG_SUCCESS;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.voc.helper.Row;
+import com.voc.utils.Row;
 
 /**
  * DeckManager is intended to handle operations related to decks in the system,
@@ -23,17 +25,8 @@ import com.voc.helper.Row;
  * DeckManager.createDeck("My First Deck");
  * List<Card> cards = DeckManager.getDeckCards(deckId);
  * </pre>
- * 
- * @author Zartex
- * @author Krittitee
- * @version 0.0.1a
- * @since 2025-08-23
  */
 public class DeckManager {
-
-    static {
-        initializeDeckTable();
-    }
 
     public static void forceDefaultDeck() {
         // Force Create Default Deck
@@ -57,24 +50,22 @@ public class DeckManager {
     /**
      * Initialize the defaultdeck to the root user of the project.
      */
-    private static void initializeDeckTable() {
-        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                "SELECT user_id_PK FROM usertb WHERE username = ?", "vocard").get("user_id_PK")).longValue();
+    public static void initializeDeckTable() {
+        long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT COUNT(*) FROM decktb").get("COUNT(*)")).longValue();
+        
+        if (deckCount == 0) {
+            Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername()).get("user_id_PK")).longValue();
 
-        Row rootDefaultDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ?",
-                rootUserID);
-
-        if (rootDefaultDeck == null) {
             DatabaseUtils.sqlSingleRowStatement(
-                    "INSERT INTO decktb (deck_name,deck_is_public, user_id_FK ) VALUES (?,?,?)",
-                    "Default", 1, 1);
-            System.out.println("Create Deck complete");
+                    "INSERT INTO decktb (deck_name, deck_is_public, user_id_FK) VALUES (?,?,?)",
+                    "Default", 1, rootUserID);
+            System.out.println(TAG_SUCCESS + "Create default complete");
+
             ObjectMapper mapper = new ObjectMapper();
 
-            // Get data from the defaultdeck json
             try (InputStream input = DeckManager.class.getClassLoader()
                     .getResourceAsStream("datasets/default_deck_sample.json")) {
-
                 if (input == null)
                     throw new RuntimeException("File not found!");
 
