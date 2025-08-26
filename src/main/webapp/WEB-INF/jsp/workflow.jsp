@@ -6,9 +6,10 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Document</title>
-            <link rel="stylesheet" type="text/css" href="/css/card_theme.css">
+            <title>Homepage</title>
+
             <link rel="stylesheet" type="text/css" href="/css/style.css">
+            <link rel="stylesheet" type="text/css" href="/css/card_theme.css">
             <link rel="stylesheet" type="text/css" href="/css/main.css">
 
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -18,43 +19,50 @@
                 integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
                 crossorigin="anonymous"></script>
             <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-
+            <script src="/js/chartz.js" defer></script>
+            <!-- temp -->
             <style>
                 :root {
                     --theme-color: #1b1d24;
                     --primary-color: rgba(23, 23, 23, 0.2);
                     --alert: #ff8989;
                 }
-
-                body {
-                    background-color: #1b1d24;
-                    color: white;
+                a {
+                    text-decoration: none;
+                    color: var(--primary-font-color);
                 }
             </style>
         </head>
 
         <body style="background-color: var(--menu-primary-color);">
+                
+                <jsp:include page="/components/menuHeader.jsp" />
 
-            <jsp:include page="/components/menuHeader.jsp" />
+                <div class="window"></div>
+                
+                <div class="workspace-container">
+                    <jsp:include page="/components/menuBar.jsp" />
 
-            <div class="window"></div>
+                    <div id="splitter">
+                        <div class="splitter-move-bar"></div>
+                    </div>
 
-            <div class="workspace-container">
-                <jsp:include page="/components/menuBar.jsp" />
-
-                <div id="splitter">
-                    <div class="splitter-move-bar"></div>
-                </div>
-
-                <div class="content-wrapper">
-                    <div id="content">
-                        <!-- main page -->
-                        <div class="">
-                            
+                    <!-- end silder -->
+                    <div class="content-wrapper">
+                        <div id="content">
+                            <c:choose>
+                                <c:when test="${not empty page}">
+                                    <jsp:include page="/WEB-INF/jsp/workflow/${page}.jsp" />
+                                </c:when>
+                                <c:otherwise>
+                                    <jsp:include page="/workflow/home" />
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                 </div>
-                <script src="/js/menu-splitter.js"></script>
+            <script src="/js/menu-splitter.js"></script>
+            <script src="/js/workflow/getPageInformation.js"></script>
         </body>
 
         </html>
