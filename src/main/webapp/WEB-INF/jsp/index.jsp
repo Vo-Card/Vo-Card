@@ -24,7 +24,11 @@
                     </li>
                     <li><a href="/explore">Explore</a></li>
                     <li><a href="/products">Products</a></li>
+<<<<<<< HEAD
                     <li><a href="/about">About Us</a></li>
+=======
+                    <li><a href="/aboutus">About Us</a></li>
+>>>>>>> 856a584 (revert: "Merge pull request #12 from ZartexVertagen/feature-my-change")
                     <li><a href="/contact">Contact</a></li>
                     <li><a href="/support">Support</a></li>
                 </ul>
