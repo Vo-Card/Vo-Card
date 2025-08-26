@@ -27,9 +27,4 @@ public class HomeController {
     public String contactPage() {
         return "contact";
     }
-
-    @RequestMapping("/not_found")
-    public String NotfoundPage() {
-        return "not_found";
-    }
 }
