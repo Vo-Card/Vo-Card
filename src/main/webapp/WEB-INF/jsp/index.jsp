@@ -24,8 +24,8 @@
                     </li>
                     <li><a href="/u/welcome">Explore</a></li>
                     <li><a href="/products">Products</a></li>
-                    <li><a href="/src/main/webapp/WEB-INF/jsp/about.jsp">About Us</a></li>
-                    <li><a href="/src/main/webapp/WEB-INF/jsp/contact.jsp">Contact</a></li>
+                    <li><a href="/aboutus">About Us</a></li>
+                    <li><a href="/contact">Contact</a></li>
                     <li><a href="/support">Support</a></li>
                 </ul>
                 <ul class="right">
