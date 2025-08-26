@@ -1,4 +1,4 @@
-<div id="menu-bar">
+<div id="workflow-sidebar">
     <div class="selection">
         <ul class="vo-card menu">
             <li>

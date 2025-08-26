@@ -1,4 +1,4 @@
-<header class="top-header">
+<header id="workflow-header">
     <div class="brand">
         <button class="menu-toggle" id="menu-toggle">
             <i class="nf nf-md-menu"></i>
