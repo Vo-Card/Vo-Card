@@ -10,7 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SessionInterceptor())
                 .addPathPatterns("/**") // Check every page...
-                .excludePathPatterns("/home", "/index", "/login", "/register", "/css/**", "/js/**", "/welcome"); // ...except
+                .excludePathPatterns("/home", "/index", "/login", "/register", "/css/**", "/js/**", "/welcome","/about","/contact","/dashboard", "/dashboard/**"); // ...except
                                                                                                                  // these
     }
 }
+
