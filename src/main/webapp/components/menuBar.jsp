@@ -20,7 +20,7 @@
             </li>
 
             <li>
-                <a href="/u/welcome">
+                <a href="/u/your-deck">
                     <i class="nf nf-md-cards"></i>Decks
                 </a>
             </li>
