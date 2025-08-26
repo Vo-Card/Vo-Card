@@ -18,14 +18,14 @@ public class HomeController {
         return "helloworld";
     }
 
-    @RequestMapping("/u/welcome")
-    public String welcome() {
-        return "/u/welcome";
+    @RequestMapping("/about")
+    public String aboutUs() {
+        return "/about";
     }
 
-    @RequestMapping("/u/your-deck")
-    public String yourDeck() {
-        return "/u/your-deck";
+    @RequestMapping("/contact")
+    public String contactPage() {
+        return "contact";
     }
 
     @RequestMapping("/not_found")

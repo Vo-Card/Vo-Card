@@ -16,6 +16,10 @@ public class WebConfig implements WebMvcConfigurer {
                     "/home", "/index", "/login",
                      "/register", "/css/**", "/js/**",
                       "/welcome", "/api/auth/**", "/about",
+<<<<<<< HEAD
                       "/contact"); // ...except these pages
+=======
+                      "/contact", "/error/**"); // ...except these pages
+>>>>>>> b5e346b73ed8227b1349ed778c9c3dfffcf0a06a
     }
 }
