@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.voc.security.AuthManager;
-import com.voc.helper.Row;
+import com.voc.utils.Row;
 
 /**
  * SessionInterceptor ensures that HTTP requests have a valid user session.
@@ -24,10 +24,6 @@ import com.voc.helper.Row;
  * attributes
  * when a valid session is found.
  * </p>
- * 
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-23
  */
 @Configuration
 public class SessionInterceptor implements HandlerInterceptor {
@@ -55,7 +51,16 @@ public class SessionInterceptor implements HandlerInterceptor {
         String currentPage = request.getRequestURI();
 
         // Pages that don't require authentication
+<<<<<<< HEAD
         String[] excludedPages = { "/home", "/login", "/register", "/css/**", "/js/**", "/resources/**","/about","/contact","/dashboard", "/dashboard/.*" };
+=======
+        String[] excludedPages = { 
+            "/home", "/login",
+            "/register", "/css/**",
+            "/js/**", "/resources/**",
+            "/api/auth/**"
+         };
+>>>>>>> main
 
         // Look for session cookie
         if (cookies != null) {

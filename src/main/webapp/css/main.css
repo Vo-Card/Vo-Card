@@ -1,0 +1,295 @@
+@import "https://www.nerdfonts.com/assets/css/webfont.css";
+
+:root {
+    --primary-font: 'Fira Code', monospace;
+    --primary-font-color: #d0d7e9;
+
+    --brand-color: linear-gradient(35deg, #ffbf76, #76a4f3);
+
+    --theme-color: #d8974d;
+
+    --primary-color: #1b1d24;
+
+    --menu-primary-color: #0f1114;
+    --menu-button-hover: rgba(255, 255, 255, 0.1);
+    --menu-button-active: rgba(255, 255, 255, 0.5);
+
+    --splitter-hover: rgb(210, 235, 255);
+
+    --light-dotted-background : 
+    radial-gradient(circle, rgba(85, 104, 119, 0.326) 0%, rgba(33, 34, 46, 0) 70%) -500px -500px / 1500px 1500px no-repeat,
+    linear-gradient(transparent 750px, var(--primary-color) 1000px),
+    radial-gradient(ellipse 150% 50%, var(--primary-color) 60%, transparent 75%) center -50vh / 100vw 500vh no-repeat,
+    radial-gradient(rgb(255,255,255) 2px, transparent 0) -25px -25px / 25px 25px repeat,
+    radial-gradient(ellipse 150% 50%, var(--primary-color) 65%,
+    var(--theme-color) 85%) center -50vh / 100vw 500vh no-repeat, rgb(27, 29, 36);
+
+    --content-border-radius: 20px 20px 0 0;
+    --content-shadow-color: rgba(159, 165, 192, 0.473);
+    --content-border: 2px solid rgba(159, 165, 192, 0.473);
+
+    --content-container-bg: #111112;
+
+    --header-height: 56px;
+    --menu-width: 250px;
+    --splitter-width: 5px;
+
+    --alert: #ff8989;
+}
+
+/* -------------------- */
+/* Left Menu Bar Styles */
+/* -------------------- */
+
+#menu-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--menu-primary-color);
+    width: var(--menu-width);
+    height: calc(100vh - var(--header-height));
+    padding: 8px;
+    font-size: 20px;
+    color: white;
+}
+
+#menu-bar .separator {
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+.selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+}
+
+.selection ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.selection ul li {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.selection ul li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+.selection ul li.active {
+    background-color: var(--theme-color);
+}
+
+.selection ul li a {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.selection ul li a i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+/* ----------------- */
+/* Top Header Styles */
+/* ----------------- */
+
+.top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--menu-primary-color);
+    width: 100vw;
+    padding: 8px;
+    height: 56px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-font-color);
+}
+
+.brand h1 {
+    font-size: 40px;
+    font-weight: bold;
+    color: var(--primary-font-color);
+    margin: 0;
+}
+
+.top-header .brand #menu-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--primary-font-color);
+}
+
+.brand-icon {
+    background: var(--brand-color);
+    -webkit-mask: url(/imgs/icon.svg) no-repeat center;
+    mask: url(/imgs/icon.svg) no-repeat center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    width: 45px;
+    height: 45px;
+    margin-right: -6px;
+}
+
+/* ------------------- */
+/* Workspace Container */
+/* ------------------- */
+
+.workspace-container {
+    display: flex;
+    flex-direction: row;
+    width: calc(100vw);
+    height: calc(100vh - var(--header-height));
+    background-color: var(--primary-color);
+}
+
+#splitter {
+    display: flex;
+    align-items: center;
+    width: var(--splitter-width);
+    cursor: col-resize;
+    background-color: transparent;
+    margin: 2px;
+}
+
+.splitter-move-bar {
+    width: 100%;
+    height: 20%;
+    background-color: transparent;
+    border-radius: 2px;
+    margin: auto;
+    transition: background-color 0.3s;
+}
+
+#splitter:hover .splitter-move-bar {
+    background-color: var(--splitter-hover);
+}
+
+#splitter.dragging .splitter-move-bar {
+    background-color: var(--splitter-hover);
+}
+
+/* ------------------ */
+/* Main Content Area */
+/* ------------------ */
+
+.content-wrapper {
+    width: 100%;
+    border-top: var(--content-border);
+    border-left: var(--content-border);
+    border-radius: 20px 20px 0 0; /* same as content */
+    overflow: hidden;              /* hides scrollbar outside the radius */
+    height: calc(100vh - var(--header-height));
+}
+
+#content {
+    display: flex;
+    flex: 1;
+    padding: 24px;
+    background: var(--light-dotted-background);
+    background-blend-mode: normal, normal, normal, overlay, normal, normal;
+    box-shadow: 0 4px 6px var(--content-shadow-color);
+    color: var(--primary-font-color);
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+.grid-container {
+    display: grid;
+    grid-template-areas: 
+        "greeting greeting daily"
+        "stats stats stats";
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 16px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.content-container{
+    background-color: var(--content-container-bg);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.greeting {
+    grid-area: greeting;
+}
+.greeting p {
+    margin: 8px 0;
+}
+
+.daily {
+    display: flex;
+    grid-area: daily;
+    text-align: center;
+}
+.daily .card-count {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 16px 0;
+}
+
+.stats {
+    grid-area: stats;
+}
+.stats .light {
+    width: 20px;
+    height: 20px;
+    background-color: #76a4f3;
+    border-radius: 50%;
+    margin-bottom: 16px;
+}
+.stats .chart-placeholder {
+    width: 100%;
+    height: 150px;
+    background-color: #2a2b30;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 18px;
+}

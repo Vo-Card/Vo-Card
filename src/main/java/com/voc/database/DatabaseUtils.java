@@ -1,18 +1,34 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.BLUE;
+import static com.voc.utils.AnsiColor.BOLD;
+import static com.voc.utils.AnsiColor.RESET;
+import static com.voc.utils.AnsiColor.TAG_ALERT;
+import static com.voc.utils.AnsiColor.TAG_DEBUG;
+import static com.voc.utils.AnsiColor.TAG_ERROR;
+import static com.voc.utils.AnsiColor.TAG_IMPORTANT;
+import static com.voc.utils.AnsiColor.TAG_INFO;
+import static com.voc.utils.AnsiColor.TAG_SUCCESS;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.voc.helper.Row;
 import com.voc.security.AuthManager;
+import com.voc.security.PasswordGenerator;
+import com.voc.utils.Row;
 
 /**
  * <p>
@@ -49,10 +65,6 @@ import com.voc.security.AuthManager;
  * connections or queries,
  * while printing relevant error messages to the console.
  * </p>
- *
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-21
  */
 public class DatabaseUtils {
 
@@ -61,46 +73,53 @@ public class DatabaseUtils {
     private static String DB_NAME;
     private static String DB_USER;
     private static String DB_PASSWORD;
-    private static String CHECK_DATABASE;
 
     private static String ROOT_USERNAME;
     private static String ROOT_DISPLAYNAME;
 
-    static {
-        // Load database configuration from JSON file
-        try (InputStream input = DatabaseUtils.class.getClassLoader()
-                .getResourceAsStream("config/database.json")) {
-            if (input == null) {
-                throw new RuntimeException(
-                        "database.json not found or not configured. Please check the resources/config folder.");
+    /**
+     * Initializes database configuration from a map of settings.
+     * <p>
+     * This method reads database connection parameters and the root user
+     * credentials from the provided map.
+     * If {@code CHECK_DATABASE} is set to {@code true}, it verifies the
+     * database connection and initializes the database if necessary.
+     * </p>
+     * <p>
+     * The root user is created only if it does not already exist in the
+     * database.
+     * </p>
+     * @param data
+     */
+    public static void initDatabase(Map<String, String> data) {
+        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] Entering initDatabase");
+
+        DB_URL = data.get("DB_URL");
+        DB_NAME = data.get("DB_NAME");
+        DB_USER = data.get("DB_USER");
+        DB_PASSWORD = data.get("DB_PASSWORD");
+        ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
+        ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
+
+        // Check and initialize database if configured
+        boolean dbOk = checkDatabase();
+        System.out.println(TAG_DEBUG + "Database check result: " + (dbOk ? "OK" : "FAILED"));
+
+        if (dbOk) {
+            Row row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
+            System.out.println(TAG_ALERT + "Root user exists? " + (row != null));
+
+            if (row == null) {
+                initializeAdministrator();
+                System.out.println(TAG_SUCCESS + "Root user initialized");
             }
-
-            // Parse JSON into a Map
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> data = mapper.readValue(input,
-                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {
-                    });
-
-            DB_URL = data.get("DB_URL");
-            DB_NAME = data.get("DB_NAME");
-            DB_USER = data.get("DB_USER");
-            DB_PASSWORD = data.get("DB_PASSWORD");
-            CHECK_DATABASE = data.get("CHECK_DATABASE");
-            ROOT_USERNAME = data.get("ROOT_USERNAME").toLowerCase();
-            ROOT_DISPLAYNAME = data.get("ROOT_DISPLAYNAME");
-
-            // Check and initialize database if configured
-            if ("true".equalsIgnoreCase(CHECK_DATABASE)) {
-                if (checkDatabase()) {
-                    if (sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME) == null) {
-                        initializeAdministrator();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            System.err.println(TAG_ERROR + "Database not ready or check failed");
         }
+    }
+
+    public static String getRootUsername() {
+        return ROOT_USERNAME;
     }
 
     /**
@@ -123,11 +142,11 @@ public class DatabaseUtils {
      */
     private static void initializeAdministrator() {
         String rootPassword = PasswordGenerator.generatePassword(32);
-        System.out.println("Root user has been initialize for this project.");
-        System.out.println("Root Username: " + ROOT_USERNAME);
-        System.out.println("Root Password: " + rootPassword);
-        System.out.println("Please keep this password in a secure location.");
-        System.out.println("The password will show only once.");
+        System.out.println(TAG_IMPORTANT+"Root user has been initialize for this project.");
+        System.out.println(TAG_IMPORTANT+"Root Username: " + ROOT_USERNAME);
+        System.out.println(TAG_IMPORTANT+"Root Password: " + rootPassword);
+        System.out.println(TAG_IMPORTANT+"Please keep this password in a secure location.");
+        System.out.println(TAG_IMPORTANT+"The password will show only once.");
         AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
     }
 
@@ -176,10 +195,10 @@ public class DatabaseUtils {
                 Statement stmt = connection.createStatement()) {
 
             stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
-            System.out.println("Database initialized successfully.");
+            System.out.println(TAG_SUCCESS + "Database initialized successfully.");
 
         } catch (SQLException e) {
-            System.err.println("Error creating database: " + e.getMessage());
+            System.err.println(TAG_ERROR + "Error creating database: " + e.getMessage());
             return;
         }
 
@@ -204,7 +223,7 @@ public class DatabaseUtils {
                 throw new FileNotFoundException("schema.sql not found in resources folder.");
             }
 
-            System.out.println("Connected to the database.");
+            System.out.println(TAG_INFO + "Loading and executing schema.sql...");
 
             // Read SQL file into a single script
             StringBuilder sqlScript = new StringBuilder();
@@ -221,7 +240,7 @@ public class DatabaseUtils {
                 }
             }
 
-            System.out.println("SQL file executed successfully.");
+            System.out.println(TAG_SUCCESS + "SQL file executed successfully.");
 
         } catch (SQLException e) {
             System.err.println("Database error: " + e.getMessage());
@@ -244,22 +263,50 @@ public class DatabaseUtils {
     public static boolean checkDatabase() {
         Connection connection = getConnection();
         if (connection == null) {
+            System.err.println(TAG_ERROR + "Connection failed. Trying to initialize database...");
             initializeDatabase();
             connection = getConnection();
         }
 
         boolean isConnected = connection != null;
-        ;
+        boolean isEmpty = true;
 
-        try {
-            if (connection != null) {
-                connection.close();
+        if (isConnected) {
+            try {
+                Row result = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
+                );
+
+                if (result != null && result.get("table_count") != null) {
+                    isEmpty = ((Number) result.get("table_count")).longValue() == 0;
+                }
+
+                if (isEmpty) {
+                    System.out.println(TAG_INFO + "Database is empty. Initializing...");
+                    initializeDatabase();
+
+                    result = DatabaseUtils.sqlSingleRowStatement(
+                        "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
+                    );
+                    if (result != null && result.get("table_count") != null) {
+                        isEmpty = ((Number) result.get("table_count")).longValue() == 0;
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println(TAG_ERROR + "Error checking database tables: " + e.getMessage());
+            } finally {
+                try {
+                    if (connection != null && !connection.isClosed()) {
+                        connection.close();
+                    }
+                } catch (Exception e) {
+                    System.err.println(TAG_ERROR + "Error closing connection in checkDatabase: " + e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            System.err.println("Error closing connection in checkDatabase: " + e.getMessage());
         }
 
-        return isConnected;
+        return isConnected && !isEmpty;
     }
 
     /**
@@ -295,7 +342,7 @@ public class DatabaseUtils {
      * @param args Arguments to bind to the SQL statement placeholders, in order.
      * @return A List of Row objects containing the results of the query, or an
      *         empty list if no results.
-     * @see com.voc.helper.Row
+     * @see com.voc.utils.Row
      * @see #sqlSingleRowStatement(String, Object...)
      */
     public static List<Row> sqlPrepareStatement(String sql, Object... args) {
