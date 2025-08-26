@@ -55,7 +55,8 @@ public class SessionInterceptor implements HandlerInterceptor {
             "/home", "/login",
             "/register", "/css/**",
             "/js/**", "/resources/**",
-            "/api/auth/**", "/about", "/contact"
+            "/api/auth/**", "/about", "/contact",
+            "/404"
          };
 
         // Look for session cookie
