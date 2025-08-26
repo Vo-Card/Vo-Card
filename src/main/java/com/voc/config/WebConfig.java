@@ -11,6 +11,10 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(new SessionInterceptor())
                 .addPathPatterns("/**") // Check every page...
-                .excludePathPatterns("/home", "/index", "/login", "/register", "/css/**", "/js/**", "/welcome", "/api/auth/**");
+                .excludePathPatterns(
+                    "/home", "/index", "/login",
+                     "/register", "/css/**", "/js/**",
+                      "/welcome", "/api/auth/**", "/about",
+                      "/contact"); // ...except these pages
     }
 }
