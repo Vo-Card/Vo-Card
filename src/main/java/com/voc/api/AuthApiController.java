@@ -15,11 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.security.AuthManager;
 
+/**
+ * AuthApiController provides RESTful endpoints for user authentication.
+ * <p>
+ * It handles user registration and login via JSON requests and responses.
+ * </p>
+ * <p>
+ * The controller validates input data, manages sessions, and returns appropriate
+ * HTTP status codes and messages.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthApiController {
 
-    // DTO for request body
+    /** Request body for user registration. */
     public static class RegisterRequest {
         public String displayName;
         public String username;
@@ -27,11 +37,21 @@ public class AuthApiController {
         public String confirmPassword;
     }
 
+    /** Request body for user login. */
     public static class LoginRequest {
         public String username;
         public String password;
     }
 
+    /**
+    * Handles user registration.
+    * <p>
+    * Validates input data and creates a new user if valid.
+    * </p>
+    *
+    * @param req The registration request body
+    * @return A response entity with success or error message
+    */
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest req) {
         String displayName = req.displayName != null ? req.displayName.trim() : "";
@@ -39,7 +59,7 @@ public class AuthApiController {
         String password = req.password != null ? req.password.trim() : "";
         String confirmPassword = req.confirmPassword != null ? req.confirmPassword.trim() : "";
 
-        // --- Validation ---
+        // Rules validation
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username and/or password cannot be empty."));
@@ -63,7 +83,7 @@ public class AuthApiController {
                             "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character."));
         }
 
-        // --- Registration ---
+        // Process registration
         boolean registered = AuthManager.registerUser(displayName, username, password);
 
         if (registered) {
@@ -74,6 +94,16 @@ public class AuthApiController {
         }
     }
 
+    /**
+    * Handles user login.
+    * <p>
+    * Validates credentials and creates a session if valid.
+    * </p>
+    * @param usr      The login request body
+    * @param request  The HTTP request
+    * @param response The HTTP response
+    * @return A response entity with success or error message
+    */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest usr,
             HttpServletRequest request,

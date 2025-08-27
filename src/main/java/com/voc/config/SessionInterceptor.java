@@ -69,6 +69,10 @@ public class SessionInterceptor implements HandlerInterceptor {
             }
         }
 
+        //TODO: Implement session expiration check
+        //TODO: Implement IP/browser fingerprint check
+        //TODO: Implement user permissions/roles check
+
         // Validate session token if present
         if (sessionToken != null) {
             Row userData = AuthManager.validateUserSession(sessionToken);

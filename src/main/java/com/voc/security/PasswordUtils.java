@@ -4,6 +4,11 @@ import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * PasswordUtils handles password hashing and verification using bcrypt.
+ * 
+ * <p>
+ * It provides methods to generate a secure hash from a plaintext password
+ * and to verify a plaintext password against a stored hash.
+ * </p>
  */
 public class PasswordUtils {
 
