@@ -12,6 +12,10 @@ import java.util.Base64;
 /**
  * SessionManager handles session token generation and decryption.
  * All sessions are encrypted using per-user AES keys derived from password.
+ * <p>
+ * This ensures that even if the session store is compromised, session tokens
+ * cannot be decrypted without the user's password.
+ * </p>
  */
 public class SessionManager {
 

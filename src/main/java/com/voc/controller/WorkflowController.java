@@ -10,10 +10,38 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * WorkflowController handles requests for dynamic workflow pages.
+ * <p>
+ * It serves JSP pages located under /WEB-INF/jsp/workflow/ based on the URL path.
+ * </p>
+ * <p>
+ * If a requested page does not exist, it returns a 404 error page.
+ * </p>
+ * <p>
+ * The controller also supports AJAX requests by returning only the relevant
+ * fragment of the page.
+ * </p>
+ */
 @Controller
 @RequestMapping("/workflow")
 public class WorkflowController {
 
+    /**
+     * Handles requests for specific workflow pages.
+     * <p>
+     * If the page exists, it returns the corresponding JSP view.
+     * If the page does not exist, it returns a 404 error page.
+     * </p>
+     * <p>
+     * Supports both full page loads and AJAX requests.
+     * </p>
+     *
+     * @param page     The requested page name
+     * @param request  The HTTP request
+     * @param response The HTTP response
+     * @return The name of the JSP view to render
+     */
     @GetMapping("/{page}")
     public String getStaticPage(@PathVariable("page") String page, 
             HttpServletRequest request,
@@ -53,6 +81,12 @@ public class WorkflowController {
         return "workflow";
     }
 
+    /**
+     * Default redirect to /workflow/home
+     * <p>
+     * This handles requests to /workflow or /workflow/ and redirects to the home page.
+     * </p>
+     */
     @GetMapping({"", "/"})
     public String workflowDefaultRedirect() {
         return "redirect:/workflow/home";

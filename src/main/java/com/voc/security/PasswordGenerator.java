@@ -20,10 +20,6 @@ import java.util.List;
  *     String password = PasswordGenerator.generatePassword(12);
  *     System.out.println(password); // e.g., "A9x!qTrz2#Wf"
  * </pre>
- *
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-23
  */
 public class PasswordGenerator {
 
@@ -32,10 +28,8 @@ public class PasswordGenerator {
     private static final String DIGITS = "0123456789";
     private static final String SPECIAL = "!@#$%^&*()-_=+[]{}|;:,.<>?";
 
-    /** Combined pool of all available characters. */
     private static final String ALL = UPPERCASE + LOWERCASE + DIGITS + SPECIAL;
 
-    /** Secure random generator for unpredictable values. */
     private static final SecureRandom random = new SecureRandom();
 
     /**

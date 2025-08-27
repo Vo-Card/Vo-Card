@@ -11,10 +11,6 @@ import com.voc.utils.Row;
  * Uses PasswordUtils for secure password handling and SessionManager
  * for session token generation and validation.
  * </p>
- * 
- * @author Zartex
- * @version 0.0.1a
- * @since 2025-08-22
  */
 public class AuthManager {
 
