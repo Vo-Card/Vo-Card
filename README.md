@@ -28,7 +28,7 @@ Vo-Card can automatically set up the database for you **if** you use an account 
 
 ```bash
 # Clone the repository
-git clone https://github.com/ZartexVertagen/Vo-Card.git
+git clone https://github.com/Vo-Card/Vo-Card.git
 cd Vo-Card
 
 # On Windows, you can use the provided dev.bat script:
