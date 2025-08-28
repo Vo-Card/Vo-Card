@@ -1,5 +1,9 @@
 package com.voc.security;
 
+import java.time.LocalDateTime;
+
+import org.mindrot.jbcrypt.BCrypt;
+
 import com.voc.database.DatabaseUtils;
 import com.voc.utils.Row;
 
@@ -46,7 +50,7 @@ public class AuthManager {
      * @param browserMetaData Browser metadata
      * @return Session token if login succeeds, or null if authentication fails
      */
-    public static String loginUser(String username, String password, String browserIp, String browserMetaData) {
+    public static Row loginUser(String username, String password, boolean rememberMe, String ipAddress, String userAgent) {
         // Fetch user
         String sql = "SELECT user_id_PK, password FROM usertb WHERE username = ?";
         Row user = DatabaseUtils.sqlSingleRowStatement(sql, username);
@@ -61,9 +65,7 @@ public class AuthManager {
             return null;
 
         try {
-            String sessionId = SessionManager.generateUserSessionToken(userId, username, storedPassword);
-            sql = "INSERT INTO sessiontb (session_id_PK, session_login_ip, session_browser_info, user_id_FK) VALUES (?, ?, ?, ?)";
-            DatabaseUtils.sqlPrepareStatement(sql, sessionId, browserIp, browserMetaData, userId);
+            Row sessionId = SessionManager.createSession(userId, username, rememberMe, ipAddress, userAgent);
             return sessionId;
         } catch (Exception e) {
             System.err.println("Encryption error: " + e.getMessage());
@@ -72,38 +74,27 @@ public class AuthManager {
     }
 
     /**
-     * Validates a session token and returns the associated user data.
-     * 
-     * @param sessionId The session token
-     * @return User row if session is valid, null otherwise
+     * Checks if a session is valid by validating both the session ID and refresh token.
+     *
+     * @param sessionId       The session ID from the cookie.
+     * @param rawRefreshToken The raw refresh token from the cookie.
+     * @return true if the session is valid and the token matches, otherwise false.
      */
-    public static Row validateUserSession(String sessionId) {
-        Row userData = SessionManager.getUserDataFromSessionID(sessionId);
-
-        if (userData != null) {
-            Long userId = ((Number) userData.get("user_id_PK")).longValue();
-            String username = (String) userData.get("username");
-            String storedPassword = (String) userData.get("password");
-
-            try {
-                String decryptedSession = SessionManager.decryptUserSessionToken(sessionId, storedPassword);
-                String[] parts = decryptedSession.split(":");
-                if (parts.length < 2)
-                    return null;
-
-                Long sessionUserId = Long.parseLong(parts[0]);
-                String sessionUsername = parts[1];
-
-                if (userId.equals(sessionUserId) && username.equals(sessionUsername)) {
-                    return userData;
-                }
-            } catch (Exception e) {
-                System.err.println("Decryption error: " + e.getMessage());
-            }
+    public static boolean validateSession(String sessionId, String rawRefreshToken) {
+        String sql = "SELECT refresh_token_hash FROM sessiontb WHERE session_id_PK = ? AND expires_at > ?";
+        
+        Row sessionData = DatabaseUtils.sqlSingleRowStatement(sql, sessionId, LocalDateTime.now());
+        
+        if (sessionData == null) {
+            return false;
         }
-
-        return null;
+        
+        String hashedToken = (String) sessionData.get("refresh_token_hash");
+        
+        boolean isValid = BCrypt.checkpw(rawRefreshToken, hashedToken);
+        return isValid;
     }
+
 
     /**
      * Checks if a username already exists in the database.

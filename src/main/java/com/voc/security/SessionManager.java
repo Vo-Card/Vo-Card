@@ -2,83 +2,74 @@ package com.voc.security;
 
 import com.voc.database.DatabaseUtils;
 import com.voc.utils.Row;
+import com.voc.jwt.JwtManager; // Ensure this is the correct package for your JwtManager
+import org.mindrot.jbcrypt.BCrypt;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.Base64;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
-/**
- * SessionManager handles session token generation and decryption.
- * All sessions are encrypted using per-user AES keys derived from password.
- * <p>
- * This ensures that even if the session store is compromised, session tokens
- * cannot be decrypted without the user's password.
- * </p>
- */
 public class SessionManager {
 
-    /**
-     * Generates an encrypted session token for a user.
-     * 
-     * @param userId   User ID
-     * @param username Username
-     * @param password User password
-     * @return Encrypted session token
-     * @throws Exception Encryption errors
-     */
-    public static String generateUserSessionToken(Long userId, String username, String password) throws Exception {
-        MessageDigest sha = MessageDigest.getInstance("SHA-256");
-        byte[] keyBytes = sha.digest(password.getBytes());
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+    /** Generate a new session with JWT access token and a refresh token. */
+    public static Row createSession(Long userId, String username, boolean rememberMe, String ipAddress, String userAgent) {
+        String sessionId = UUID.randomUUID().toString();
+        String rawRefreshToken = UUID.randomUUID().toString();
+        String hashedRefreshToken = BCrypt.hashpw(rawRefreshToken, BCrypt.gensalt(12));
 
-        byte[] randomBytes = new byte[32];
-        new SecureRandom().nextBytes(randomBytes);
-        String sessionRandom = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        int daysToExpire = rememberMe ? 30 : 7;
+        Instant expiresAt = Instant.now().plus(daysToExpire, ChronoUnit.DAYS);
 
-        String compound = userId + ":" + username + ":" + sessionRandom;
+        String sql = "INSERT INTO sessiontb (session_id_PK, user_id_FK, refresh_token_hash, remember_me, expires_at, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt), ipAddress, userAgent);
 
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encrypted = cipher.doFinal(compound.getBytes());
+        String accessToken = JwtManager.signJwt(userId.toString(), username);
 
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
+        Row sessionData = new Row();
+        sessionData.put("session_id", sessionId);
+        sessionData.put("access_token", accessToken);
+        sessionData.put("refresh_token", rawRefreshToken);
+        sessionData.put("max_age", daysToExpire * 24 * 60 * 60L);
+        return sessionData;
     }
 
     /**
-     * Decrypts a session token using the user's password.
-     * 
-     * @param token    Encrypted session token
-     * @param password User password
-     * @return Decrypted string in the form "userId:username:random"
-     * @throws Exception Decryption errors
+     * Refresh an existing session. This includes refresh token rotation and sliding session expiration.
+     * Returns a new JWT access token and a new refresh token.
      */
-    public static String decryptUserSessionToken(String token, String password) throws Exception {
-        MessageDigest sha = MessageDigest.getInstance("SHA-256");
-        byte[] keyBytes = sha.digest(password.getBytes());
-        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+    public static Optional<Row> refreshSession(String sessionId, String rawRefreshToken) {
+        // Step 1: Validate the session from the database.
+        String sql = "SELECT user_id_FK, refresh_token_hash, remember_me, ip_address, user_agent FROM sessiontb WHERE session_id_PK = ? AND expires_at > NOW()";
+        Row sessionRow = DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
 
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        if (sessionRow == null) {
+            return Optional.empty();
+        }
 
-        byte[] decoded = Base64.getUrlDecoder().decode(token);
-        byte[] decrypted = cipher.doFinal(decoded);
+        String hashedToken = (String) sessionRow.get("refresh_token_hash");
+        if (!BCrypt.checkpw(rawRefreshToken, hashedToken)) {
+            String deleteSql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
+            DatabaseUtils.sqlPrepareStatement(deleteSql, sessionId);
+            return Optional.empty(); // Invalid token.
+        }
 
-        return new String(decrypted);
+        String deleteSql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
+        DatabaseUtils.sqlPrepareStatement(deleteSql, sessionId);
+
+        Long userId = (Long) sessionRow.get("user_id_FK");
+        String username = (String) sessionRow.get("username");
+        boolean rememberMe = (boolean) sessionRow.get("remember_me");
+        String ipAddress = (String) sessionRow.get("ip_address");
+        String userAgent = (String) sessionRow.get("user_agent");
+
+        return Optional.of(createSession(userId, username, rememberMe, ipAddress, userAgent));
     }
 
-    /**
-     * Fetches user data associated with a session token.
-     * 
-     * @param sessionId Session token
-     * @return User row or null if session not found
-     */
-    public static Row getUserDataFromSessionID(String sessionId) {
-        String sql = "SELECT u.user_id_PK, u.username, u.password " +
-                "FROM sessiontb s " +
-                "JOIN usertb u ON s.user_id_FK = u.user_id_PK " +
-                "WHERE s.session_id_PK = ?";
-        return DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
+    /** Optionally delete a session (logout) */
+    public static void deleteSession(String sessionId) {
+        String sql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
+        DatabaseUtils.sqlPrepareStatement(sql, sessionId);
     }
 }

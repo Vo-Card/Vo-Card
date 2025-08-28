@@ -1,96 +1,84 @@
 package com.voc.config;
 
+import com.voc.jwt.JwtManager;
+import com.voc.security.AuthManager;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
+import org.springframework.web.servlet.HandlerInterceptor;
+import java.util.Optional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
-import org.springframework.web.servlet.HandlerInterceptor;
-
-import com.voc.security.AuthManager;
-import com.voc.utils.Row;
-
-/**
- * SessionInterceptor ensures that HTTP requests have a valid user session.
- * <p>
- * Requests without a valid session will be redirected to the login page,
- * except for a defined list of excluded pages (public pages, static resources,
- * etc.).
- * </p>
- * 
- * <p>
- * This interceptor automatically injects the username into the request
- * attributes
- * when a valid session is found.
- * </p>
- */
-@Configuration
 public class SessionInterceptor implements HandlerInterceptor {
 
-    /**
-     * Pre-handle method invoked before controller methods.
-     * Checks for a valid session cookie and redirects to login if session is
-     * missing or invalid.
-     *
-     * @param request  The HTTP request
-     * @param response The HTTP response
-     * @param handler  The handler object
-     * @return true if request should proceed, false if redirected
-     * @throws Exception in case of unexpected errors
-     */
     @Override
     public boolean preHandle(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull Object handler) throws Exception {
-        Cookie[] cookies = request.getCookies();
-        String sessionToken = null;
 
-        // Get the current page URL
+        String authHeader = request.getHeader("Authorization");
         String currentPage = request.getRequestURI();
 
-        // Pages that don't require authentication
-        String[] excludedPages = { 
-            "/home", "/login",
-            "/register", "/css/**",
-            "/js/**", "/resources/**",
-            "/api/auth/**", "/about", "/contact",
-            "/error/**"
-         };
+        // Assume no session exists by default
+        boolean hasSession = false;
 
-        // Look for session cookie
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("session_id".equals(cookie.getName())) {
-                    sessionToken = cookie.getValue();
-                    break;
+        // 1. Check for JWT authentication first
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
+            if (optionalUserId.isPresent()) {
+                hasSession = true;
+            }
+        }
+        
+        // 2. If no JWT, check for a valid session cookie
+        if (!hasSession) {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("session_token".equals(cookie.getName())) {
+                        String[] parts = cookie.getValue().split(":");
+                        if (parts.length == 2) {
+                            String sessionId = parts[0];
+                            String rawRefreshToken = parts[1];
+                            if (AuthManager.validateSession(sessionId, rawRefreshToken)) {
+                                hasSession = true;
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        //TODO: Implement session expiration check
-        //TODO: Implement IP/browser fingerprint check
-        //TODO: Implement user permissions/roles check
-
-        // Validate session token if present
-        if (sessionToken != null) {
-            Row userData = AuthManager.validateUserSession(sessionToken);
-            if (userData != null) {
-                request.setAttribute("username", (String) userData.get("username"));
-                return true;
-            }
+        // Set the attribute based on the result of the checks
+        if (hasSession) {
+            request.setAttribute("hasSession", true);
         }
 
-        // Allow access to excluded/public pages
+        // 3. Now, handle excluded and protected pages
+        String[] excludedPages = {
+            "/home", "/login", "/register", "/css/**", "/js/**",
+            "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**"
+        };
         for (String page : excludedPages) {
             if (currentPage.matches(page.replace("**", ".*"))) {
                 return true;
             }
         }
 
-        // Redirect to login if session is missing/invalid
-        response.sendRedirect("/login");
-        return false;
+        // If the page is not excluded, it must have a session
+        if (!hasSession) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            if (currentPage.startsWith("/api/")) {
+                response.getWriter().write("JWT is invalid or missing.");
+            } else {
+                response.sendRedirect("/login");
+            }
+            return false;
+        }
+
+        return true;
     }
 }
