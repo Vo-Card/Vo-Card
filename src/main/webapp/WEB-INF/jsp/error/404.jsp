@@ -15,7 +15,7 @@
             integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK"
             crossorigin="anonymous"></script>
         <script src="/js/screen_correction.js" defer></script>
-
+        <script src="/js/mpa-reloader.js"></script>
 
     <style>
         :root {

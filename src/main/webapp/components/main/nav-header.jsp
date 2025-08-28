@@ -12,9 +12,9 @@
         <li><a href="/support">Support</a></li>
     </ul>
     <ul class="right">
-        <c:set var="username" value="${param.username}" />
+        <c:set var="hasSession" value="${param.hasSession}" />
         <c:choose>
-            <c:when test="${not empty username}">
+            <c:when test="${not empty hasSession}">
                 <li><a href="/workflow/home" class="opeb_btn">Open Vo-Card</a></li>
             </c:when>
             <c:otherwise>
