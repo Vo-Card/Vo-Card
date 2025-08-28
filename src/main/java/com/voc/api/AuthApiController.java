@@ -146,6 +146,7 @@ public class AuthApiController {
         ResponseCookie newCookie = ResponseCookie.from("session_token", sessionId + ":" + refreshToken)
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(maxAge)
                 .build();
@@ -182,6 +183,7 @@ public class AuthApiController {
                 .httpOnly(true)
                 .secure(true) // Remember to set to false for localhost
                 .path("/")
+                .sameSite("Strict")
                 .maxAge(maxAge)
                 .build();
 
