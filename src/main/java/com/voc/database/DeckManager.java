@@ -6,8 +6,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.util.SystemPropertyUtils;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.voc.security.SessionManager;
 import com.voc.utils.Row;
 
 /**
@@ -40,10 +46,9 @@ public class DeckManager {
         }
     }
 
-    // not complete yet
     public static void createDeck(String name, String description, Long user_id) {
         DatabaseUtils.sqlSingleRowStatement(
-                "INSERT INTO decktb (deck_name,deck_description, user_id_FK) VALUES (?,?,?,?)", name,
+                "INSERT INTO decktb (deck_name,deck_description, user_id_FK) VALUES (?,?,?)", name,
                 description, user_id);
     }
 
@@ -51,11 +56,13 @@ public class DeckManager {
      * Initialize the defaultdeck to the root user of the project.
      */
     public static void initializeDeckTable() {
-        long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT COUNT(*) FROM decktb").get("COUNT(*)")).longValue();
-        
+        long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT COUNT(*) FROM decktb").get("COUNT(*)"))
+                .longValue();
+
         if (deckCount == 0) {
             Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername()).get("user_id_PK")).longValue();
+                    "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
+                    .get("user_id_PK")).longValue();
 
             DatabaseUtils.sqlSingleRowStatement(
                     "INSERT INTO decktb (deck_name, deck_is_public, user_id_FK) VALUES (?,?,?)",
@@ -103,5 +110,14 @@ public class DeckManager {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    // Check Deck_ID that contain User_ID_FK For loading in decks.jsp
+    // select * FROM DECK_ID WHERE USER_id_FK = {user_id};
+    public static List<Row> deckLoader(long userid) {
+        List<Row> deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
+
+        System.out.println(deckList);
+        return deckList;
     }
 }
