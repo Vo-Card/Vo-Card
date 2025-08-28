@@ -23,10 +23,7 @@ export const TokenManager = {
 export async function fetchWithAuth(url, options = {}) {
     const accessToken = TokenManager.getAccessToken();
 
-    console.log("Using access token:", accessToken);
-
     if (!accessToken) {
-        console.error("No access token found. Redirecting to login.");
         return null;
     }
 
@@ -37,10 +34,7 @@ export async function fetchWithAuth(url, options = {}) {
 
     let response = await fetch(url, { ...options, headers });
 
-    console.log("Fetch response status:", response.status);
-
     if (response.status === 401) {
-        console.log("Access token expired. Attempting to refresh.");
         try {
             const refreshResponse = await fetch("/api/auth/refresh", { 
                 method: "POST",
@@ -59,12 +53,12 @@ export async function fetchWithAuth(url, options = {}) {
                 response = await fetch(url, { ...options, headers: newHeaders });
                 
             } else {
-                console.error("Session refresh failed. Redirecting to login.");
                 TokenManager.clearAccessToken();
+                window.location.replace("/login");
             }
         } catch (error) {
-            console.error("Network error during refresh:", error);
             TokenManager.clearAccessToken();
+            window.location.replace("/login");
         }
     }
     

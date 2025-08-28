@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('content');
     
     if (!TokenManager.getAccessToken()) {
-        console.log("No access token found. Redirecting to login.");
         window.location.replace("/login");
         return;
     }
@@ -60,12 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (response.ok) {
             mainContent.style.display = 'block';
-            console.log("Session is valid. Displaying content for /workflow/home.");
         } else {
-            console.log("Session invalid. fetchWithAuth has redirected to login.");
+            window.location.replace("/login");
         }
     } catch (error) {
-        console.error("Authentication check failed:", error);
         window.location.replace("/login");
     }
     runPageInit();
