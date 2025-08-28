@@ -1,6 +1,3 @@
-// /js/auth/auth.js
-
-// The TokenManager handles getting and setting tokens from sessionStorage
 export const TokenManager = {
     getAccessToken: () => {
         return sessionStorage.getItem('access_token');

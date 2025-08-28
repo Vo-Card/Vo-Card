@@ -15,6 +15,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.scheduling.annotation.Scheduled;
+
+/**
+ * JwtManager handles the creation, signing, and validation of JSON Web Tokens (JWTs).
+ * <p>
+ * JWT is used for stateless authentication, allowing secure transmission of user information.
+ * </p>
+ * <p>
+ * The class manages a cache of active signing keys, supports key rotation, and ensures
+ * that tokens are signed with a valid key. It also validates incoming tokens against the
+ * appropriate signing key based on the {@code key ID} (kid) in the token header.
+ * </p>
+ */
 public class JwtManager {
 
     private static final int JWT_EXP_MINUTES = 20;
@@ -27,7 +40,8 @@ public class JwtManager {
 
     /**
      * Initializes the key cache by loading all valid keys from the database.
-     * This method should be called once at application startup.
+     * This method will be called once at application startup.
+     * If no valid keys are found, a new key will be generated.
      */
     public static void initializeKeys() {
         activeKeys.clear();
@@ -57,7 +71,13 @@ public class JwtManager {
     /**
      * Generates and stores a new primary signing key.
      * This method is synchronized to prevent race conditions during key rotation.
+     * If a primary key already exists, it will be demoted to a non-primary key.
+     * The new key will have a unique key ID (kid) and an expiration date.
+     * <p>
+     * This will automatically run every day on midnight.
+     * </p>
      */
+    @Scheduled(cron = "0 0 0 * * ?")
     public static synchronized void rotateKey() {
         DatabaseUtils.sqlPrepareStatement("UPDATE jwt_keys SET is_primary = 0 WHERE is_primary = 1");
 
@@ -69,6 +89,10 @@ public class JwtManager {
         DatabaseUtils.sqlPrepareStatement(
             "INSERT INTO jwt_keys (kid, secret_key, expire_at, is_primary) VALUES (?, ?, ?, 1)",
             kid, encodedSecret, Date.from(expireAt)
+        );
+
+        DatabaseUtils.sqlPrepareStatement(
+        "DELETE FROM jwt_keys WHERE expire_at < NOW()"
         );
 
         initializeKeys();
@@ -115,7 +139,10 @@ public class JwtManager {
 
     /**
      * Validates a JWT using its key ID and returns the user ID if valid.
-     * This method is robust against various token-related exceptions.
+     * <p>
+     * If the token is invalid, expired, or the key ID does not match any active keys,
+     * an empty Optional is returned.
+     * </p>
      *
      * @param token The JWT to validate.
      * @return An Optional containing the user ID if the token is valid, otherwise an empty Optional.
