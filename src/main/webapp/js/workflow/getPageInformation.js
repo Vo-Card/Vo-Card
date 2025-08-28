@@ -48,15 +48,9 @@ function runPageInit() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('content');
-    
-    if (!TokenManager.getAccessToken()) {
-        window.location.replace("/login");
-        return;
-    }
-    
+
     try {
         const response = await fetchWithAuth("/api/ping");
-        
         if (response.ok) {
             mainContent.style.display = 'block';
         } else {
@@ -65,5 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
+    
     runPageInit();
 });
