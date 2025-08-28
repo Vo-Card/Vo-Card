@@ -18,7 +18,7 @@
         <body>
 
             <jsp:include page="/components/main/nav-header.jsp">
-                <jsp:param name="username" value="${username}" />
+                <jsp:param name="hasSession" value="${hasSession}" />
             </jsp:include>
 
             <div class="container">
