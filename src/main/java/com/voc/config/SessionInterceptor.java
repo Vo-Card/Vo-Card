@@ -24,7 +24,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         // Assume no session exists by default
         boolean hasSession = false;
 
-        // 1. Check for JWT authentication first
+        // Check for JWT authentication first
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
@@ -33,8 +33,8 @@ public class SessionInterceptor implements HandlerInterceptor {
             }
         }
         
-        // 2. If no JWT, check for a valid session cookie
-        if (!hasSession) {
+        // If no JWT, check for a valid session cookie and not API request
+        if (!hasSession && !currentPage.startsWith("/api/")) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
@@ -57,7 +57,7 @@ public class SessionInterceptor implements HandlerInterceptor {
             request.setAttribute("hasSession", true);
         }
 
-        // 3. Now, handle excluded and protected pages
+        // Now, handle excluded and protected pages
         String[] excludedPages = {
             "/home", "/login", "/register", "/css/**", "/js/**",
             "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**"
