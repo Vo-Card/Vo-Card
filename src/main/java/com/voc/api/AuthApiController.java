@@ -1,19 +1,25 @@
 package com.voc.api;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.security.AuthManager;
+import com.voc.security.SessionManager;
+import com.voc.utils.Row;
 
 /**
  * AuthApiController provides RESTful endpoints for user authentication.
@@ -41,6 +47,7 @@ public class AuthApiController {
     public static class LoginRequest {
         public String username;
         public String password;
+        public boolean rememberMe;
     }
 
     /**
@@ -83,7 +90,6 @@ public class AuthApiController {
                             "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character."));
         }
 
-        // Process registration
         boolean registered = AuthManager.registerUser(displayName, username, password);
 
         if (registered) {
@@ -110,23 +116,76 @@ public class AuthApiController {
             HttpServletResponse response) {
         String username = usr.username != null ? usr.username.trim() : "";
         String password = usr.password != null ? usr.password.trim() : "";
+        boolean rememberMe = usr.rememberMe;
 
         if (username.isEmpty() || password.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username and/or password cannot be empty."));
         }
 
-        String sessionId = AuthManager.loginUser(username, password, request.getHeader("X-Forwarded-For"),
-                request.getHeader("User-Agent"));
+        String ipAddr = request.getHeader("X-Forwarded-For");
+        if (ipAddr == null || ipAddr.isEmpty()) {
+            ipAddr = request.getRemoteAddr();
+        } else {
+            // Sometimes X-Forwarded-For contains multiple IPs (client, proxy1, proxy2)
+            ipAddr = ipAddr.split(",")[0].trim();
+        }
 
-        if (sessionId == null) {
+        Row sessionData = AuthManager.loginUser(username, password, rememberMe, ipAddr, request.getHeader("User-Agent"));
+
+        if (sessionData == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username or Password is not Correct."));
         }
-        Cookie cookie = new Cookie("session_id", sessionId);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-        return ResponseEntity.ok(Map.of("message", "Login successful."));
+
+        String accessToken = (String) sessionData.get("access_token");
+        String refreshToken = (String) sessionData.get("refresh_token");
+        String sessionId = (String) sessionData.get("session_id");
+        long maxAge = (long) sessionData.get("max_age");
+
+        ResponseCookie newCookie = ResponseCookie.from("session_token", sessionId + ":" + refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader("Set-Cookie", newCookie.toString());
+        return ResponseEntity.ok(Collections.singletonMap("access_token", accessToken));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(@CookieValue("session_token") String cookieValue,
+                                                           HttpServletResponse response) {
+        String[] parts = cookieValue.split(":");
+
+        if (parts.length != 2) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Invalid refresh token format."));
+        }
+        String sessionId = parts[0];
+        String rawRefreshToken = parts[1];
+
+        Optional<Row> newSessionData = SessionManager.refreshSession(sessionId, rawRefreshToken);
+
+        if (newSessionData.isEmpty()) {
+            ResponseCookie emptyCookie = ResponseCookie.from("session_token", "").maxAge(0).build();
+            response.addHeader("Set-Cookie", emptyCookie.toString());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Session expired. Please log in again."));
+        }
+
+        String newAccessToken = (String) newSessionData.get().get("access_token");
+        String newRefreshToken = (String) newSessionData.get().get("refresh_token");
+        String newSessionId = (String) newSessionData.get().get("session_id");
+        long maxAge = (long) newSessionData.get().get("max_age");
+
+        ResponseCookie newCookie = ResponseCookie.from("session_token", newSessionId + ":" + newRefreshToken)
+                .httpOnly(true)
+                .secure(true) // Remember to set to false for localhost
+                .path("/")
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader("Set-Cookie", newCookie.toString());
+        return ResponseEntity.ok(Collections.singletonMap("access_token", newAccessToken));
     }
 }

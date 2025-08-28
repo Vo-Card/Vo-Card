@@ -1,26 +1,31 @@
-async function loadPage(path) {
+import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
+
+//TODO: Make a proper documentation for this file
+
+async function loadPage(path, addHistory = true) {
     try {
         const res = await fetch(path, { headers: { "X-Requested-With": "XMLHttpRequest" } });
-
         if (!res.ok) {
             window.location.href = "/error/404";
             return;
         }
 
         const html = await res.text();
-        document.getElementById("content").innerHTML = html;
+        const contentEl = document.getElementById("content");
+        if (contentEl) contentEl.innerHTML = html;
 
-        if (path === "/workflow/home") {
-            initChartz();
+        if (path === "/workflow/home") initChartz();
+
+        if (addHistory) {
+            window.history.pushState({ path }, "", path);
         }
 
-        window.history.pushState({}, "", path);
-
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         window.location.href = "/error/404";
     }
 }
+
 
 document.addEventListener("click", e => {
     const link = e.target.closest("a[data-workflow]");
@@ -30,8 +35,9 @@ document.addEventListener("click", e => {
     }
 });
 
-window.addEventListener("popstate", () => {
-    loadPage(window.location.pathname);
+window.addEventListener("popstate", (event) => {
+    const path = event.state?.path || window.location.pathname;
+    loadPage(path, false); // false = don’t pushState again
 });
 
 function runPageInit() {
@@ -39,4 +45,28 @@ function runPageInit() {
     if (page === "home" || page === "" ) initChartz();
 }
 
-document.addEventListener("DOMContentLoaded", runPageInit);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const mainContent = document.getElementById('content');
+    
+    if (!TokenManager.getAccessToken()) {
+        console.log("No access token found. Redirecting to login.");
+        window.location.replace("/login");
+        return;
+    }
+    
+    try {
+        const response = await fetchWithAuth("/api/ping");
+        
+        if (response.ok) {
+            mainContent.style.display = 'block';
+            console.log("Session is valid. Displaying content for /workflow/home.");
+        } else {
+            console.log("Session invalid. fetchWithAuth has redirected to login.");
+        }
+    } catch (error) {
+        console.error("Authentication check failed:", error);
+        window.location.replace("/login");
+    }
+    runPageInit();
+});
