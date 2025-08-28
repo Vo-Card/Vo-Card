@@ -1,6 +1,6 @@
 // grab elements
 const splitter = document.getElementById('splitter');
-const sidebar = document.getElementById('menu-bar');
+const sidebar = document.getElementById('workflow-sidebar');
 
 let isDragging = false;
 
