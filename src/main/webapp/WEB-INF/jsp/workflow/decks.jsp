@@ -15,7 +15,7 @@
 
     <!-- quite bad naming -->
     <div class="deck-loader-container">
-        <div class="deck-container">
+        <div class="deck-container" id="deck-container">
             <!-- Deck will load here -->
 
             <div>

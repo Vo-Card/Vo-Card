@@ -16,13 +16,13 @@
 
     --splitter-hover: rgb(210, 235, 255);
 
-    --light-dotted-background : 
-    radial-gradient(circle, rgba(85, 104, 119, 0.326) 0%, rgba(33, 34, 46, 0) 70%) -500px -500px / 1500px 1500px no-repeat,
-    linear-gradient(transparent 750px, var(--primary-color) 1000px),
-    radial-gradient(ellipse 150% 50%, var(--primary-color) 60%, transparent 75%) center -50vh / 100vw 500vh no-repeat,
-    radial-gradient(rgb(255,255,255) 2px, transparent 0) -25px -25px / 25px 25px repeat,
-    radial-gradient(ellipse 150% 50%, var(--primary-color) 65%,
-    var(--theme-color) 85%) center -50vh / 100vw 500vh no-repeat, rgb(27, 29, 36);
+    --light-dotted-background:
+        radial-gradient(circle, rgba(85, 104, 119, 0.326) 0%, rgba(33, 34, 46, 0) 70%) -500px -500px / 1500px 1500px no-repeat,
+        linear-gradient(transparent 750px, var(--primary-color) 1000px),
+        radial-gradient(ellipse 150% 50%, var(--primary-color) 60%, transparent 75%) center -50vh / 100vw 500vh no-repeat,
+        radial-gradient(rgb(255, 255, 255) 2px, transparent 0) -25px -25px / 25px 25px repeat,
+        radial-gradient(ellipse 150% 50%, var(--primary-color) 65%,
+            var(--theme-color) 85%) center -50vh / 100vw 500vh no-repeat, rgb(27, 29, 36);
 
     --content-border-radius: 20px 20px 0 0;
     --content-shadow-color: rgba(159, 165, 192, 0.473);
@@ -203,8 +203,10 @@
     width: 100%;
     border-top: var(--content-border);
     border-left: var(--content-border);
-    border-radius: 20px 20px 0 0; /* same as content */
-    overflow: hidden;              /* hides scrollbar outside the radius */
+    border-radius: 20px 20px 0 0;
+    /* same as content */
+    overflow: hidden;
+    /* hides scrollbar outside the radius */
     height: calc(100vh - var(--header-height));
 }
 
@@ -237,7 +239,7 @@
 
 .grid-container {
     display: grid;
-    grid-template-areas: 
+    grid-template-areas:
         "greeting greeting daily"
         "stats stats stats";
     grid-template-columns: 1fr 1fr 1fr;
@@ -247,7 +249,7 @@
     margin: 0 auto;
 }
 
-.content-container{
+.content-container {
     background-color: var(--content-container-bg);
     padding: 16px;
     border-radius: 8px;
@@ -257,6 +259,7 @@
 .greeting {
     grid-area: greeting;
 }
+
 .greeting p {
     margin: 8px 0;
 }
@@ -266,6 +269,7 @@
     grid-area: daily;
     text-align: center;
 }
+
 .daily .card-count {
     font-size: 36px;
     font-weight: bold;
@@ -275,6 +279,7 @@
 .stats {
     grid-area: stats;
 }
+
 .stats .light {
     width: 20px;
     height: 20px;
@@ -282,6 +287,7 @@
     border-radius: 50%;
     margin-bottom: 16px;
 }
+
 .stats .chart-placeholder {
     width: 100%;
     height: 150px;
@@ -292,4 +298,58 @@
     justify-content: center;
     color: #555;
     font-size: 18px;
+}
+
+/* ----------------------- */
+/* Your-Decks Content Area */
+/* ----------------------- */
+.decks {
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 100%;
+}
+
+.decks-header {
+    width: 100%;
+    height: fit-content;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cover-search-decks {
+    width: 40%;
+}
+
+.cover-search-decks input {
+    padding: 7px;
+    width: 100%;
+}
+
+.decks-text p {
+    border-bottom-style: solid;
+    border-width: 2px;
+    border-color: white;
+    padding-left: 2px;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.deck-loader-container {
+    width: 100%;
+    height: 100%;
+}
+
+.deck-container {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    grid-template-columns: repeat(5, 200px);
+}
+
+.deck-editor {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
