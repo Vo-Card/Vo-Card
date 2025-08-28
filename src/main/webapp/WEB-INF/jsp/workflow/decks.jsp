@@ -1,4 +1,4 @@
-
+<script src="/js/workflow/page-fixer.js"></script>
 <div>
     <div class="preview" id="card_preview">
         <div class="deck default a1" style="z-index: 1;">
