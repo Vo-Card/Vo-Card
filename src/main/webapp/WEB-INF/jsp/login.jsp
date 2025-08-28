@@ -13,7 +13,7 @@
             integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK"
             crossorigin="anonymous"></script>
         <script src="/js/screen_correction.js" defer></script>
-
+        <script src="/js/mpa-reloader.js"></script>
 
         <style>
             :root {
@@ -113,18 +113,24 @@
                         <input name="password" id="password" type="password" placeholder="Password" /><br />
                         <div id="message"></div>
                         <p>Need an account? <a href="/register">Register</a></p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe" style="color: white;">
+                                Remember me
+                            </label>
+                        </div>
                         <c:if test="${not empty error}">
                             <p style="color:red">${error}</p>
                         </c:if>
                     </div>
                     <div class="mt-3 ">
-                        <input type="submit" value="Login" />
+                        <input type="submit" id="loginButton" value="Login" />
                     </div>
                 </form>
             </div>
 
         </div>
-        <script src="/js/auth/login.js" defer></script>
+        <script type="module" src="/js/auth/login.js" defer></script>
 
     </body>
 

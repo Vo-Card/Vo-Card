@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.voc.database.DatabaseUtils;
 import com.voc.database.DeckManager;
+import com.voc.jwt.JwtManager;
+
 import static com.voc.utils.AnsiColor.*;
 
 @WebServlet(urlPatterns = "/startup", loadOnStartup = 1)
@@ -74,6 +76,9 @@ public class AppStartupServlet extends HttpServlet {
 
             DeckManager.initializeDeckTable();
             System.out.println(TAG_SUCCESS + "Default deck ensured.");
+
+            JwtManager.initializeKeys();
+            System.out.println(TAG_SUCCESS + "JWT keys initialized.");
 
             System.out.flush();
         } catch (Exception e) {

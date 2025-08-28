@@ -1,3 +1,4 @@
+<script src="/js/workflow/page-fixer.js"></script>
 <div class="grid-container">
     <div class="greeting content-container">
         <p class="font-fixed">{daily_welcome_message}, {username}!</p>

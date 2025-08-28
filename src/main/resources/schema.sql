@@ -74,10 +74,13 @@ CREATE TABLE `reviewtb` (
 
 CREATE TABLE `sessiontb` (
   `session_id_PK` varchar(255) NOT NULL,
-  `session_last_login` datetime DEFAULT current_timestamp(),
-  `session_login_ip` varchar(255) DEFAULT NULL,
-  `session_browser_info` varchar(255) DEFAULT NULL,
-  `user_id_FK` int(10) unsigned DEFAULT NULL,
+  `user_id_FK` int(10) unsigned NOT NULL,
+  `refresh_token_hash` varchar(100) NOT NULL,
+  `expires_at` datetime NOT NULL DEFAULT (current_timestamp() + interval 30 day),
+  `remember_me` bit(1) NOT NULL,
+  `ip_address` varchar(255) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`session_id_PK`),
   KEY `session_usertb_FK` (`user_id_FK`),
   CONSTRAINT `session_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
@@ -140,3 +143,15 @@ CREATE TABLE `learned_cardtb` (
   CONSTRAINT `learned_cardtb_cardtb_FK` FOREIGN KEY (`card_id_PK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE,
   CONSTRAINT `learned_cardtb_usertb_FK` FOREIGN KEY (`user_id_PK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- vo_card.jwt_keys definition
+
+CREATE TABLE `jwt_keys` (
+  `kid` varchar(36) NOT NULL,
+  `secret_key` varchar(128) NOT NULL,
+  `expire_at` timestamp NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_primary` bit(1) NOT NULL,
+  PRIMARY KEY (`kid`),
+  KEY `jwt_keys_expire_at_IDX` (`expire_at`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

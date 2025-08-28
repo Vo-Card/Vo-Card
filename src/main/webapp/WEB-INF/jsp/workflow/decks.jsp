@@ -1,3 +1,4 @@
+<script src="/js/workflow/page-fixer.js"></script>
 <div class="decks" id="loadDecks">
     <div class="decks-header">
         <div>
