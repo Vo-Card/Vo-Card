@@ -109,9 +109,9 @@ public class DeckManager {
     // Check Deck_ID that contain User_ID_FK For loading in decks.jsp
     // select * FROM DECK_ID WHERE USER_id_FK = {user_id};
     public static List<Row> deckLoader(long userid) {
-        List<Row> deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
+        SQLResult deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
 
         System.out.println(deckList);
-        return deckList;
+        return deckList.getData();
     }
 }

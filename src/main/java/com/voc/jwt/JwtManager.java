@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
 import com.voc.database.DatabaseUtils;
+import com.voc.database.SQLResult;
 import com.voc.utils.Row;
 
 import java.io.IOException;
@@ -46,10 +47,10 @@ public class JwtManager {
     public static void initializeKeys() {
         activeKeys.clear();
         String sql = "SELECT kid, secret_key, is_primary FROM jwt_keys WHERE expire_at > NOW() OR is_primary = 1";
-        List<Row> rows = DatabaseUtils.sqlPrepareStatement(sql);
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(sql);
 
-        if (rows != null) {
-            for (Row row : rows) {
+        if (res.isSuccess()) {
+            for (Row row : res.getData()) {
                 String kid = (String) row.get("kid");
                 String encodedSecret = (String) row.get("secret_key");
                 boolean isPrimary = (boolean) row.get("is_primary");
