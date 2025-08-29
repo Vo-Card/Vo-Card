@@ -345,8 +345,9 @@ public class DatabaseUtils {
      * @see com.voc.utils.Row
      * @see #sqlSingleRowStatement(String, Object...)
      */
-    public static List<Row> sqlPrepareStatement(String sql, Object... args) {
+    public static SQLResult sqlPrepareStatement(String sql, Object... args) {
         List<Row> resultList = new ArrayList<>();
+        long generatedKey = -1;
 
         try (Connection connection = getConnection();
                 PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -372,14 +373,24 @@ public class DatabaseUtils {
                     }
                 }
             } else {
-                pstmt.executeUpdate();
+            int affectedRows = pstmt.executeUpdate();
+                if (affectedRows == 0) {
+                    System.err.println("SQL warning: No rows affected by statement.");
+                }
+
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedKey = rs.getLong(1);
+                    }
+                }
             }
+            return new SQLResult(true, resultList, generatedKey, null);
 
         } catch (SQLException e) {
             System.err.println("SQL error: " + e.getMessage());
+            return new SQLResult(false, null, generatedKey, e.getMessage());
         }
 
-        return resultList;
     }
 
     /**
@@ -391,7 +402,10 @@ public class DatabaseUtils {
      * @see #sqlPrepareStatement(String, Object...)
      */
     public static Row sqlSingleRowStatement(String sql, Object... args) {
-        List<Row> rows = sqlPrepareStatement(sql, args);
-        return rows.isEmpty() ? null : rows.get(0);
+        SQLResult rows = sqlPrepareStatement(sql, args);
+        if (rows.isSuccess()) {
+            return rows.getData().isEmpty() ? null : rows.getData().get(0);
+        }
+        return null;
     }
 }
