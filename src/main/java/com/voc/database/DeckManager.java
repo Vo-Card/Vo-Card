@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.voc.server.Snowflake;
 import com.voc.utils.Row;
 
 /**
@@ -40,10 +42,34 @@ public class DeckManager {
         }
     }
 
-    public static void createDeck(String name, String description, Long user_id) {
+    public static void createNewDeck(Long deckId, String name, String description, Boolean isPublic, Long userId) {
         DatabaseUtils.sqlSingleRowStatement(
-                "INSERT INTO decktb (deck_name,deck_description, user_id_FK) VALUES (?,?,?)", name,
-                description, user_id);
+                "INSERT INTO decktb (deck_id_PK, deck_name, deck_is_public, user_id_FK) VALUES (?, ?, ?, ?)",
+                deckId != null ? deckId : Snowflake.nextId(), name, isPublic, userId);
+    }
+
+    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long deckId){
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, deck_id_FK) VALUES (?, ?, ?, ?)",
+                levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight, deckId);
+    }
+
+    public static void createNewCard(Long cardId, Long levelId, String cardName){
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)",
+                cardId != null ? cardId : Snowflake.nextId(), levelId, cardName);
+    }
+
+    public static void createNewPartOfSpeech(Long posID, Long cardId, String pos){
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)",
+                posID != null ? posID : Snowflake.nextId(), cardId, pos);
+    }
+    
+    public static void createNewDefinition(Long definitionId, Long posID, String definition){
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
+                definitionId != null ? definitionId : Snowflake.nextId(), posID, definition);
     }
 
     /**
@@ -58,10 +84,8 @@ public class DeckManager {
                     "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
                     .get("user_id_PK")).longValue();
 
-            DatabaseUtils.sqlSingleRowStatement(
-                    "INSERT INTO decktb (deck_name, deck_is_public, user_id_FK) VALUES (?,?,?)",
-                    "Default", 1, rootUserID);
-            System.out.println(TAG_SUCCESS + "Create default complete");
+            Long deckId = Snowflake.nextId();
+            createNewDeck(deckId, "Default", "This is a VoCard official default deck.", true, rootUserID);
 
             ObjectMapper mapper = new ObjectMapper();
 
@@ -78,28 +102,38 @@ public class DeckManager {
 
                 int weight = 1;
 
-                for (Map.Entry<String, Map<String, Map<String, List<String>>>> entry : defaultDeck.entrySet()) {
-                    String level = entry.getKey();
-                    Map<String, Map<String, List<String>>> levelData = entry.getValue();
-                    DatabaseUtils.sqlPrepareStatement(
-                            "INSERT INTO card_leveltb (level_weight, level_name, deck_id_FK) VALUES (?, ?, ?)",
-                            weight, level, 1);
-                    Long level_id = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                            "SELECT level_id_PK FROM card_leveltb WHERE level_weight = ? AND level_name = ?",
-                            weight, level).get("level_id_PK")).longValue();
+                for (Map.Entry<String, Map<String, Map<String, List<String>>>> levelData : defaultDeck.entrySet()) {
+                    String levelName = levelData.getKey();
+                    Map<String, Map<String, List<String>>> levelContent = levelData.getValue();
+
+                    Long levelId = Snowflake.nextId();
+                    createNewLevel(levelId, levelName, weight, deckId);
                     weight = weight + 1;
 
-                    for (Map.Entry<String, Map<String, List<String>>> wordData : levelData.entrySet()) {
-                        String word = wordData.getKey();
-                        Map<String, List<String>> wordContent = wordData.getValue();
+                    for (Map.Entry<String, Map<String, List<String>>> cardData : levelContent.entrySet()) {
+                        String cardName = cardData.getKey();
+                        Map<String, List<String>> cardContent = cardData.getValue();
 
-                        String wordContentJSON = mapper.writeValueAsString(wordContent);
+                        Long cardId = Snowflake.nextId();
 
-                        DatabaseUtils.sqlPrepareStatement(
-                                "INSERT INTO cardtb (card_word, card_content, level_id_FK, deck_id_FK) VALUES (?, ?, ?, ?)",
-                                word, wordContentJSON, level_id, 1);
+                        createNewCard(cardId, levelId, cardName);
+
+                        for (Map.Entry<String, List<String>> posData : cardContent.entrySet()){
+                            String partOfSpeech = posData.getKey();
+                            List<String> definitions = posData.getValue();
+
+                            Long posId = Snowflake.nextId();
+                            createNewPartOfSpeech(posId, cardId, partOfSpeech);
+
+                            for (String def : definitions) {
+                                Long defId = Snowflake.nextId();
+                                createNewDefinition(defId, posId, def);
+                            }
+                        }
                     }
                 }
+
+                System.out.println(TAG_SUCCESS + "Create default complete");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }

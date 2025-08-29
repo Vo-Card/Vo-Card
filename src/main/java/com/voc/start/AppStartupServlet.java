@@ -1,37 +1,33 @@
 package com.voc.start;
 
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.voc.database.DatabaseUtils;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
+import com.voc.server.Snowflake;
+import com.voc.server.WorkerSessionManager;
 
 import static com.voc.utils.AnsiColor.*;
 
-@WebServlet(urlPatterns = "/startup", loadOnStartup = 1)
-public class AppStartupServlet extends HttpServlet {
+/**
+ * AppStartupServlet now implements ServletContextListener to handle
+ * both startup and shutdown properly.
+ */
+@WebListener
+public class AppStartupServlet implements ServletContextListener {
 
-    /**
-     * Initialize the servlet and set up the database connection.
-     * <p>
-     * This method is called when the servlet is first loaded into memory. It reads
-     * the database configuration from a JSON file and initializes the database
-     * connection. It also ensures that the default deck is created in the database.
-     * </p>
-     * @param config The servlet configuration object.
-     * @throws ServletException if an error occurs during initialization.
-     */
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void contextInitialized(ServletContextEvent sce) {
         System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] App Startup Initializing...");
 
         Map<String, String> data = null;
@@ -52,12 +48,12 @@ public class AppStartupServlet extends HttpServlet {
         if (data == null) {
             try {
                 data = Map.of(
-                    "DB_URL", System.getenv("DB_URL"),
-                    "DB_NAME", System.getenv("DB_NAME"),
-                    "DB_USER", System.getenv("DB_USER"),
-                    "DB_PASSWORD", System.getenv("DB_PASSWORD"),
-                    "ROOT_USERNAME", System.getenv("ROOT_USERNAME"),
-                    "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME")
+                        "DB_URL", System.getenv("DB_URL"),
+                        "DB_NAME", System.getenv("DB_NAME"),
+                        "DB_USER", System.getenv("DB_USER"),
+                        "DB_PASSWORD", System.getenv("DB_PASSWORD"),
+                        "ROOT_USERNAME", System.getenv("ROOT_USERNAME"),
+                        "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME")
                 );
 
                 if (data.values().stream().anyMatch(v -> v == null)) {
@@ -66,24 +62,49 @@ public class AppStartupServlet extends HttpServlet {
 
                 System.out.println(TAG_SUCCESS + "Loaded config from ENV.");
             } catch (Exception e) {
-                throw new ServletException(TAG_ERROR + " No valid config source (JSON or ENV).", e);
+                System.err.println(TAG_ERROR + " No valid config source (JSON or ENV).");
+                throw new RuntimeException(e);
             }
         }
 
+        String hostname = "unknown";
         try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            System.err.println("Could not determine local hostname: " + e.getMessage());
+        }
+
+        try {
+            // Initialize Worker and Database
             DatabaseUtils.initDatabase(data);
+            WorkerSessionManager.InitializeWorker(hostname);
+            
+            // Initialize Snowflake and Administrator after database
+            Snowflake.InitializeSnowflake(WorkerSessionManager.getWorkerId());
+            DatabaseUtils.initializeAdministrator();
+
             System.out.println(TAG_SUCCESS + "Database initialized successfully.");
 
             DeckManager.initializeDeckTable();
             System.out.println(TAG_SUCCESS + "Default deck ensured.");
-
+            
             JwtManager.initializeKeys();
             System.out.println(TAG_SUCCESS + "JWT keys initialized.");
 
-            System.out.flush();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ServletException(TAG_ERROR + "Failed to initialize default configuration.", e);
+            throw new RuntimeException(TAG_ERROR + "Failed to initialize default configuration.", e);
         }
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        System.out.println("[" + BOLD + BLUE + "VO-CARD" + RESET + "] App shutting down, cleaning resources...");
+
+        // Stop scheduler in WorkerSessionManager
+        WorkerSessionManager.shutdownScheduler();
+
+        // Other cleanup if needed
+        System.out.flush();
     }
 }
