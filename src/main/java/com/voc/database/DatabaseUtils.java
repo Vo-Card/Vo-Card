@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -104,18 +105,6 @@ public class DatabaseUtils {
         // Check and initialize database if configured
         boolean dbOk = checkDatabase();
         System.out.println(TAG_DEBUG + "Database check result: " + (dbOk ? "OK" : "FAILED"));
-
-        if (dbOk) {
-            Row row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
-            System.out.println(TAG_ALERT + "Root user exists? " + (row != null));
-
-            if (row == null) {
-                initializeAdministrator();
-                System.out.println(TAG_SUCCESS + "Root user initialized");
-            }
-        } else {
-            System.err.println(TAG_ERROR + "Database not ready or check failed");
-        }
     }
 
     public static String getRootUsername() {
@@ -140,14 +129,31 @@ public class DatabaseUtils {
      *           setup process. Repeated calls will overwrite the root user's
      *           credentials.
      */
-    private static void initializeAdministrator() {
-        String rootPassword = PasswordGenerator.generatePassword(32);
-        System.out.println(TAG_IMPORTANT+"Root user has been initialize for this project.");
-        System.out.println(TAG_IMPORTANT+"Root Username: " + ROOT_USERNAME);
-        System.out.println(TAG_IMPORTANT+"Root Password: " + rootPassword);
-        System.out.println(TAG_IMPORTANT+"Please keep this password in a secure location.");
-        System.out.println(TAG_IMPORTANT+"The password will show only once.");
-        AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
+    public static void initializeAdministrator() {
+        boolean dbOk = checkDatabase();
+
+        if (dbOk) {
+            Row row = sqlSingleRowStatement("SELECT * FROM usertb WHERE username = ?", ROOT_USERNAME);
+            System.out.println(TAG_ALERT + "Root user exists? " + (row != null));
+
+            if (row == null) {
+                String rootPassword = PasswordGenerator.generatePassword(32);
+                AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
+        
+                Row result = sqlSingleRowStatement("SELECT user_id_PK FROM usertb WHERE username = ?", ROOT_USERNAME);
+        
+                System.out.println(TAG_IMPORTANT+"Root user has been initialize for this project.");
+                System.out.println(TAG_IMPORTANT+"Root ID: " + (BigInteger) result.get("user_id_PK"));
+                System.out.println(TAG_IMPORTANT+"Root Username: " + ROOT_USERNAME);
+                System.out.println(TAG_IMPORTANT+"Root Password: " + rootPassword);
+                System.out.println(TAG_IMPORTANT+"Please keep this password in a secure location.");
+                System.out.println(TAG_IMPORTANT+"The password will show only once.");
+
+                System.out.println(TAG_SUCCESS + "Root user initialized");
+            }
+        } else {
+            System.err.println(TAG_ERROR + "Database not ready or check failed");
+        }
     }
 
     /**
@@ -348,9 +354,9 @@ public class DatabaseUtils {
     public static SQLResult sqlPrepareStatement(String sql, Object... args) {
         List<Row> resultList = new ArrayList<>();
         long generatedKey = -1;
-
+        int affectedRows = 0;
         try (Connection connection = getConnection();
-                PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             // Bind parameters
             if (args != null) {
@@ -373,22 +379,18 @@ public class DatabaseUtils {
                     }
                 }
             } else {
-            int affectedRows = pstmt.executeUpdate();
-                if (affectedRows == 0) {
-                    System.err.println("SQL warning: No rows affected by statement.");
-                }
-
+                affectedRows = pstmt.executeUpdate();
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         generatedKey = rs.getLong(1);
                     }
                 }
             }
-            return new SQLResult(true, resultList, generatedKey, null);
+            return new SQLResult(true, resultList, generatedKey, affectedRows, null);
 
         } catch (SQLException e) {
             System.err.println("SQL error: " + e.getMessage());
-            return new SQLResult(false, null, generatedKey, e.getMessage());
+            return new SQLResult(false, null, generatedKey, affectedRows, e.getMessage());
         }
 
     }
