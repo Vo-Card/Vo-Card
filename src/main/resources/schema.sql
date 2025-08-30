@@ -192,3 +192,14 @@ CREATE TABLE `definitiontb` (
   KEY `definitiontb_postb_FK_IDX` (`pos_id_FK`),
   CONSTRAINT `definitiontb_postb_FK` FOREIGN KEY (`pos_id_FK`) REFERENCES `postb` (`pos_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- vo_card.forktb definition
+
+CREATE TABLE `forktb` (
+  `deck_id_fk` bigint unsigned DEFAULT NULL,
+  `user_id_FK` bigint unsigned DEFAULT NULL,
+  KEY `forktb_decktb_fk` (`deck_id_fk`),
+  KEY `forktb_usertb_fk` (`user_id_FK`),
+  CONSTRAINT `forktb_decktb_fk` FOREIGN KEY (`deck_id_fk`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `forktb_usertb_fk` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
