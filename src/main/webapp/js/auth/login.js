@@ -9,7 +9,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     const payload = {
         username: document.getElementById("username").value.trim(),
         password: document.getElementById("password").value.trim(),
-        rememberme: document.getElementById("rememberMe").checked
+        rememberMe: document.getElementById("rememberMe").checked
     };
 
     try {

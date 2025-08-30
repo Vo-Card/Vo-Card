@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.voc.database.DatabaseUtils;
+import com.voc.server.Snowflake;
 import com.voc.utils.Row;
 
 /**
@@ -34,8 +35,8 @@ public class AuthManager {
     public static boolean registerUser(String displayName, String username, String password) {
         if (!isUserExist(username)) {
             String hashedPassword = PasswordUtils.generateSecretKey(password);
-            String sql = "INSERT INTO usertb (display_name, username, password) VALUES (?, ?, ?)";
-            DatabaseUtils.sqlPrepareStatement(sql, displayName, username, hashedPassword);
+            String sql = "INSERT INTO usertb (user_id_PK, display_name, username, password) VALUES (?, ?, ?, ?)";
+            DatabaseUtils.sqlPrepareStatement(sql, Snowflake.nextId(), displayName, username, hashedPassword);
             return true;
         }
         return false;
@@ -60,7 +61,6 @@ public class AuthManager {
 
         Long userId = ((Number) user.get("user_id_PK")).longValue();
         String storedPassword = (String) user.get("password");
-
         if (!PasswordUtils.verifyPassword(password, storedPassword))
             return null;
 

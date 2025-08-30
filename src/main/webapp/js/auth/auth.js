@@ -11,6 +11,41 @@ export const TokenManager = {
 };
 
 /**
+ * Refresh the access token using the HttpOnly refresh token cookie.
+ * Stores the new access token in sessionStorage.
+ * @returns {Promise<string|null>} The new access token, or null if refresh failed.
+ */
+export async function refreshToken() {
+    try {
+        const response = await fetch("/api/auth/refresh", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            TokenManager.clearAccessToken();
+            return null;
+        }
+
+        const data = await response.json();
+        const newAccessToken = data.access_token;
+
+        if (newAccessToken) {
+            TokenManager.setAccessToken(newAccessToken);
+            return newAccessToken;
+        } else {
+            TokenManager.clearAccessToken();
+            return null;
+        }
+
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        TokenManager.clearAccessToken();
+        return null;
+    }
+}
+
+/**
  * A wrapper for the native fetch() API that automatically handles JWT
  * authentication and token refreshing.
  * @param {string} url - The URL to fetch.
@@ -18,10 +53,14 @@ export const TokenManager = {
  * @returns {Promise<Response>} The response from the fetch call.
  */
 export async function fetchWithAuth(url, options = {}) {
-    const accessToken = TokenManager.getAccessToken();
+    let accessToken = TokenManager.getAccessToken();
 
     if (!accessToken) {
-        return null;
+        accessToken = await refreshToken();
+        if (!accessToken) {
+            window.location.replace("/login");
+            return null;
+        }
     }
 
     const headers = {
