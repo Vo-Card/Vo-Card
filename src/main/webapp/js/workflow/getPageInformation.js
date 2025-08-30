@@ -48,17 +48,9 @@ function runPageInit() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('content');
-    const deckContainer = document.getElementById('deck-container')
-
-
-    if (!TokenManager.getAccessToken()) {
-        window.location.replace("/login");
-        return;
-    }
 
     try {
-        const response = await fetchWithAuth("/api/decks/getDecks");
-
+        const response = await fetchWithAuth("/api/ping");
         if (response.ok) {
             mainContent.style.display = 'block';
             const data = await response.json();
@@ -74,5 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
+    
     runPageInit();
 });
