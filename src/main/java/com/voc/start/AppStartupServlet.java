@@ -75,21 +75,32 @@ public class AppStartupServlet implements ServletContextListener {
         }
 
         try {
+            long start = System.currentTimeMillis();
+
             // Initialize Worker and Database
+            long t1 = System.currentTimeMillis();
             DatabaseUtils.initDatabase(data);
             WorkerSessionManager.InitializeWorker(hostname);
-            
+            System.out.println(TAG_SUCCESS + "Worker + Database initialized in " + (System.currentTimeMillis() - t1) + "ms");
+
             // Initialize Snowflake and Administrator after database
+            t1 = System.currentTimeMillis();
             Snowflake.InitializeSnowflake(WorkerSessionManager.getWorkerId());
             DatabaseUtils.initializeAdministrator();
+            System.out.println(TAG_SUCCESS + "Snowflake + Administrator initialized in " + (System.currentTimeMillis() - t1) + "ms");
 
-            System.out.println(TAG_SUCCESS + "Database initialized successfully.");
-
+            // Default Deck
+            t1 = System.currentTimeMillis();
             DeckManager.initializeDeckTable();
-            System.out.println(TAG_SUCCESS + "Default deck ensured.");
-            
+            System.out.println(TAG_SUCCESS + "Default deck ensured in " + (System.currentTimeMillis() - t1) + "ms");
+
+            // JWT Keys
+            t1 = System.currentTimeMillis();
             JwtManager.initializeKeys();
-            System.out.println(TAG_SUCCESS + "JWT keys initialized.");
+            System.out.println(TAG_SUCCESS + "JWT keys initialized in " + (System.currentTimeMillis() - t1) + "ms");
+
+            long end = System.currentTimeMillis();
+            System.out.println(TAG_SUCCESS + "Total initialization finished in " + (end - start) + "ms");
 
         } catch (Exception e) {
             e.printStackTrace();

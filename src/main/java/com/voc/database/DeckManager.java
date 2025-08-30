@@ -1,8 +1,7 @@
 package com.voc.database;
 
-import static com.voc.utils.AnsiColor.TAG_SUCCESS;
-
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,74 +68,72 @@ public class DeckManager {
     public static void createNewDefinition(Long definitionId, Long posID, String definition){
         DatabaseUtils.sqlPrepareStatement(
                 "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
-                definitionId != null ? definitionId : Snowflake.nextId(), posID, definition);
+                definitionId != null ? definitionId : Snowflake.nextId(), posID, definition != null ? definition : "New Definition");
     }
 
     /**
      * Initialize the defaultdeck to the root user of the project.
      */
     public static void initializeDeckTable() {
-        long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT COUNT(*) FROM decktb").get("COUNT(*)"))
-                .longValue();
+        long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                "SELECT COUNT(*) FROM decktb").get("COUNT(*)")).longValue();
 
-        if (deckCount == 0) {
-            Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
-                    "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
-                    .get("user_id_PK")).longValue();
+        if (deckCount != 0) return;
 
-            Long deckId = Snowflake.nextId();
-            createNewDeck(deckId, "Default", "This is a VoCard official default deck.", true, rootUserID);
+        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
+                .get("user_id_PK")).longValue();
 
-            ObjectMapper mapper = new ObjectMapper();
+        Long deckId = Snowflake.nextId();
+        createNewDeck(deckId, "Default", "This is a VoCard official default deck.", true, rootUserID);
 
-            try (InputStream input = DeckManager.class.getClassLoader()
-                    .getResourceAsStream("datasets/default_deck_sample.json")) {
-                if (input == null)
-                    throw new RuntimeException("File not found!");
+        ObjectMapper mapper = new ObjectMapper();
 
-                Map<String, Map<String, Map<String, Map<String, List<String>>>>> rootJson = mapper.readValue(input,
-                        new TypeReference<>() {
-                        });
+        try (InputStream input = DeckManager.class.getClassLoader().getResourceAsStream("datasets/default_deck_sample.json")) {
+            if (input == null) throw new RuntimeException("File not found!");
 
-                Map<String, Map<String, Map<String, List<String>>>> defaultDeck = rootJson.get("default");
+            Map<String, Map<String, Map<String, Map<String, List<String>>>>> rootJson = mapper.readValue(input,
+                    new TypeReference<>() {});
+            Map<String, Map<String, Map<String, List<String>>>> defaultDeck = rootJson.get("default");
 
-                int weight = 1;
+            List<Object[]> levelBatch = new ArrayList<>();
+            List<Object[]> cardBatch = new ArrayList<>();
+            List<Object[]> posBatch = new ArrayList<>();
+            List<Object[]> defBatch = new ArrayList<>();
 
-                for (Map.Entry<String, Map<String, Map<String, List<String>>>> levelData : defaultDeck.entrySet()) {
-                    String levelName = levelData.getKey();
-                    Map<String, Map<String, List<String>>> levelContent = levelData.getValue();
+            int weight = 1;
+            for (Map.Entry<String, Map<String, Map<String, List<String>>>> levelData : defaultDeck.entrySet()) {
+                Long levelId = Snowflake.nextId();
+                levelBatch.add(new Object[]{levelId, weight, levelData.getKey(), deckId});
+                weight++;
 
-                    Long levelId = Snowflake.nextId();
-                    createNewLevel(levelId, levelName, weight, deckId);
-                    weight = weight + 1;
+                for (Map.Entry<String, Map<String, List<String>>> cardData : levelData.getValue().entrySet()) {
+                    Long cardId = Snowflake.nextId();
+                    cardBatch.add(new Object[]{cardId, levelId, cardData.getKey()});
 
-                    for (Map.Entry<String, Map<String, List<String>>> cardData : levelContent.entrySet()) {
-                        String cardName = cardData.getKey();
-                        Map<String, List<String>> cardContent = cardData.getValue();
+                    for (Map.Entry<String, List<String>> posData : cardData.getValue().entrySet()) {
+                        Long posId = Snowflake.nextId();
+                        posBatch.add(new Object[]{posId, cardId, posData.getKey()});
 
-                        Long cardId = Snowflake.nextId();
-
-                        createNewCard(cardId, levelId, cardName);
-
-                        for (Map.Entry<String, List<String>> posData : cardContent.entrySet()){
-                            String partOfSpeech = posData.getKey();
-                            List<String> definitions = posData.getValue();
-
-                            Long posId = Snowflake.nextId();
-                            createNewPartOfSpeech(posId, cardId, partOfSpeech);
-
-                            for (String def : definitions) {
-                                Long defId = Snowflake.nextId();
-                                createNewDefinition(defId, posId, def);
-                            }
+                        for (String def : posData.getValue()) {
+                            Long defId = Snowflake.nextId();
+                            defBatch.add(new Object[]{defId, posId, def});
                         }
                     }
                 }
-
-                System.out.println(TAG_SUCCESS + "Create default complete");
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
             }
+
+            // Execute batches
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO card_leveltb (level_id_PK, level_weight, level_name, deck_id_FK) VALUES (?, ?, ?, ?)", levelBatch);
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)", cardBatch);
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

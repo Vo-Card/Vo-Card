@@ -187,7 +187,7 @@ CREATE TABLE `postb` (
 CREATE TABLE `definitiontb` (
   `definition_id_PK` bigint(20) unsigned NOT NULL,
   `pos_id_FK` bigint(20) unsigned NOT NULL,
-  `definition` varchar(1024) NOT NULL DEFAULT 'New Definition',
+  `definition` TEXT NOT NULL,
   PRIMARY KEY (`definition_id_PK`),
   KEY `definitiontb_postb_FK_IDX` (`pos_id_FK`),
   CONSTRAINT `definitiontb_postb_FK` FOREIGN KEY (`pos_id_FK`) REFERENCES `postb` (`pos_id_PK`) ON DELETE CASCADE
