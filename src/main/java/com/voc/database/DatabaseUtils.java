@@ -257,6 +257,53 @@ public class DatabaseUtils {
         }
     }
 
+        /**
+     * Executes a batch of inserts/updates in a single transaction.
+     * 
+     * @param sql        The SQL insert/update statement with placeholders.
+     * @param batchArgs  List of argument arrays, each array corresponds to one row.
+     * @param batchLimit Number of statements to execute per batch.
+     * @throws SQLException
+     */
+    public static void sqlExecuteBatch(String sql, List<Object[]> batchArgs, int batchLimit) {
+        if (batchArgs == null || batchArgs.isEmpty()) return;
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+
+            int count = 0;
+
+            for (Object[] args : batchArgs) {
+                for (int i = 0; i < args.length; i++) {
+                    pstmt.setObject(i + 1, args[i]);
+                }
+                pstmt.addBatch();
+                count++;
+
+                if (count >= batchLimit) {
+                    pstmt.executeBatch();
+                    conn.commit();
+                    count = 0;
+                }
+            }
+
+            if (count > 0) {
+                pstmt.executeBatch();
+                conn.commit();
+            }
+        } catch (Exception e){
+            System.err.println("SQL Batch err: " + e.getMessage());
+        }
+    }
+
+    // Convenience overload with default batch size
+    public static void sqlExecuteBatch(String sql, List<Object[]> batchArgs) {
+        sqlExecuteBatch(sql, batchArgs, 500);
+    }
+
+
     /**
      * Validates the database condition.
      * <p>
