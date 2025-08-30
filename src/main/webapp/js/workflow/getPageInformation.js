@@ -42,23 +42,32 @@ window.addEventListener("popstate", (event) => {
 
 function runPageInit() {
     const page = document.location.pathname.split("/").pop();
-    if (page === "home" || page === "" ) initChartz();
+    if (page === "home" || page === "") initChartz();
 }
 
 
 document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('content');
-    
+    const deckContainer = document.getElementById('deck-container')
+
+
     if (!TokenManager.getAccessToken()) {
         window.location.replace("/login");
         return;
     }
-    
+
     try {
-        const response = await fetchWithAuth("/api/ping");
-        
+        const response = await fetchWithAuth("/api/decks/getDecks");
+
         if (response.ok) {
             mainContent.style.display = 'block';
+            const data = await response.json();
+            const newElement = document.createElement("div");
+            newElement.textContent = data["decks"][0]["deck_name"];
+
+            console.log(data["decks"][0]["user_id_FK"]);
+
+            deckContainer.appendChild(newElement);
         } else {
             window.location.replace("/login");
         }
