@@ -53,13 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const response = await fetchWithAuth("/api/ping");
         if (response.ok) {
             mainContent.style.display = 'block';
-            const data = await response.json();
-            const newElement = document.createElement("div");
-            newElement.textContent = data["decks"][0]["deck_name"];
 
-            console.log(data["decks"][0]["user_id_FK"]);
-
-            deckContainer.appendChild(newElement);
         } else {
             window.location.replace("/login");
         }
