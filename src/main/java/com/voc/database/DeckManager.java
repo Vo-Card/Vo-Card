@@ -175,18 +175,95 @@ public class DeckManager {
         if (deleteDeck != null) {
             DatabaseUtils.sqlSingleRowStatement("DELETE FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deck_id,
                     user_id);
+            return "This Deck has been deleted successfully";
         }
-        // multiple deck delete ????
-        return "Delete success";
+        return "Deck was not found";
     }
 
-    // UPDATE table_name SET A1 = ?, A2 =? WHERE <condition>
-    // can set card
-    // can set deck
-    // change level?
-    // WIP
-    public static String updateDeck(long deck_id, long card_id) {
-        SQLResult updateDeck = DatabaseUtils.sqlPrepareStatement("SELECT * FROM  ");
-        return "yes";
+    public static String updateDeck(long deck_id, String deckName, String deckDescription, boolean deckIsPublic) {
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "UPDATE decktb SET deck_name = ?, deck_description = ?, deck_is_public = ? WHERE deck_id_PK = ?",
+                deckName, deckDescription, deckIsPublic,
+                deck_id);
+
+        if (result.isSuccess()) {
+            return "This Deck has been updated successfully";
+        }
+
+        return "Deck was not found";
+    }
+
+    public static String updateLevel(long level_id, int level_weight, String level_name) {
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "UPDATE card_leveltb SET level_weight = ?, level_name = ? WHERE level_id_PK = ?",
+                level_weight, level_name, level_id);
+        if (result.isSuccess()) {
+            return "This level has been updated successfully";
+        }
+
+        return "Level was not found";
+    }
+
+    public static String updatePos(long pos_id, String part_of_speech) {
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement("UPDATE postb SET part_of_speech = ? WHERE pos_id_PK = ?",
+                part_of_speech, pos_id);
+
+        if (result.isSuccess()) {
+            return "Part of speech has been updated successfully";
+        }
+
+        return "Part of speech was not found";
+    }
+
+    public static String updateDefinition(long definition_id, String new_definition) {
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement("UPDATE definition SET definition = ? WHERE = ?",
+                new_definition, definition_id);
+
+        if (result.isSuccess()) {
+            return "Definition has been updated successfully";
+        }
+
+        return "Definition was not found";
+    }
+
+    public static String deleteLevel(long level_id, long deck_id) {
+
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM card_leveltb WHERE level_id_PK = ? AND deck_id_FK = ? ", level_id,
+                        deck_id);
+        if (result.isSuccess()) {
+            return "Level has been deleted successfully";
+        }
+        return "Level was not found";
+    }
+
+    public static String deleteCard(long card_id) {
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM cardtb WHERE card_id_PK = ?", card_id);
+        if (result.isSuccess()) {
+            return "Card has been deleted successfully";
+        }
+        return "Card was not found";
+    }
+
+    public static String deletePos(long pos_id, long card_id) {
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM postb WHERE pos_id_PK = ? AND card_id_FK = ?", pos_id, card_id);
+        if (result.isSuccess()) {
+            return "Part of Speech has been deleted successfully";
+        }
+        return "Part of Speech was not found on current card";
+    }
+
+    public static String deleteDefinition(long definition_id) {
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM definitiontb WHERE definition_id_PK = ?", definition_id);
+        if (result.isSuccess()) {
+            return "Definition has been deleted successfully";
+        }
+        return "Definition was not found";
     }
 }

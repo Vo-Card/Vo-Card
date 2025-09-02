@@ -37,7 +37,9 @@ public class AppStartupServlet implements ServletContextListener {
                 .getResourceAsStream("config/database.json")) {
             if (input != null) {
                 ObjectMapper mapper = new ObjectMapper();
-                data = mapper.readValue(input, new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+                data = mapper.readValue(input,
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {
+                        });
                 System.out.println(TAG_SUCCESS + "Loaded config from database.json");
             }
         } catch (Exception e) {
@@ -53,8 +55,7 @@ public class AppStartupServlet implements ServletContextListener {
                         "DB_USER", System.getenv("DB_USER"),
                         "DB_PASSWORD", System.getenv("DB_PASSWORD"),
                         "ROOT_USERNAME", System.getenv("ROOT_USERNAME"),
-                        "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME")
-                );
+                        "ROOT_DISPLAYNAME", System.getenv("ROOT_DISPLAYNAME"));
 
                 if (data.values().stream().anyMatch(v -> v == null)) {
                     throw new IllegalStateException("Missing ENV variables for database initialization.");
@@ -81,13 +82,15 @@ public class AppStartupServlet implements ServletContextListener {
             long t1 = System.currentTimeMillis();
             DatabaseUtils.initDatabase(data);
             WorkerSessionManager.InitializeWorker(hostname);
-            System.out.println(TAG_SUCCESS + "Worker + Database initialized in " + (System.currentTimeMillis() - t1) + "ms");
+            System.out.println(
+                    TAG_SUCCESS + "Worker + Database initialized in " + (System.currentTimeMillis() - t1) + "ms");
 
             // Initialize Snowflake and Administrator after database
             t1 = System.currentTimeMillis();
             Snowflake.InitializeSnowflake(WorkerSessionManager.getWorkerId());
             DatabaseUtils.initializeAdministrator();
-            System.out.println(TAG_SUCCESS + "Snowflake + Administrator initialized in " + (System.currentTimeMillis() - t1) + "ms");
+            System.out.println(TAG_SUCCESS + "Snowflake + Administrator initialized in "
+                    + (System.currentTimeMillis() - t1) + "ms");
 
             // Default Deck
             t1 = System.currentTimeMillis();
@@ -101,6 +104,10 @@ public class AppStartupServlet implements ServletContextListener {
 
             long end = System.currentTimeMillis();
             System.out.println(TAG_SUCCESS + "Total initialization finished in " + (end - start) + "ms");
+
+            String message = DeckManager.updateDeck(749591183663042560L, "Default Deck", "This is Default Deck",
+                    false);
+            System.out.println(TAG_DEBUG + message);
 
         } catch (Exception e) {
             e.printStackTrace();
