@@ -15,6 +15,7 @@ async function loadPage(path, addHistory = true) {
         if (contentEl) contentEl.innerHTML = html;
 
         if (path === "/workflow/home") initChartz();
+        if (path === "/workflow/decks") deckLoader();
 
         if (addHistory) {
             window.history.pushState({ path }, "", path);
@@ -60,6 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
-    
+
     runPageInit();
 });
