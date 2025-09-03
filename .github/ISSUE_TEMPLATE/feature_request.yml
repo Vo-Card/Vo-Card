@@ -1,0 +1,54 @@
+name: Feature Request
+description: Propose a new functionality or improvement
+labels:
+  - feature request
+body:
+  - type: dropdown
+    id: dropdown-0
+    attributes:
+      label: Which scope will be requested on this project?
+      options:
+        - api
+        - backend
+        - card
+        - core
+        - component
+        - database
+        - deck
+        - documentation
+        - functionality
+        - security
+        - structure
+        - page
+        - performance
+        - ui
+        - utils
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-1
+    attributes:
+      label: Feature
+      description: A clear description of what the problem is, or what feature you
+        want to be in this project.
+      value: I would like this project to have... because...
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-2
+    attributes:
+      label: Ideal solution or implementation
+      description: A clear description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-3
+    attributes:
+      label: Alternative solutions or implementations
+      description: A clear description of any alternative solutions or features you
+        have considered.
+  - type: textarea
+    id: textarea-4
+    attributes:
+      label: Other context
+      description: Any other context, screenshots, or file uploads.
