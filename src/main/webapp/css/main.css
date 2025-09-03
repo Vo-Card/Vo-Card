@@ -41,7 +41,7 @@
 /* Left Menu Bar Styles */
 /* -------------------- */
 
-#workflow-sidebar {
+#workspace-sidebar {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,7 +53,7 @@
     color: white;
 }
 
-#workflow-sidebar .separator {
+#workspace-sidebar .separator {
     width: 100%;
     height: 2px;
     background: rgba(255, 255, 255, 0.1);
@@ -110,7 +110,7 @@
 /* Top Header Styles */
 /* ----------------- */
 
-#workflow-header {
+#workspace-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -138,7 +138,7 @@
     margin: 0;
 }
 
-#workflow-header .brand #menu-toggle {
+#workspace-header .brand #menu-toggle {
     cursor: pointer;
     background: none;
     border: none;
@@ -301,7 +301,7 @@
 }
 
 /* ----------------------- */
-/* Your-Decks Content Area */
+/*   Decks Content Area    */
 /* ----------------------- */
 .decks {
     padding-left: 5px;
@@ -352,4 +352,12 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
+}
+
+.deck-cover {
+    margin-top: 25px;
+    text-align: center;
+    padding-top: 150 * 0.8px;
+    padding-bottom: 150 * 0.8px;
+    background-color: #0B0B0B;
 }

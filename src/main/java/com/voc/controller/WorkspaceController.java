@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * WorkflowController handles requests for dynamic workflow pages.
+ * workspaceController handles requests for dynamic workspace pages.
  * <p>
- * It serves JSP pages located under /WEB-INF/jsp/workflow/ based on the URL path.
+ * It serves JSP pages located under /WEB-INF/jsp/workspace/ based on the URL
+ * path.
  * </p>
  * <p>
  * If a requested page does not exist, it returns a 404 error page.
@@ -24,11 +25,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * </p>
  */
 @Controller
-@RequestMapping("/workflow")
-public class WorkflowController {
+@RequestMapping("/workspace")
+public class WorkspaceController {
 
     /**
-     * Handles requests for specific workflow pages.
+     * Handles requests for specific workspace pages.
      * <p>
      * If the page exists, it returns the corresponding JSP view.
      * If the page does not exist, it returns a 404 error page.
@@ -43,11 +44,11 @@ public class WorkflowController {
      * @return The name of the JSP view to render
      */
     @GetMapping("/{page}")
-    public String getStaticPage(@PathVariable("page") String page, 
+    public String getStaticPage(@PathVariable("page") String page,
             HttpServletRequest request,
             HttpServletResponse response) {
         boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-        String jspPath = "/WEB-INF/jsp/workflow/" + page + ".jsp";
+        String jspPath = "/WEB-INF/jsp/workspace/" + page + ".jsp";
         File file = new File(request.getServletContext().getRealPath(jspPath));
         if (!file.exists()) {
             if (isAjax) {
@@ -59,10 +60,10 @@ public class WorkflowController {
         }
 
         if (isAjax) {
-            return "workflow/" + page;
+            return "workspace/" + page;
         } else {
             request.setAttribute("page", page);
-            return "workflow";
+            return "workspace";
         }
     }
 
@@ -78,17 +79,18 @@ public class WorkflowController {
         request.setAttribute("cardId", cardId);
         request.setAttribute("page", "decks");
 
-        return "workflow";
+        return "workspace";
     }
 
     /**
-     * Default redirect to /workflow/home
+     * Default redirect to /workspace/home
      * <p>
-     * This handles requests to /workflow or /workflow/ and redirects to the home page.
+     * This handles requests to /workspace or /workspace/ and redirects to the home
+     * page.
      * </p>
      */
-    @GetMapping({"", "/"})
-    public String workflowDefaultRedirect() {
-        return "redirect:/workflow/home";
+    @GetMapping({ "", "/" })
+    public String workspaceDefaultRedirect() {
+        return "redirect:/workspace/home";
     }
 }

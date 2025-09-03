@@ -1,4 +1,4 @@
-<script src="/js/workflow/page-fixer.js"></script>
+<script src="/js/workspace/page-fixer.js"></script>
 <div class="decks" id="loadDecks">
     <div class="decks-header">
         <div>
@@ -44,7 +44,6 @@
                     <div>Remove</div>
                 </div>
             </div>
-
 
 
         </div>

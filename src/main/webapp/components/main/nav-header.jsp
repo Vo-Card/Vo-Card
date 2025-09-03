@@ -15,7 +15,7 @@
         <c:set var="hasSession" value="${param.hasSession}" />
         <c:choose>
             <c:when test="${not empty hasSession}">
-                <li><a href="/workflow/home" class="opeb_btn">Open Vo-Card</a></li>
+                <li><a href="/workspace/home" class="opeb_btn">Open Vo-Card</a></li>
             </c:when>
             <c:otherwise>
                 <li><a href="/login" class="lgn_btn">Login</a></li>

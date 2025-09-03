@@ -15,8 +15,8 @@ async function loadPage(path, addHistory = true) {
         const contentEl = document.getElementById("content");
         if (contentEl) contentEl.innerHTML = html;
 
-        if (path === "/workflow/home") initChartz();
-        if (path === "/workflow/decks") deckLoader();
+        if (path === "/workspace/home") initChartz();
+        if (path === "/workspace/decks") deckLoader();
 
         console.log(path)
 
@@ -32,7 +32,7 @@ async function loadPage(path, addHistory = true) {
 
 
 document.addEventListener("click", e => {
-    const link = e.target.closest("a[data-workflow]");
+    const link = e.target.closest("a[data-workspace]");
     if (link) {
         e.preventDefault();
         loadPage(link.getAttribute("href"));
