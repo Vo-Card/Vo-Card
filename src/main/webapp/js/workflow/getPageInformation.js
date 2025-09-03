@@ -1,5 +1,6 @@
 import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
 
+import { deckLoader } from '/js/deckManagement/deckLoader.js';
 //TODO: Make a proper documentation for this file
 
 async function loadPage(path, addHistory = true) {
@@ -16,6 +17,8 @@ async function loadPage(path, addHistory = true) {
 
         if (path === "/workflow/home") initChartz();
         if (path === "/workflow/decks") deckLoader();
+
+        console.log(path)
 
         if (addHistory) {
             window.history.pushState({ path }, "", path);
@@ -41,11 +44,6 @@ window.addEventListener("popstate", (event) => {
     loadPage(path, false); // false = don’t pushState again
 });
 
-function runPageInit() {
-    const page = document.location.pathname.split("/").pop();
-    if (page === "home" || page === "") initChartz();
-}
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     const mainContent = document.getElementById('content');
@@ -62,5 +60,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.replace("/login");
     }
 
-    runPageInit();
+    loadPage(document.location.pathname);
 });

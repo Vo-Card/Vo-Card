@@ -1,28 +1,26 @@
 // TODO:<send response to api>
+import { fetchWithAuth } from '/js/auth/auth.js';
 
-// FIXME:<deck loader not loading>
-function deckLoader() {
-    document.addEventListener('DOMContentLoaded', async () => {
-        const deckContainer = document.getElementById('deck-container')
+export async function deckLoader() {
+    const deckContainer = document.getElementById('deck-container')
 
-        try {
-            const response = await fetchWithAuth("/api/decks/getDecks");
+    try {
+        const response = await fetchWithAuth("/api/decks/getDecks");
 
-            if (response.ok) {
+        if (response.ok) {
 
-                const data = await response.json();
-                const newDeck = document.createElement("div");
-                newDeck.className = 'deck-cover'
-                newDeck.textContent = data["decks"][0]["deck_name"];
+            const data = await response.json();
+            const newDeck = document.createElement("div");
+            newDeck.className = 'deck-cover'
+            newDeck.textContent = data["decks"][0]["deck_name"];
 
-                console.log(data["decks"][0]["user_id_FK"]);
+            console.log(data["decks"][0]["user_id_FK"]);
 
-                deckContainer.appendChild(newDeck);
-            } else {
-                window.location.replace("/login");
-            }
-        } catch (error) {
+            deckContainer.appendChild(newDeck);
+        } else {
             window.location.replace("/login");
         }
-    })
+    } catch (error) {
+        window.location.replace("/login");
+    }
 }

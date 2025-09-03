@@ -2,6 +2,7 @@ package com.voc.api;
 // TODO:<request get cookie send to DeckManager>
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
+import com.voc.utils.Row;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -26,7 +28,7 @@ public class DeckApiController {
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
             if (optionalUserId.isPresent()) {
-                Object temp = DeckManager.deckLoader(optionalUserId.get());
+                List<Row> temp = DeckManager.deckLoader(optionalUserId.get());
                 response.put("decks", temp);
             }
         }
