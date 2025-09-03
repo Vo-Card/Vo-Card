@@ -1,0 +1,54 @@
+name: Bug Report
+description: Report a bug to help this project better
+labels:
+  - Bug Report
+body:
+  - type: dropdown
+    id: dropdown-0
+    attributes:
+      label: Which scope the bug occurs on this project?
+      options:
+        - api
+        - backend
+        - card
+        - core
+        - component
+        - database
+        - deck
+        - documentation
+        - functionality
+        - security
+        - structure
+        - page
+        - performance
+        - ui
+        - utils
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-1
+    attributes:
+      label: How did you find this bug?
+      description: A clear description of how did you cause this bug to happen.
+      value: I create this bug by doing...
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-2
+    attributes:
+      label: Error messages from terminal or console log (if any).
+      description: A clear description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-3
+    attributes:
+      label: Platform / browser where the bug occurs
+      description: A clear description of your device and browser name.
+    validations:
+      required: true
+  - type: textarea
+    id: textarea-4
+    attributes:
+      label: Other context
+      description: Any other context, screenshots, or file uploads.
