@@ -58,7 +58,7 @@ public class SessionManager {
         String deleteSql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
         DatabaseUtils.sqlPrepareStatement(deleteSql, sessionId);
 
-        Long userId = (Long) sessionRow.get("user_id_FK");
+        Long userId = ((Number) sessionRow.get("user_id_FK")).longValue();
         String username = (String) sessionRow.get("username");
         boolean rememberMe = (boolean) sessionRow.get("remember_me");
         String ipAddress = (String) sessionRow.get("ip_address");
