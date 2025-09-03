@@ -37,10 +37,11 @@ function updateBackground() {
     document.body.style.background = `${glow}, ${bgLayers.gradient}, ${glow2_mask}, ${dot}, ${glow2}, ${bgLayers.color}`;
     var card_preview = document.getElementById('card_preview');
     var width = window.innerWidth;
-    var scale = width / 1080 / 2.5;
-    card_preview.style.scale = scale;
+    if (card_preview != null){
+        var scale = width / 1080 / 2.5;
+        card_preview.style.scale = scale;
+    }
 }
-
 // Initial background setup
 updateBackground();
 
