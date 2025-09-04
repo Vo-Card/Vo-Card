@@ -104,14 +104,14 @@ CREATE TABLE `decktb` (
 -- vo_card.forktb definition
 
 CREATE TABLE `forktb` (
-  `deck_id_fk` bigint unsigned DEFAULT NULL,
-  `user_id_FK` bigint unsigned DEFAULT NULL,
-  KEY `forktb_decktb_fk` (`deck_id_fk`),
+  `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `user_id_FK` bigint(20) unsigned DEFAULT NULL,
+  UNIQUE KEY `forktb_unique` (`deck_id_FK`,`user_id_FK`),
+  KEY `forktb_decktb_fk` (`deck_id_FK`),
   KEY `forktb_usertb_fk` (`user_id_FK`),
-  CONSTRAINT `forktb_decktb_fk` FOREIGN KEY (`deck_id_fk`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `forktb_decktb_fk` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
   CONSTRAINT `forktb_usertb_fk` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 
 -- vo_card.moderation_action definition
 
