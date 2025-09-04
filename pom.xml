@@ -71,6 +71,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.github.open-spaced-repetition</groupId>
+            <artifactId>fsrs</artifactId>
+            <version>1.0.0</version> <!-- Replace with the latest version available -->
+        </dependency>
+
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
