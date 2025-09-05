@@ -1,6 +1,7 @@
 import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
 
 import { deckLoader } from '/js/deckManagement/deckLoader.js';
+import { statsLoader } from '/js/workspace/statsLoader.js';
 //TODO: Make a proper documentation for this file
 
 async function loadPage(path, addHistory = true) {
@@ -17,6 +18,7 @@ async function loadPage(path, addHistory = true) {
 
         if (path === "/workspace/home") initChartz();
         if (path === "/workspace/decks") deckLoader();
+        if (path === "/workspace/stats") statsLoader();
 
         console.log(path)
 
