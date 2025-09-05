@@ -29,49 +29,6 @@ import com.voc.utils.Row;
  */
 public class DeckManager {
 
-    public static void forceDefaultDeck() {
-        // Force Create Default Deck
-        Row temp = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ? ", 1);
-
-        if (temp == null) {
-            DatabaseUtils.sqlSingleRowStatement(
-                    "INSERT INTO decktb (deck_name,deck_is_public, user_id_FK ) VALUES (?,?,?)",
-                    "Default", 1, 1);
-            System.out.println("Create Deck complete");
-        }
-    }
-
-    public static void createNewDeck(Long deckId, String name, String description, Boolean isPublic, Long userId) {
-        DatabaseUtils.sqlSingleRowStatement(
-                "INSERT INTO decktb (deck_id_PK, deck_name, deck_is_public, user_id_FK) VALUES (?, ?, ?, ?)",
-                deckId != null ? deckId : Snowflake.nextId(), name, isPublic, userId);
-    }
-
-    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long deckId) {
-        DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, deck_id_FK) VALUES (?, ?, ?, ?)",
-                levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight, deckId);
-    }
-
-    public static void createNewCard(Long cardId, Long levelId, String cardName) {
-        DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)",
-                cardId != null ? cardId : Snowflake.nextId(), levelId, cardName);
-    }
-
-    public static void createNewPartOfSpeech(Long posID, Long cardId, String pos) {
-        DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)",
-                posID != null ? posID : Snowflake.nextId(), cardId, pos);
-    }
-
-    public static void createNewDefinition(Long definitionId, Long posID, String definition) {
-        DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
-                definitionId != null ? definitionId : Snowflake.nextId(), posID,
-                definition != null ? definition : "New Definition");
-    }
-
     /**
      * Initialize the defaultdeck to the root user of the project.
      */
@@ -143,32 +100,164 @@ public class DeckManager {
         }
     }
 
-    // Check Deck_ID that contain User_ID_FK For loading in decks.jsp
-    // select * FROM DECK_ID WHERE USER_id_FK = {user_id};
-    public static List<Row> deckLoader(long userid) {
-        SQLResult deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
+    /**
+     * 
+     * @param userId
+     * @return True if successfilly fork the default deck to new user.
+     */
+    public static boolean initializeForkedDeck(Long userId){
+        
+        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername()).get("user_id_PK")).longValue();
 
-        System.out.println(deckList);
+        boolean isRoot = (rootUserID == userId);
+        
+        if (!isRoot){
+            SQLResult rootDecks = DatabaseUtils.sqlPrepareStatement(
+                "SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
+                rootUserID
+                );
+            if(rootDecks.isSuccess()){
+                for (Row deck: rootDecks.getData()){
+                    Long rootDeckId = ((Number) deck.get("deck_id_PK")).longValue();
+                    if(!forkDeck(rootDeckId, userId)){
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 
+     * @param deckId
+     * @param name
+     * @param description
+     * @param isPublic
+     * @param userId
+     */
+    public static void createNewDeck(
+        Long deckId, String name,
+        String description, Boolean isPublic,
+        Long userId) {
+
+        String sql ="INSERT INTO decktb " +
+                    "(deck_id_PK, deck_name, deck_is_public, user_id_FK) " + 
+                    "VALUES (?, ?, ?, ?)";
+        
+        DatabaseUtils.sqlSingleRowStatement(sql, deckId != null ? deckId : Snowflake.nextId(), name, isPublic, userId);
+    }
+
+
+
+    /**
+     * 
+     * @param levelId
+     * @param levelName
+     * @param levelWeight
+     * @param deckId
+     */
+    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long deckId) {
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, deck_id_FK) VALUES (?, ?, ?, ?)",
+                levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight, deckId);
+    }
+
+    /**
+     * 
+     * @param cardId
+     * @param levelId
+     * @param cardName
+     */
+    public static void createNewCard(Long cardId, Long levelId, String cardName) {
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)",
+                cardId != null ? cardId : Snowflake.nextId(), levelId, cardName);
+    }
+
+    /**
+     * 
+     * @param posId
+     * @param cardId
+     * @param pos
+     */
+    public static void createNewPartOfSpeech(Long posId, Long cardId, String pos) {
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)",
+                posId != null ? posId : Snowflake.nextId(), cardId, pos);
+    }
+
+    /**
+     * 
+     * @param definitionId
+     * @param posId
+     * @param definition
+     */
+    public static void createNewDefinition(Long definitionId, Long posId, String definition) {
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
+                definitionId != null ? definitionId : Snowflake.nextId(), posId,
+                definition != null ? definition : "New Definition");
+    }
+
+    /**
+     * 
+     * @param userid
+     * @return
+     */
+    public static List<Row> getOwnedDecks(Long userid) {
+        SQLResult deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
         return deckList.getData();
+    }
+
+    /**
+     * 
+     * @param userid
+     * @return
+     */
+    public static List<Row> getForkedDecks(Long userid) {
+        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement("SELECT deck_id_FK FROM forktb WHERE user_id_fk = ?", userid);
+        List<Row> totalDecks = new ArrayList<>();
+        
+        if(forkedDecksList.isSuccess()){
+            
+            List<Row> forkedDeck = forkedDecksList.getData();
+            for (Row forkedDeckData : forkedDeck){
+                Long deckId = ((Number) forkedDeckData.get("deck_id_FK")).longValue();
+                Row deckData = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM decktb WHERE deck_id_PK = ?", deckId);
+                totalDecks.add(deckData);
+            }
+        }
+
+        return totalDecks;
     }
 
     // if targetDeck doesn't in forktb
     // add deck_id to forktb first
     // otherwise add user_id
-    public static String forkDeck(long deck_id, long user_id) {
+    public static boolean forkDeck(Long deck_id, Long user_id) {
+        // Check if they're trying to fork their own deck
+        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT dekc_id_PK FROM decktb WHERE user_id_FK = ?", user_id);
+
+        if (isOwnDeck != null)
+            return false;
+
+        // Check if deck already paired
         SQLResult deckFork = DatabaseUtils
                 .sqlPrepareStatement("SELECT * FROM forktb WHERE deck_id_FK = ? AND user_id_FK = ?", deck_id, user_id);
 
         if (deckFork.getData().isEmpty()) {
             DatabaseUtils.sqlPrepareStatement("INSERT INTO forktb (deck_id_FK, user_id_FK) VALUES (?, ?)", deck_id,
                     user_id);
-            return "Success";
+            return true;
         }
         // not sure there anything more
-        return "Cannot fork the deck";
+        return false;
     }
 
-    public static String deleteDeck(long deck_id, long user_id) {
+    public static String deleteDeck(Long deck_id, Long user_id) {
         Row deleteDeck = DatabaseUtils.sqlSingleRowStatement(
                 "SELECT * FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deck_id, user_id);
 
@@ -180,7 +269,7 @@ public class DeckManager {
         return "Deck was not found";
     }
 
-    public static String updateDeck(long deck_id, String deckName, String deckDescription, boolean deckIsPublic) {
+    public static String updateDeck(Long deck_id, String deckName, String deckDescription, boolean deckIsPublic) {
         SQLResult result = DatabaseUtils.sqlPrepareStatement(
                 "UPDATE decktb SET deck_name = ?, deck_description = ?, deck_is_public = ? WHERE deck_id_PK = ?",
                 deckName, deckDescription, deckIsPublic,
@@ -193,7 +282,7 @@ public class DeckManager {
         return "Deck was not found";
     }
 
-    public static String updateLevel(long level_id, int level_weight, String level_name) {
+    public static String updateLevel(Long level_id, int level_weight, String level_name) {
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement(
                 "UPDATE card_leveltb SET level_weight = ?, level_name = ? WHERE level_id_PK = ?",
@@ -205,7 +294,7 @@ public class DeckManager {
         return "Level was not found";
     }
 
-    public static String updatePos(long pos_id, String part_of_speech) {
+    public static String updatePos(Long pos_id, String part_of_speech) {
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement("UPDATE postb SET part_of_speech = ? WHERE pos_id_PK = ?",
                 part_of_speech, pos_id);
@@ -217,7 +306,7 @@ public class DeckManager {
         return "Part of speech was not found";
     }
 
-    public static String updateDefinition(long definition_id, String new_definition) {
+    public static String updateDefinition(Long definition_id, String new_definition) {
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement("UPDATE definition SET definition = ? WHERE = ?",
                 new_definition, definition_id);
@@ -229,7 +318,7 @@ public class DeckManager {
         return "Definition was not found";
     }
 
-    public static String deleteLevel(long level_id, long deck_id) {
+    public static String deleteLevel(Long level_id, Long deck_id) {
 
         SQLResult result = DatabaseUtils
                 .sqlPrepareStatement("DELETE FROM card_leveltb WHERE level_id_PK = ? AND deck_id_FK = ? ", level_id,
@@ -240,7 +329,7 @@ public class DeckManager {
         return "Level was not found";
     }
 
-    public static String deleteCard(long card_id) {
+    public static String deleteCard(Long card_id) {
         SQLResult result = DatabaseUtils
                 .sqlPrepareStatement("DELETE FROM cardtb WHERE card_id_PK = ?", card_id);
         if (result.isSuccess()) {
@@ -249,7 +338,7 @@ public class DeckManager {
         return "Card was not found";
     }
 
-    public static String deletePos(long pos_id, long card_id) {
+    public static String deletePos(Long pos_id, Long card_id) {
         SQLResult result = DatabaseUtils
                 .sqlPrepareStatement("DELETE FROM postb WHERE pos_id_PK = ? AND card_id_FK = ?", pos_id, card_id);
         if (result.isSuccess()) {
@@ -258,7 +347,7 @@ public class DeckManager {
         return "Part of Speech was not found on current card";
     }
 
-    public static String deleteDefinition(long definition_id) {
+    public static String deleteDefinition(Long definition_id) {
         SQLResult result = DatabaseUtils
                 .sqlPrepareStatement("DELETE FROM definitiontb WHERE definition_id_PK = ?", definition_id);
         if (result.isSuccess()) {

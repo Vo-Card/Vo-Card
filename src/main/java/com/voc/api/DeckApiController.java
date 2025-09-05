@@ -23,13 +23,19 @@ public class DeckApiController {
 
     public ResponseEntity<Map<String, Object>> deckLoader(
             @RequestHeader(value = "Authorization", required = false) String authToken) {
+
         Map<String, Object> response = new HashMap<>();
+
         if (authToken != null && authToken.startsWith("Bearer ")) {
+            
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
+
             if (optionalUserId.isPresent()) {
-                List<Row> temp = DeckManager.deckLoader(optionalUserId.get());
-                response.put("decks", temp);
+                List<Row> ownedDecks = DeckManager.getOwnedDecks(optionalUserId.get());
+                List<Row> forkedDecks = DeckManager.getForkedDecks(optionalUserId.get());
+                response.put("ownedDecks", ownedDecks);
+                response.put("forkedDecks", forkedDecks);
             }
         }
         response.put("status", "session is valid");
