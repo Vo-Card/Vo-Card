@@ -33,5 +33,5 @@ document.addEventListener('mousemove', (e) => {
     if (newWidth > maxWidth) newWidth = maxWidth;
 
     // apply new width
-    sidebar.style.width = `${newWidth}px`;
+    sidebar.style.minWidth = `${newWidth - 2}px`;
 });

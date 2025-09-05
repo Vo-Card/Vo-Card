@@ -20,7 +20,6 @@
                 crossorigin="anonymous"></script>
             <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
             <script src="/js/chartz.js" defer></script>
-            <script src="/js/deckManagement/deckLoader.js" defer></script>
             <script type="module" src="/js/workspace/getPageInformation.js"></script>
             <!-- temp -->
             <style>
@@ -40,8 +39,6 @@
         <body style="background-color: var(--menu-primary-color);">
 
             <jsp:include page="/components/layout/workspace-header.jsp" />
-
-            <div class="window"></div>
 
             <div class="workspace-container">
                 <jsp:include page="/components/layout/workspace-sidebar.jsp" />
@@ -63,7 +60,12 @@
                         </c:choose>
                     </div>
                 </div>
+                <div class="right-container">
+                    <!-- Configuration content will be here -->
+                </div>
             </div>
+
+
             <script src="/js/menu-splitter.js"></script>
         </body>
 

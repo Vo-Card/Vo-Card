@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.voc.database.DatabaseUtils;
+import com.voc.database.DeckManager;
 import com.voc.server.Snowflake;
 import com.voc.utils.Row;
 
@@ -36,7 +37,12 @@ public class AuthManager {
         if (!isUserExist(username)) {
             String hashedPassword = PasswordUtils.generateSecretKey(password);
             String sql = "INSERT INTO usertb (user_id_PK, display_name, username, password) VALUES (?, ?, ?, ?)";
-            DatabaseUtils.sqlPrepareStatement(sql, Snowflake.nextId(), displayName, username, hashedPassword);
+            Long userId = Snowflake.nextId();
+            
+            DatabaseUtils.sqlPrepareStatement(sql, userId, displayName, username, hashedPassword);
+
+            // Initialize default deck from the root user.
+            DeckManager.initializeForkedDeck(userId);
             return true;
         }
         return false;

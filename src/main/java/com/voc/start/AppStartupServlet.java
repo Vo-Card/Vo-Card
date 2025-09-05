@@ -105,11 +105,6 @@ public class AppStartupServlet implements ServletContextListener {
             long end = System.currentTimeMillis();
             System.out.println(TAG_SUCCESS + "Total initialization finished in " + (end - start) + "ms");
 
-            String message = DeckManager.updateDeck(749591183663042560L, "Default Deck", "This is Default Deck",
-                    false);
-
-            System.out.println(TAG_DEBUG + message);
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(TAG_ERROR + "Failed to initialize default configuration.", e);
