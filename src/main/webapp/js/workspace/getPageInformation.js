@@ -113,3 +113,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // temporalInterceptor()
     loadPage(document.location.pathname);
 });
+
+function startHideTimer() {
+    let hideTimeout = setTimeout(() => {
+        document.getElementById('sort-options').style.display = "none";
+    }, 3000);
+}
+
+window.openSortOption = function openSortOption() {
+    const el = document.getElementById('sort-options');
+    el.style.display = el.style.display === "block" ? "none" : "block";
+    startHideTimer();
+};
