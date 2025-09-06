@@ -32,7 +32,7 @@ public class SessionInterceptor implements HandlerInterceptor {
                 hasSession = true;
             }
         }
-        
+
         // If no JWT, check for a valid session cookie and not API request
         if (!hasSession && !currentPage.startsWith("/api/")) {
             Cookie[] cookies = request.getCookies();
@@ -59,9 +59,9 @@ public class SessionInterceptor implements HandlerInterceptor {
 
         // Now, handle excluded and protected pages
         String[] excludedPages = {
-            "/home", "/login", "/register", "/css/**", "/js/**",
-            "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**",
-            "/components/template/**"
+                "/home", "/login", "/register", "/css/**", "/js/**",
+                "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**",
+                "/components/template/**", "/support/**"
         };
         for (String page : excludedPages) {
             if (currentPage.matches(page.replace("**", ".*"))) {

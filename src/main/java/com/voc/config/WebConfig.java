@@ -12,9 +12,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new SessionInterceptor())
                 .addPathPatterns("/**") // Check every page...
                 .excludePathPatterns(
-                    "/home", "/index", "/login",
-                     "/register", "/css/**", "/js/**",
-                      "/welcome", "/api/auth/**", "/about",
-                      "/contact", "/error/**", "/components/template/**"); // ...except these pages
+                        "/home", "/index", "/login",
+                        "/register", "/css/**", "/js/**",
+                        "/welcome", "/api/auth/**", "/about",
+                        "/contact", "/error/**", "/components/template/**", "/support/**"); // ...except these pages
     }
 }
