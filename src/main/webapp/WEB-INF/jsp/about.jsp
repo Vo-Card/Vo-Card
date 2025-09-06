@@ -71,7 +71,7 @@
                     <p>This project is a flashcard web application inspired by Anki, developed as part of my Year 2
                         course in Software- Engineer
                         The goal is to help users study and memorize using a spaced repetition system (SRS)
-                        Users can create their own decks, publissh for others to import.</p>
+                        Users can create their own decks, publish for others to import.</p>
                 </div>
             </div>
         </body>

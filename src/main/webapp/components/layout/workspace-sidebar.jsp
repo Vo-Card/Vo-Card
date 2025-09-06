@@ -14,8 +14,8 @@
             </li>
 
             <li>
-                <a href="/workspace/learn" data-workspace>
-                    <i class="nf nf-md-bookshelf"></i>Learn
+                <a href="/workspace/review" data-workspace>
+                    <i class="nf nf-md-bookshelf"></i>Review
                 </a>
             </li>
 

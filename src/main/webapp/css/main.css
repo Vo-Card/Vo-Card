@@ -212,7 +212,7 @@
     background-color: var(--splitter-hover);
 }
 
-.right-container{
+.right-container {
     width: var(--right-container-width);
     height: calc(100vh - var(--header-height));
 }
@@ -403,7 +403,7 @@
     overflow: hidden;
 }
 
-.hoverOverlay{
+.hoverOverlay {
     position: relative;
     overflow: hidden;
     border-radius: 5px;
@@ -418,12 +418,10 @@
     top: -50px;
     left: -50px;
     z-index: 1;
-    background: linear-gradient(
-        45deg, transparent 40%, #ffffff 40%,
-        #ffffff 50%, transparent 50%,
-        transparent 60%, #ffffff 60%,
-        #ffffff 62%, transparent 62%
-    );
+    background: linear-gradient(45deg, transparent 40%, #ffffff 40%,
+            #ffffff 50%, transparent 50%,
+            transparent 60%, #ffffff 60%,
+            #ffffff 62%, transparent 62%);
     background-position-y: -150px;
     mix-blend-mode: overlay;
     opacity: 0;
@@ -436,8 +434,13 @@
 }
 
 @keyframes verticalOverlay {
-    0% { background-position-y: -150px; }
-    100% { background-position-y: calc(var(--card-height) + 100px - 150px); }
+    0% {
+        background-position-y: -150px;
+    }
+
+    100% {
+        background-position-y: calc(var(--card-height) + 100px - 150px);
+    }
 }
 
 .deck-container svg {
@@ -511,7 +514,7 @@
 }
 
 .monthly-stats-head {
-    font-size: 28px;
+    font-size: 24px;
     padding-bottom: 8px;
 }
 
@@ -546,7 +549,7 @@
 
 .monthly-header {
     padding-bottom: 8px;
-    font-size: 28px;
+    font-size: 24px;
 }
 
 .monthly-gamemode-items {
@@ -580,4 +583,117 @@
     display: grid;
     grid-area: stats_7d;
     background-color: var(--content-container-bg);
+}
+
+.stats-header {
+    font-size: 24px;
+    padding-bottom: 8px;
+}
+
+.stats_7d p {
+    font-size: 16px;
+    padding-left: 10px;
+}
+
+.stats-canvas {
+    width: 100%;
+}
+
+/* ----------------------- */
+/*   Review Content Area   */
+/* ----------------------- */
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 2px solid #C38A39;
+    padding: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.review-header div {
+    font-size: 18px;
+}
+
+.review-right {
+    display: flex;
+}
+
+.review-right div {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-right: 1px solid white;
+    width: 100%;
+    height: 100%;
+    transition: 400ms ease-out;
+    align-items: center;
+}
+
+.review-right .review-create div:hover {
+    transition: 400ms ease-out;
+    background-color: white;
+    color: black;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.review-right div:hover {
+    transition: 400ms ease-out;
+    background-color: white;
+    color: black;
+}
+
+#review-search-bar {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    border-radius: 18px;
+    background-color: #131621;
+    color: white;
+}
+
+.review-left {
+    position: relative;
+    font-family: Arial, sans-serif;
+    width: 150px;
+}
+
+.review-sort-selected {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    background: #f9f9f900;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#sort-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    background-color: #3c3c3c;
+    list-style-type: none;
+    margin: 0;
+    padding: 0px;
+    border-radius: 8px;
+}
+
+.sort-option {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.sort-option:hover {
+    border-radius: 8px;
+    background: #f0f0f0;
 }

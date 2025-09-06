@@ -28,4 +28,51 @@ export async function statsLoader() {
 
         barContainer.appendChild(progress);
     }
+
+    var myCanvas = document.getElementById('stats-bar').getContext('2d');
+
+    let datetime = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    var chart = {
+        type: "bar",
+        data: {
+            labels: datetime,
+            datasets: [{
+                label: "Words per day",
+                data: [50, 20, 31, 15, 15, 12, 39],
+                backgroundColor: [
+                    'rgba(108, 162, 51, 0.5)',
+                ],
+                borderColor: [
+                    'rgba(108, 162, 51, 1)',
+
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    gird: {
+                        offset: true
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                },
+                y: {
+                    ticks: {
+                        stepSize: 5,
+                        color: 'white'
+                    },
+                    grid: {
+                        color: ' rgba(231, 231, 231, 0.2)',
+                        borderColor: 'red'
+                    }
+                },
+                beginAtZero: true
+            }
+        }
+
+    };
+    var statChart = new Chart(myCanvas, chart);
 }
