@@ -42,6 +42,19 @@
 }
 
 /* -------------------- */
+/* Temporal Interceptor */
+/* -------------------- */
+
+#temporal-interceptor{
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99;
+    pointer-events: none;
+}
+
+/* -------------------- */
 /* Left Menu Bar Styles */
 /* -------------------- */
 
@@ -355,12 +368,29 @@
     height: 100%;
 }
 
-#forked-decks-container, #owned-decks-container {
+#forked-decks-container, #owned-decks-container, #cards-container {
     display: grid;
     width: 100%;
     gap: 10px;
     grid-template-columns: repeat(auto-fit, minmax(var(--card-width), max-content));
+    justify-content: center;
     padding: 20px;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
 .deck-container {
@@ -370,12 +400,14 @@
     justify-content: center;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
 }
 
 .hoverOverlay{
     position: relative;
     overflow: hidden;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .hoverOverlay::before {
