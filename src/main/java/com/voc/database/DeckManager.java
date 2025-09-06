@@ -46,7 +46,7 @@ public class DeckManager {
 
         Long themeId = createNewTheme("Default", ThemeTypes.Deck, "/components/template/deck_template.svg");
 
-        Long themeModifierId = createNewModifier("#0f1114", "#0f1114", null, ThemeTypes.Deck);
+        Long themeModifierId = createNewModifier("#0f1114", "#C38A39", null, ThemeTypes.Deck);
 
         Long deckId = createNewDeck("Default", "This is the VoCard official default deck.", true, themeId, themeModifierId, rootUserID);
 
@@ -167,6 +167,80 @@ public class DeckManager {
         return false;
     }
 
+    public static boolean validateOwnership(Long userId, Long deckId){
+        // Is in userOwnedDecks
+        Row ownedDeck = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM decktb WHERE user_id_FK = ?, deck_id_PK", userId, deckId);
+
+        Row forkedDeck = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM forktb WHERE user_id_FK = ?, deck_id_FK", userId, deckId);
+
+        if (ownedDeck == null && forkedDeck == null){
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 
+     * @param userid
+     * @return
+     */
+    public static List<Row> getOwnedDecks(Long userid) {
+        String sql = """
+            SELECT d.*, 
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM decktb d
+            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+            WHERE d.user_id_FK = ?
+        """;
+
+        SQLResult deckList = DatabaseUtils.sqlPrepareStatement(sql, userid);
+        return deckList.getData();
+    }
+
+    /**
+     * 
+     * @param userid
+     * @return
+     */
+    public static List<Row> getForkedDecks(Long userid) {
+        String sql = """
+            SELECT d.*, 
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM forktb f
+            INNER JOIN decktb d ON f.deck_id_fk = d.deck_id_PK
+            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+            WHERE f.user_id_FK = ?
+        """;
+
+        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
+        return forkedDecksList.getData();
+    }
+
+    /**
+     * 
+     * @param deckId
+     * @return
+     */
+    public static List<Row> getDeckLevel(Long deckId) {
+        String sql = """
+            SELECT cl.*,
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM card_leveltb cl
+            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+            WHERE deck_id_FK = ?
+        """;
+
+        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, deckId);
+        return forkedDecksList.getData();
+    }
+
     /**
      * 
      * @param themeId
@@ -283,47 +357,6 @@ public class DeckManager {
                 "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
                 definitionId != null ? definitionId : Snowflake.nextId(), posId,
                 definition != null ? definition : "New Definition");
-    }
-
-    /**
-     * 
-     * @param userid
-     * @return
-     */
-    public static List<Row> getOwnedDecks(Long userid) {
-        String sql = """
-            SELECT d.*, 
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM decktb d
-            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
-            WHERE d.user_id_FK = ?
-        """;
-
-        SQLResult deckList = DatabaseUtils.sqlPrepareStatement(sql, userid);
-        return deckList.getData();
-    }
-
-    /**
-     * 
-     * @param userid
-     * @return
-     */
-    public static List<Row> getForkedDecks(Long userid) {
-        String sql = """
-            SELECT d.*, 
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM forktb f
-            INNER JOIN decktb d ON f.deck_id_fk = d.deck_id_PK
-            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
-            WHERE f.user_id_FK = ?
-        """;
-
-        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
-        return forkedDecksList.getData();
     }
 
     // if targetDeck doesn't in forktb
