@@ -6,12 +6,12 @@
     <!-- First Grid Section -->
     <div class="most-learn content-container">
         <div class="most-learn-deck-head">Most learn decks</div>
-        <div class="most-learn-deck">{1.deck}</div>
-        <div class="most-learn-deck">{2.deck}</div>
-        <div class="most-learn-deck">{3.deck}</div>
-        <div class="most-learn-deck">{4.deck}</div>
-        <div class="most-learn-deck">{5.deck}</div>
-        <div class="most-learn-deck">{6.deck}</div>
+        <div class="most-learn-deck">Vocab Vault</div>
+        <div class="most-learn-deck">English Vocabulary – Beginner</div>
+        <div class="most-learn-deck">Common English Phrases</div>
+        <div class="most-learn-deck">English Edge</div>
+        <div class="most-learn-deck">PhraseFlash</div>
+        <div class="most-learn-deck">English Idioms & Expressions</div>
     </div>
 
     <div class="monthly-normal content-container">
@@ -81,10 +81,14 @@
     <div class="total-played content-container">
         <div>Total played</div>
         <div>Every session you play</div>
-        <p>11231342</p>
+        <p>10</p>
         <div>Times</div>
     </div>
 
     <!-- Third Grid Section -->
-    <div class="stats_7d container"></div>
+    <div class="stats_7d content-container">
+        <div class="stats-header">Stat Review</div>
+        <p>Reviewed Stats: Monday–Sunday</p>
+        <canvas class="stats-canvas" id="stats-bar"></canvas>
+    </div>
 </div>
