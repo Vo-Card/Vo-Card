@@ -1,11 +1,31 @@
 import { fetchWithAuth } from '/js/auth/auth.js';
 
-function insertDeckContainer(data, target, template){
+const templateCache = new Map();
+
+async function loadTemplate(themeUrl){
+    if (templateCache.has(themeUrl))
+        return templateCache.get(themeUrl)
+
+    try {
+        const templateJson = await fetch(themeUrl);
+        const template = await templateJson.text();
+        templateCache.set(themeUrl, template);
+        return template;
+    } catch (err) {
+        window.location.replace("/login");
+    }
+}
+
+async function insertDeckContainer(data, target){
     for (let i = 0; i < data.length; i++) {
+
+        const template = await loadTemplate(data[i]["theme_url"])
+
         target.innerHTML = ""; // Clear innerHTML 
+
         let cardHTML = template
-            .replace(/{primary_color}/g, "#0f1114")
-            .replace(/{secondary_color}/g, "#0f1114")
+            .replace(/{primary_color}/g, data[i]["primary_color"])
+            .replace(/{secondary_color}/g, data[i]["secondary_color"])
             .replace(/{deck_id}/g, data[i]["deck_id_PK"]);
 
         const wrapDeck = document.createElement("div");
@@ -45,8 +65,8 @@ export async function deckLoader() {
     try {
         const response = await fetchWithAuth("/api/decks/getDecks");
 
-        const cardTemplate = await fetch("/components/cards/deck_template.jsp", { headers: { "X-Requested-With": "XMLHttpRequest" }}); 
-        const searchDecks = await fetch("/components/cards/search_decks.jsp", { headers: { "X-Requested-With": "XMLHttpRequest" }});
+        const cardTemplate = await fetch("/components/template/deck_template.svg", { headers: { "X-Requested-With": "XMLHttpRequest" }}); 
+        const searchDecks = await fetch("/components/template/search_decks.svg", { headers: { "X-Requested-With": "XMLHttpRequest" }});
         
         if (response.ok && cardTemplate.ok) {
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.voc.server.Snowflake;
 import com.voc.utils.Row;
+import com.voc.utils.ThemeTypes;
 
 /**
  * DeckManager is intended to handle operations related to decks in the system,
@@ -43,8 +44,11 @@ public class DeckManager {
                 "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
                 .get("user_id_PK")).longValue();
 
-        Long deckId = Snowflake.nextId();
-        createNewDeck(deckId, "Default", "This is a VoCard official default deck.", true, rootUserID);
+        Long themeId = createNewTheme("Default", ThemeTypes.Deck, "/components/template/deck_template.svg");
+
+        Long themeModifierId = createNewModifier("#0f1114", "#0f1114", null, ThemeTypes.Deck);
+
+        Long deckId = createNewDeck("Default", "This is the VoCard official default deck.", true, themeId, themeModifierId, rootUserID);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -66,9 +70,40 @@ public class DeckManager {
             int weight = 1;
             for (Map.Entry<String, Map<String, Map<String, List<String>>>> levelData : defaultDeck.entrySet()) {
                 Long levelId = Snowflake.nextId();
-                levelBatch.add(new Object[] { levelId, weight, levelData.getKey(), deckId });
-                weight++;
+                Long levelThemeId = null;
+                Long levelThemeModifierId = null;
+                switch (weight) {
+                    case 1:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#395B8E", "dots", ThemeTypes.Card);
+                        break;
+                    case 2:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#26226B", "dots", ThemeTypes.Card);
+                        break;
+                    case 3:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#6B1D42", "dots", ThemeTypes.Card);
+                        break;
+                    case 4:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#AF3935", "dots", ThemeTypes.Card);
+                        break;
+                    case 5:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#6CA233", "dots", ThemeTypes.Card);
+                        break;
+                    case 6:
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier("#0f1114", "#277243", "dots", ThemeTypes.Card);
+                        break;
+                    default:
+                        break;
+                }
+                    
+                levelBatch.add(new Object[] { levelId, levelData.getKey(), weight, levelThemeId, levelThemeModifierId, deckId });
 
+                weight++;
                 for (Map.Entry<String, Map<String, List<String>>> cardData : levelData.getValue().entrySet()) {
                     Long cardId = Snowflake.nextId();
                     cardBatch.add(new Object[] { cardId, levelId, cardData.getKey() });
@@ -87,7 +122,9 @@ public class DeckManager {
 
             // Execute batches
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO card_leveltb (level_id_PK, level_weight, level_name, deck_id_FK) VALUES (?, ?, ?, ?)",
+                "INSERT INTO card_leveltb "+
+                "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "+
+                "VALUES (?, ?, ?, ?, ?, ?)",
                     levelBatch);
             DatabaseUtils.sqlExecuteBatch(
                     "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)", cardBatch);
@@ -132,25 +169,68 @@ public class DeckManager {
 
     /**
      * 
+     * @param themeId
+     * @param themeName
+     * @param themeType
+     * @param themeURL
+     */
+    public static Long createNewTheme(String themeName, ThemeTypes themeType, String themeURL){
+
+        Long themeId = Snowflake.nextId();
+
+        DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO themetb (theme_id_PK, theme_name, theme_type, theme_url) VALUES (?, ?, ?, ?)", 
+                    themeId, themeName, themeType.getValue(), themeURL);
+        return themeId;
+    }
+
+    public static Long createNewModifier(String primaryColor, String secondaryColor, String pattern, ThemeTypes themeType){
+        Long modifierId = Snowflake.nextId();
+        switch (themeType) {
+            case Card:
+                DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color, card_pattern) VALUES (?, ?, ?, ?)", 
+                    modifierId, primaryColor, secondaryColor, pattern);
+                break;
+            case Deck:
+                DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color) VALUES (?, ?, ?)", 
+                    modifierId, primaryColor, secondaryColor);
+                break;
+            default:
+                break;
+        }
+        return modifierId;
+    }
+
+    /**
+     * 
      * @param deckId
      * @param name
      * @param description
      * @param isPublic
      * @param userId
      */
-    public static void createNewDeck(
-        Long deckId, String name,
+    public static Long createNewDeck(
+        String name,
         String description, Boolean isPublic,
+        Long themeId, Long modifierId,
         Long userId) {
+        
+        Long deckId = Snowflake.nextId();
 
         String sql ="INSERT INTO decktb " +
-                    "(deck_id_PK, deck_name, deck_is_public, user_id_FK) " + 
-                    "VALUES (?, ?, ?, ?)";
+                    "(deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK) " + 
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
         
-        DatabaseUtils.sqlSingleRowStatement(sql, deckId != null ? deckId : Snowflake.nextId(), name, isPublic, userId);
+        DatabaseUtils.sqlSingleRowStatement(
+            sql,
+            deckId,
+            name, description, isPublic,
+            themeId, modifierId, userId);
+
+        return deckId;
     }
-
-
 
     /**
      * 
@@ -159,10 +239,13 @@ public class DeckManager {
      * @param levelWeight
      * @param deckId
      */
-    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long deckId) {
+    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long themeId, Long modifierId, Long deckId) {
         DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, deck_id_FK) VALUES (?, ?, ?, ?)",
-                levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight, deckId);
+                "INSERT INTO card_leveltb "+
+                "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "+
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight,
+                themeId, modifierId, deckId);
     }
 
     /**
@@ -208,7 +291,17 @@ public class DeckManager {
      * @return
      */
     public static List<Row> getOwnedDecks(Long userid) {
-        SQLResult deckList = DatabaseUtils.sqlPrepareStatement("SELECT * FROM decktb WHERE user_id_FK = ? ", userid);
+        String sql = """
+            SELECT d.*, 
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM decktb d
+            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+            WHERE d.user_id_FK = ?
+        """;
+
+        SQLResult deckList = DatabaseUtils.sqlPrepareStatement(sql, userid);
         return deckList.getData();
     }
 
@@ -218,20 +311,19 @@ public class DeckManager {
      * @return
      */
     public static List<Row> getForkedDecks(Long userid) {
-        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement("SELECT deck_id_FK FROM forktb WHERE user_id_fk = ?", userid);
-        List<Row> totalDecks = new ArrayList<>();
-        
-        if(forkedDecksList.isSuccess()){
-            
-            List<Row> forkedDeck = forkedDecksList.getData();
-            for (Row forkedDeckData : forkedDeck){
-                Long deckId = ((Number) forkedDeckData.get("deck_id_FK")).longValue();
-                Row deckData = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM decktb WHERE deck_id_PK = ?", deckId);
-                totalDecks.add(deckData);
-            }
-        }
+        String sql = """
+            SELECT d.*, 
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM forktb f
+            INNER JOIN decktb d ON f.deck_id_fk = d.deck_id_PK
+            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+            WHERE f.user_id_FK = ?
+        """;
 
-        return totalDecks;
+        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
+        return forkedDecksList.getData();
     }
 
     // if targetDeck doesn't in forktb
