@@ -1,18 +1,6 @@
--- vo_card.theme_modifiertb definition
+-- vo_card.themetb definition
 
-CREATE TABLE `theme_modifiertb` (
-  `modifier_id_PK` bigint unsigned NOT NULL,
-  `primary_color` varchar(255) NOT NULL DEFAULT '0',
-  `secondary_color` varchar(255) NOT NULL DEFAULT '0',
-  `card_pattern` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`modifier_id_PK`),
-  KEY `theme_modifiertb_modifier_id_PK_IDX` (`modifier_id_PK`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- vo_card.deck_themetb definition
-
-CREATE TABLE `deck_themetb` (
+CREATE TABLE `themetb` (
   `theme_id_PK` bigint unsigned NOT NULL,
   `theme_name` varchar(255) NOT NULL DEFAULT 'New theme',
   `theme_type` enum('Card','Deck') NOT NULL,
@@ -25,8 +13,8 @@ CREATE TABLE `deck_themetb` (
 -- vo_card.jwt_keys definition
 
 CREATE TABLE `jwt_keys` (
-  `kid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `secret_key` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `kid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `secret_key` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expire_at` timestamp NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `is_primary` tinyint(1) NOT NULL,
@@ -39,20 +27,32 @@ CREATE TABLE `jwt_keys` (
 
 CREATE TABLE `permissiontb` (
   `permission_id_PK` bigint unsigned NOT NULL,
-  `permission_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal',
+  `permission_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal',
   `permission_level` bigint NOT NULL DEFAULT '0',
-  `permission_description` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `permission_description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`permission_id_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- vo_card.theme_modifiertb definition
+
+CREATE TABLE `theme_modifiertb` (
+  `modifier_id_PK` bigint unsigned NOT NULL,
+  `primary_color` varchar(255) NOT NULL DEFAULT '0',
+  `secondary_color` varchar(255) NOT NULL DEFAULT '0',
+  `card_pattern` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`modifier_id_PK`),
+  KEY `theme_modifiertb_modifier_id_PK_IDX` (`modifier_id_PK`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- vo_card.workertb definition
 
 CREATE TABLE `workertb` (
   `worker_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `hostname` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('ACTIVE','INACTIVE') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ACTIVE',
+  `uuid` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `hostname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('ACTIVE','INACTIVE') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ACTIVE',
   `last_heartbeat` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at` timestamp NOT NULL DEFAULT ((now() + interval 7 day)),
@@ -66,9 +66,9 @@ CREATE TABLE `workertb` (
 
 CREATE TABLE `usertb` (
   `user_id_PK` bigint unsigned NOT NULL,
-  `display_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `display_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `join_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `permission_level_FK` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`user_id_PK`),
@@ -82,8 +82,8 @@ CREATE TABLE `usertb` (
 
 CREATE TABLE `decktb` (
   `deck_id_PK` bigint unsigned NOT NULL,
-  `deck_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Deck',
-  `deck_description` text COLLATE utf8mb4_unicode_ci,
+  `deck_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Deck',
+  `deck_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `deck_created_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deck_contain_card` int NOT NULL DEFAULT '0',
   `deck_lastest_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -95,8 +95,8 @@ CREATE TABLE `decktb` (
   KEY `decktb_usertb_FK_IDX` (`user_id_FK`),
   KEY `decktb_deck_themetb_FK` (`theme_id_FK`),
   KEY `decktb_theme_modifiertb_FK` (`modifier_id_FK`),
-  CONSTRAINT `decktb_deck_themetb_FK` FOREIGN KEY (`theme_id_FK`) REFERENCES `deck_themetb` (`theme_id_PK`),
   CONSTRAINT `decktb_theme_modifiertb_FK` FOREIGN KEY (`modifier_id_FK`) REFERENCES `theme_modifiertb` (`modifier_id_PK`),
+  CONSTRAINT `decktb_themetb_FK` FOREIGN KEY (`theme_id_FK`) REFERENCES `themetb` (`theme_id_PK`),
   CONSTRAINT `decktb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -104,21 +104,21 @@ CREATE TABLE `decktb` (
 -- vo_card.forktb definition
 
 CREATE TABLE `forktb` (
-  `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
-  `user_id_FK` bigint(20) unsigned DEFAULT NULL,
-  UNIQUE KEY `forktb_unique` (`deck_id_FK`,`user_id_FK`),
-  KEY `forktb_decktb_fk` (`deck_id_FK`),
+  `deck_id_fk` bigint unsigned DEFAULT NULL,
+  `user_id_FK` bigint unsigned DEFAULT NULL,
+  KEY `forktb_decktb_fk` (`deck_id_fk`),
   KEY `forktb_usertb_fk` (`user_id_FK`),
-  CONSTRAINT `forktb_decktb_fk` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `forktb_decktb_fk` FOREIGN KEY (`deck_id_fk`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
   CONSTRAINT `forktb_usertb_fk` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 -- vo_card.moderation_action definition
 
 CREATE TABLE `moderation_action` (
   `action_id_PK` bigint unsigned NOT NULL,
-  `action_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `action_message` text COLLATE utf8mb4_unicode_ci,
+  `action_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `action_time_stamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_id_FK` bigint unsigned DEFAULT '0',
   PRIMARY KEY (`action_id_PK`),
@@ -144,13 +144,13 @@ CREATE TABLE `reviewtb` (
 -- vo_card.sessiontb definition
 
 CREATE TABLE `sessiontb` (
-  `session_id_PK` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `session_id_PK` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id_FK` bigint unsigned NOT NULL,
-  `refresh_token_hash` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `refresh_token_hash` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `expires_at` datetime NOT NULL DEFAULT ((now() + interval 30 day)),
   `remember_me` tinyint(1) NOT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `user_agent` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`session_id_PK`),
   KEY `session_usertb_FK_IDX` (`user_id_FK`),
@@ -177,11 +177,17 @@ CREATE TABLE `stattb` (
 CREATE TABLE `card_leveltb` (
   `level_id_PK` bigint unsigned NOT NULL,
   `level_weight` int NOT NULL DEFAULT '1',
-  `level_name` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Level',
+  `level_name` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Level',
   `deck_id_FK` bigint unsigned NOT NULL,
+  `theme_id_FK` bigint unsigned DEFAULT NULL,
+  `modifier_id_FK` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`level_id_PK`),
   KEY `card_leveltb_decktb_FK_IDX` (`deck_id_FK`),
-  CONSTRAINT `card_leveltb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE
+  KEY `card_leveltb_themetb_FK` (`theme_id_FK`),
+  KEY `card_leveltb_theme_modifiertb_FK` (`modifier_id_FK`),
+  CONSTRAINT `card_leveltb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `card_leveltb_theme_modifiertb_FK` FOREIGN KEY (`modifier_id_FK`) REFERENCES `theme_modifiertb` (`modifier_id_PK`),
+  CONSTRAINT `card_leveltb_themetb_FK` FOREIGN KEY (`theme_id_FK`) REFERENCES `themetb` (`theme_id_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -190,7 +196,7 @@ CREATE TABLE `card_leveltb` (
 CREATE TABLE `cardtb` (
   `card_id_PK` bigint unsigned NOT NULL,
   `level_id_FK` bigint unsigned NOT NULL,
-  `card_word` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Card',
+  `card_word` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Card',
   PRIMARY KEY (`card_id_PK`),
   KEY `cardtb_card_leveltb_FK_IDX` (`level_id_FK`),
   CONSTRAINT `cardtb_card_leveltb_FK` FOREIGN KEY (`level_id_FK`) REFERENCES `card_leveltb` (`level_id_PK`) ON DELETE CASCADE
@@ -217,7 +223,7 @@ CREATE TABLE `learned_cardtb` (
 CREATE TABLE `postb` (
   `pos_id_PK` bigint unsigned NOT NULL,
   `card_id_FK` bigint unsigned NOT NULL,
-  `part_of_speech` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
+  `part_of_speech` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'None',
   PRIMARY KEY (`pos_id_PK`),
   KEY `postb_cardtb_FK_IDX` (`card_id_FK`),
   CONSTRAINT `postb_cardtb_FK` FOREIGN KEY (`card_id_FK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE
@@ -229,7 +235,7 @@ CREATE TABLE `postb` (
 CREATE TABLE `definitiontb` (
   `definition_id_PK` bigint unsigned NOT NULL,
   `pos_id_FK` bigint unsigned NOT NULL,
-  `definition` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `definition` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`definition_id_PK`),
   KEY `definitiontb_postb_FK_IDX` (`pos_id_FK`),
   CONSTRAINT `definitiontb_postb_FK` FOREIGN KEY (`pos_id_FK`) REFERENCES `postb` (`pos_id_PK`) ON DELETE CASCADE
