@@ -79,23 +79,23 @@ public class DeckManager {
                         break;
                     case 2:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#26226B", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#26226B", "dots", ThemeTypes.Card);
                         break;
                     case 3:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#6B1D42", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#6B1D42", "dots", ThemeTypes.Card);
                         break;
                     case 4:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#AF3935", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#AF3935", "dots", ThemeTypes.Card);
                         break;
                     case 5:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#6CA233", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#6CA233", "dots", ThemeTypes.Card);
                         break;
                     case 6:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#277243", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#277243", "dots", ThemeTypes.Card);
                         break;
                     default:
                         break;
@@ -166,18 +166,19 @@ public class DeckManager {
 
         return false;
     }
+    public static boolean validateOwnership(Long userId, Long deckId) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM decktb d
+                WHERE d.user_id_FK = ? AND d.deck_id_PK = ?
+                UNION
+                SELECT 1 FROM forktb f
+                WHERE f.user_id_FK = ? AND f.deck_id_FK = ?
+            ) AS ownership
+            """;
 
-    public static boolean validateOwnership(Long userId, Long deckId){
-        // Is in userOwnedDecks
-        Row ownedDeck = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM decktb WHERE user_id_FK = ?, deck_id_PK", userId, deckId);
-
-        Row forkedDeck = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM forktb WHERE user_id_FK = ?, deck_id_FK", userId, deckId);
-
-        if (ownedDeck == null && forkedDeck == null){
-            return false;
-        }
-
-        return true;
+        Row row = DatabaseUtils.sqlSingleRowStatement(sql, userId, deckId, userId, deckId);
+        return row != null && ((Number) row.get("ownership")).intValue() == 1;
     }
 
     /**
@@ -211,7 +212,7 @@ public class DeckManager {
                 t.theme_name, t.theme_type, t.theme_url,
                 m.primary_color, m.secondary_color, m.card_pattern
             FROM forktb f
-            INNER JOIN decktb d ON f.deck_id_fk = d.deck_id_PK
+            INNER JOIN decktb d ON f.deck_id_FK = d.deck_id_PK
             LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
             LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
             WHERE f.user_id_FK = ?

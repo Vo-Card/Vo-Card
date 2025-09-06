@@ -50,19 +50,10 @@
                 <!-- end silder -->
                 <div class="content-wrapper">
                     <div id="content">
-                        <c:choose>
-                            <c:when test="${not empty page}">
-                                <jsp:include page="/WEB-INF/jsp/workspace/${page}.jsp" />
-                            </c:when>
-                            <c:otherwise>
-                                <jsp:include page="/workspace/home" />
-                            </c:otherwise>
-                        </c:choose>
+
                     </div>
                 </div>
-                <div class="right-container">
-                    <!-- Configuration content will be here -->
-                </div>
+                <div class="right-container"></div>
             </div>
 
 

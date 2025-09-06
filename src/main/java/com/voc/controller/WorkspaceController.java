@@ -29,27 +29,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class WorkspaceController {
 
     /**
-     * Handles requests for specific workspace pages.
+     * Handles requests for specific workspace pages. 
      * <p>
      * If the page exists, it returns the corresponding JSP view.
      * If the page does not exist, it returns a 404 error page.
      * </p>
-     * <p>
+     * <p> 
      * Supports both full page loads and AJAX requests.
      * </p>
      *
-     * @param page     The requested page name
-     * @param request  The HTTP request
+     * @param page The requested page name
+     * @param request The HTTP request
      * @param response The HTTP response
      * @return The name of the JSP view to render
      */
     @GetMapping("/{page}")
-    public String getStaticPage(@PathVariable("page") String page,
+    public String getStaticPage(
+            @PathVariable("page") String page,
             HttpServletRequest request,
             HttpServletResponse response) {
+
         boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
         String jspPath = "/WEB-INF/jsp/workspace/" + page + ".jsp";
         File file = new File(request.getServletContext().getRealPath(jspPath));
+
         if (!file.exists()) {
             if (isAjax) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -62,24 +65,25 @@ public class WorkspaceController {
         if (isAjax) {
             return "workspace/" + page;
         } else {
-            request.setAttribute("page", page);
             return "workspace";
         }
     }
 
-    @GetMapping("/decks/{deckId}/{levelId}/{cardId}/edit")
-    public String getDeckEditPage(
-            @PathVariable String deckId,
-            @PathVariable String levelId,
-            @PathVariable String cardId,
-            HttpServletRequest request) {
+    @GetMapping({"/decks/{deckId}", "/decks/{deckId}/{levelId}", "/decks/{deckId}/{levelId}/{cardId}"})
+    public String getDeckSubPages(
+            @PathVariable(required = false) String deckId,
+            @PathVariable(required = false) String levelId,
+            @PathVariable(required = false) String cardId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
 
-        request.setAttribute("deckId", deckId);
-        request.setAttribute("levelId", levelId);
-        request.setAttribute("cardId", cardId);
-        request.setAttribute("page", "decks");
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
 
-        return "workspace";
+        if (isAjax) {
+            return "workspace/deckDetail";
+        } else {
+            return "workspace";
+        }
     }
 
     /**

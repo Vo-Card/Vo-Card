@@ -1,6 +1,6 @@
 import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
 
-import { deckLoader } from '/js/deckManagement/deckLoader.js';
+import { deckLoader, deckDetailLoader } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
 //TODO: Make a proper documentation for this file
 
@@ -63,8 +63,25 @@ async function loadPage(path, addHistory = true) {
     if (contentEl) contentEl.innerHTML = html;
 
     if (path === "/workspace/home") initChartz();
-    if (path === "/workspace/decks") deckLoader();
     if (path === "/workspace/stats") statsLoader();
+    if (path.startsWith("/workspace/decks")) {
+        // /workspace/decks or /workspace/decks/
+        if (/^\/workspace\/decks\/?$/.test(path)) {
+            deckLoader();
+        }
+        // /workspace/decks/{deckId} or /workspace/decks/{deckId}/
+        else if (/^\/workspace\/decks\/[^/]+\/?$/.test(path)) {
+            deckDetailLoader(path);
+        }
+        // /workspace/decks/{deckId}/{levelId} or with trailing slash
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path)) {
+            levelDetailLoader(path);
+        }
+        // /workspace/decks/{deckId}/{levelId}/{cardId} or with trailing slash
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path)) {
+            cardDetailLoader(path);
+        }
+    }
 
         console.log(path)
 
@@ -93,6 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
-
+    temporalInterceptor()
     loadPage(document.location.pathname);
 });

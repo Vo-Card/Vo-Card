@@ -1,0 +1,20 @@
+<svg width="175" height="239" viewBox="0 0 175 239" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect x="1.33984" y="0.929993" width="173.17" height="236.93" rx="8" fill="black"/>
+<rect x="1.33984" y="0.929993" width="173.17" height="236.93" rx="8" fill="url(#paint0_radial_113_428)"/>
+<rect x="1.33984" y="0.929993" width="173.17" height="236.93" rx="8" style="mix-blend-mode:overlay" fill="url(#new_card_temp_pattern)"/>
+<rect x="1.33984" y="0.929993" width="173.17" height="236.93" rx="8" stroke="white"/>
+<path d="M84.0781 100.969H92.1406V120.094H110.75V126.984H92.1406V146.203H84.0781V126.984H65.9375V120.094H84.0781V100.969Z" fill="white"/>
+<line x1="152.84" y1="10.93" x2="152.84" y2="73.93" stroke="white"/>
+<line x1="165.34" y1="25.43" x2="122.34" y2="25.43" stroke="white"/>
+<rect x="158.34" y="10.93" width="7" height="7" fill="#D9D9D9"/>
+<rect x="158.34" y="221.93" width="7" height="7" fill="#D9D9D9"/>
+<defs>
+<radialGradient id="paint0_radial_113_428" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(87.9248 119.395) rotate(42.5432) scale(336.567 145.105)">
+<stop stop-opacity="0"/>
+<stop offset="1" stop-color="#717171"/>
+</radialGradient>
+<pattern id="new_card_temp_pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+<circle cx="2" cy="2" r="2" fill="white" />
+</pattern>
+</defs>
+</svg>
