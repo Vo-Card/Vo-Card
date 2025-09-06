@@ -40,7 +40,7 @@ async function fetchPage(path, signal) {
         cache.set(path, html);
         return html;
     } catch (err) {
-        if (err.name === "AbortError") 
+        if (err.name === "AbortError")
             return null;
         console.error(err);
         return null;
@@ -83,7 +83,7 @@ async function loadPage(path, addHistory = true) {
         }
     }
 
-        console.log(path)
+    console.log(path)
 
     if (addHistory) {
         window.history.pushState({ path }, "", path);
@@ -110,6 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
-    temporalInterceptor()
+    // temporalInterceptor()
     loadPage(document.location.pathname);
 });

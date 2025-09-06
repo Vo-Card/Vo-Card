@@ -1,4 +1,17 @@
 <script src="/js/workspace/page-fixer.js"></script>
+<script>
+    function startHideTimer() {
+        hideTimeout = setTimeout(() => {
+            document.getElementById('sort-options').style.display = "none";
+        }, 3000);
+    }
+
+    function openSortOption() {
+        document.getElementById('sort-options').style.display = document.getElementById('sort-options').style.display === "block" ? "none" : "block";
+        startHideTimer();
+    }
+</script>
+
 <div style=" padding-left: 10px; padding-right: 10px; padding-bottom: 8px;">
     <div style="font-size: 36px;">Review</div>
     <p>Choose your review style</p>
@@ -38,17 +51,3 @@
     <!-- Showing Deck Session -->
 </div>
 <div id="forked-decks-container owned-decks-container"></div>
-
-
-<script>
-    function startHideTimer() {
-        hideTimeout = setTimeout(() => {
-            document.getElementById('sort-options').style.display = "none";
-        }, 3000);
-    }
-
-    function openSortOption() {
-        document.getElementById('sort-options').style.display = document.getElementById('sort-options').style.display === "block" ? "none" : "block";
-        startHideTimer();
-    }
-</script>
