@@ -5,16 +5,17 @@
 <head>
     <title>Feedback</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
     <script src="/js/screen_correction.js" defer></script>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sansita:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
 
 
     <style>
@@ -24,210 +25,117 @@
             --alert: #ff8989;
         }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Sansita', sans-serif;
-            color: rgb(0, 0, 0);
-        }
         p{
+            color: black;
             box-sizing: border-box;
-            font-family: 'Sansita', sans-serif;
             margin: auto;
             font-family: sarabun;
             font-size: 20px;
         }
-        h1 , h4 {
+        h1 {
             color: white;
-        }
+            font-size:60px;
+            padding-bottom: 50px;
+            padding-top: 100px;
+            font-family: Sansita;
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom, #794BB6, #1b1d24);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         .feedback-container {
             margin: auto;     
             width: 100%;
             max-width: 1200px;
-            padding: 0 20px 80px;      
+            padding: 20px 80px;      
             text-align: center;
         }
 
-        .feedback-container h1 {
-            font-size:60px;
-            padding-bottom: 50px;
-            padding-top: 100px;
-        }
-
-        .feedback-container input[type="text"] {
-            padding: 16px;
-            padding-left: 50px;
-            width: 100%;
-            max-width: 1300px;   
-            border-radius: 8px;
-            border: none;
-            display: block;
-        }
-
-        .feedback-container select {
-            padding: 14px;
-            
-            width: 100%;
-            max-width: 200px;   
-            margin: 12px auto;
-            margin-bottom: 120px;
-            border-radius: 8px;
-            border: none;
-            display: block;
-        }
-
-        .feedback-buttons {
-            display: flex;
-            flex-wrap: nowrap;        
+        .feedback {
+            display: flex;     
             justify-content: center;  
             gap: 30px;
-            margin: 30px auto 25px;
+            margin: auto;
             max-width: 600px;
         }
 
-        .feedback-buttons button {
+        .feedback a {
             display: flex;             
             flex-direction: column;   
             justify-content: space-between;  
-            align-items: center;
-
+            
             background-color: #e1c89d;
             padding: 25px 30px;
-            border: none;
             border-radius: 12px;
-            font-weight: bold;
             min-width: 250px;
-            flex: 1 1 calc(33.333% - 30px);
-            max-width: 200px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-
-            
+            min-height: 150px;
+            box-sizing: border-box;
+            margin: auto;
+            font-size: 20px;
         }
-
-        .feedback-buttons .btn-title {
-            font-weight: 300;
-            line-height: 1.4;
-        }
-
-        .feedback-buttons .btn-subtitle {
-            font-weight: 200;
-            padding-top: 17px;
-        }
-
-
-        .new-post-section {
-            padding-top: 100px;
-            padding-bottom: 10px;
-        }
-
-
-
-        .new-post-section button {
-            background-color: #e1c89d;
-            padding: 13px 28px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-
-        .search-box p{
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            margin: 12px auto;
-        }
-
-        .search-box input [type="text"] {
-            padding: 12px 12px 12px 30px; 
-            width: 100%;
-            border-radius: 8px;
-            border: none;
-            display: block;
-        }
-
-        .search-box .fa-search {
-            position: absolute;
-            top: 50%;
-            left: 18px;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-    
 
     </style>
 </head>
 
 <body>
     <jsp:include page="/components/main/nav-header.jsp">
-        <jsp:param name="hasSession" value="${hasSession}" />
+            <jsp:param name="hasSession" value="${hasSession}" />
     </jsp:include>
 
     <div class="feedback-container">
         <h1>Feedback</h1>
-        <div class="search-box">
-            <p><i class="fa fa-search"></i><input type="text" placeholder="Search"/></p>
+        
+        <div >
+            <p><input type="text" placeholder="Search" style="padding: 16px; width: 100%; max-width: 1000px; border-radius: 8px; border: none; margin: auto;"/></p>
         </div>
 
-
-        <select>
+        <select style="padding: 14px;width: 15%; margin: 12px; margin-bottom: 120px; border-radius: 8px; border: none;">
             <option>
                 Heading Topic
             </option>
         </select>
 
-        <div class="feedback-buttons">  
-            <button>
-                <div class="btn-title">
+        
+        <div class="feedback">  
+            <a href="#">
+                <div>
                     <p>Performance & Accessibility</p>
                 </div>
 
-                <div class="btn-subtitle">
+                <div>
                     <p>{P&A Post}</p>
                 </div>
-            </button>
+            </a>
 
-
-            <button>
-                <div class="btn-title">
+            <a href="#">
+                <div>
                     <p>Features</p>
                 </div>
 
-                <div class="btn-subtitle">
+                <div>
                     <p>{P&A Post}</p>
                 </div>
-            </button>
+            </a>
 
-            <button>
-                <div class="btn-title">
+            <a href="#">
+                <div>
                     <p>Overall Satisfaction</p>
                 </div>
 
-                <div class="btn-subtitle">
+                <div>
                     <p>{P&A Post}</p>
                 </div>
-            </button>
+            </a>
 
         </div>
         
 
-        <div class="new-post-section">
-            <p><h4>Not find, what you were looking for?</h4></p>
-            
-            <button>
-                <p>New Post</p>
-            </button>
+        <div style="padding-top: 100px; padding-bottom: 10px; ">
+            <p style="color: white;">Not find, what you were looking for?</p>
+        </div>  
+        
+        <div style="padding-top: 10px; padding-bottom: 10px;"></div>
+            <a href="#" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
+                New Post
+            </a>
         </div>
     </div>
 
