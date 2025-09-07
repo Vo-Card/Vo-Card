@@ -27,6 +27,16 @@
         * {
             box-sizing: border-box;
             font-family: 'Sansita', sans-serif;
+            color: rgb(0, 0, 0);
+        }
+        p{
+            box-sizing: border-box;
+            font-family: 'Sansita', sans-serif;
+            margin: auto;
+            font-family: sarabun;
+            font-size: 20px;
+        }
+        h1 , h4 {
             color: white;
         }
 
@@ -40,140 +50,110 @@
         }
 
         .feedback-container {
-            margin: 180px auto 30px;     /* ✅ ขยับขึ้นบนโดยกำหนด margin-top */
+            margin: auto;     
             width: 100%;
             max-width: 1200px;
-            padding: 0 20px 80px;       /* ✅ เอา padding-top ออก */
+            padding: 0 20px 80px;      
             text-align: center;
         }
 
-
         .feedback-container h1 {
-            font-size:85px;
-            margin-bottom: 50px;
+            font-size:60px;
+            padding-bottom: 50px;
+            padding-top: 100px;
         }
 
         .feedback-container input[type="text"] {
             padding: 16px;
+            padding-left: 50px;
             width: 100%;
-            max-width: 1300px;   /* ✅ เพิ่มความยาวช่อง Search */
-            margin: 14px auto;
+            max-width: 1300px;   
             border-radius: 8px;
             border: none;
-            font-size: 30px;
             display: block;
-            color: black;
         }
 
         .feedback-container select {
-            padding: 18px;
+            padding: 14px;
             
             width: 100%;
-            max-width: 300px;   /* ✅ ลดความยาวช่อง Heading Topic */
-            margin: 14px auto;
-            margin-bottom: 150px;
+            max-width: 200px;   
+            margin: 12px auto;
+            margin-bottom: 120px;
             border-radius: 8px;
             border: none;
-            font-size: 30px;
             display: block;
-            color: black;
         }
 
         .feedback-buttons {
             display: flex;
-            flex-wrap: nowrap;        /* ✅ ไม่ให้ปุ่มล้นแล้วขึ้นบรรทัดใหม่ */
-            justify-content: center;  /* ✅ จัดให้อยู่ตรงกลาง */
+            flex-wrap: nowrap;        
+            justify-content: center;  
             gap: 30px;
-            margin: 60px auto 50px;
-            max-width: 900px;
+            margin: 30px auto 25px;
+            max-width: 600px;
         }
 
         .feedback-buttons button {
-            display: flex;             /* ✅ ใช้ Flexbox */
-            flex-direction: column;    /* ✅ เรียงจากบนลงล่าง */
-            justify-content: space-between;  /* ✅ ดัน subtitle ไปล่างสุด */
+            display: flex;             
+            flex-direction: column;   
+            justify-content: space-between;  
             align-items: center;
 
             background-color: #e1c89d;
-            color: black;
-            padding: 60px 70px;
+            padding: 25px 30px;
             border: none;
             border-radius: 12px;
             font-weight: bold;
-            font-size: 22px;
-            min-width: 500px;
+            min-width: 250px;
             flex: 1 1 calc(33.333% - 30px);
-            max-width: 400px;
+            max-width: 200px;
             cursor: pointer;
             transition: transform 0.2s ease;
 
             
         }
 
-        .feedback-buttons button:hover {
-            transform: scale(1.05);
-        }
         .feedback-buttons .btn-title {
-            font-size: 44px;
-            font-weight: 700;
+            font-weight: 300;
             line-height: 1.4;
-            color: black;
         }
 
         .feedback-buttons .btn-subtitle {
-            font-size: 22px;
-            font-weight: 400;
-            color: black;
-            margin-top: 17px;
+            font-weight: 200;
+            padding-top: 17px;
         }
 
 
         .new-post-section {
-            margin-top: 200px;
+            padding-top: 100px;
+            padding-bottom: 10px;
         }
 
-        .new-post-section p {
-            margin-bottom: 14px;
-            font-size: 30px;
-        }
+
 
         .new-post-section button {
             background-color: #e1c89d;
-            color: black;
-            padding: 26px 56px;
+            padding: 13px 28px;
             border: none;
             border-radius: 10px;
-            font-size: 22px;
             font-weight: bold;
             cursor: pointer;
         }
 
-        @media (max-width: 900px) {
-            .feedback-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
 
-            .feedback-buttons button {
-                width: 100%;
-                max-width: 400px;
-            }
-        }
-
-        .search-box {
+        .search-box p{
             position: relative;
             width: 100%;
-            max-width: 1300px;
-            margin: 14px auto;
+            max-width: 1000px;
+            margin: 12px auto;
         }
 
-        .search-box input[type="text"] {
-            padding: 16px 16px 16px 50px; /* ✅ เผื่อที่ด้านซ้ายให้ไอคอน */
+        .search-box input [type="text"] {
+            padding: 12px 12px 12px 30px; 
             width: 100%;
             border-radius: 8px;
             border: none;
-            font-size: 30px;
-            color: black;
             display: block;
         }
 
@@ -182,61 +162,72 @@
             top: 50%;
             left: 18px;
             transform: translateY(-50%);
-            color: black;
-            font-size: 22px;
             pointer-events: none;
         }
+    
 
     </style>
 </head>
 
 <body>
-
-    <!-- Navbar -->
     <jsp:include page="/components/main/nav-header.jsp">
         <jsp:param name="hasSession" value="${hasSession}" />
     </jsp:include>
 
-    <!-- Feedback Content -->
     <div class="feedback-container">
         <h1>Feedback</h1>
-
         <div class="search-box">
-            <i class="fa fa-search"></i>
-            <input type="text" placeholder="Search" />
+            <p><i class="fa fa-search"></i><input type="text" placeholder="Search"/></p>
         </div>
 
 
-
         <select>
-            <option>Heading Topic</option>
-            <!-- More options can be added -->
+            <option>
+                Heading Topic
+            </option>
         </select>
 
-        <div class="feedback-buttons">
-            
+        <div class="feedback-buttons">  
             <button>
-                <div class="btn-title">Performance & Accessibility</div>
-                <div class="btn-subtitle">{P&A Post}</div>
+                <div class="btn-title">
+                    <p>Performance & Accessibility</p>
+                </div>
+
+                <div class="btn-subtitle">
+                    <p>{P&A Post}</p>
+                </div>
             </button>
 
 
             <button>
-                <div class="btn-title">Features</div>
-                <div class="btn-subtitle">{P&A Post}</div>
+                <div class="btn-title">
+                    <p>Features</p>
+                </div>
+
+                <div class="btn-subtitle">
+                    <p>{P&A Post}</p>
+                </div>
             </button>
 
             <button>
-                <div class="btn-title">Overall Satisfaction</div>
-                <div class="btn-subtitle">{P&A Post}</div>
+                <div class="btn-title">
+                    <p>Overall Satisfaction</p>
+                </div>
+
+                <div class="btn-subtitle">
+                    <p>{P&A Post}</p>
+                </div>
             </button>
 
         </div>
         
 
         <div class="new-post-section">
-            <p>Not find, what you were looking for?</p>
-            <button>New Post</button>
+            <p><h4>Not find, what you were looking for?</h4></p>
+            
+            <button>
+                <p>New Post</p>
+            </button>
         </div>
     </div>
 
