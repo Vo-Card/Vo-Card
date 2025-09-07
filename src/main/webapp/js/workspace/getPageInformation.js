@@ -2,6 +2,8 @@ import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
 
 import { deckLoader, deckDetailLoader } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
+import { snowfallEffect } from '/js/workspace/snowfall.js';
+
 //TODO: Make a proper documentation for this file
 
 // Use to cache pages
@@ -64,6 +66,7 @@ async function loadPage(path, addHistory = true) {
 
     if (path === "/workspace/home") initChartz();
     if (path === "/workspace/stats") statsLoader();
+    if (path === "/workspace/playground") snowfallEffect();
     if (path.startsWith("/workspace/decks")) {
         // /workspace/decks or /workspace/decks/
         if (/^\/workspace\/decks\/?$/.test(path)) {
