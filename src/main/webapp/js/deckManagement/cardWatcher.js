@@ -1,3 +1,4 @@
+import { loadPage } from "/js/workspace/pageManager.js";
 
 export function insertEventActions() {
     
@@ -17,6 +18,7 @@ export function insertEventActions() {
             } else {
                 clearTimeout(clickTimer);
                 console.log('Double click detected');
+                loadPage(document.location.pathname + '/' + element.getAttribute('item-id'))
                 clickTimer = null;
             }
         });
@@ -40,8 +42,4 @@ export function insertEventActions() {
             });
         })
     })
-}
-
-function handleInteractableClick(el) {
-    console.log("Handling click for:", el);
 }

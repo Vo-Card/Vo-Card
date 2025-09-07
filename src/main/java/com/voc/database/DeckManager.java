@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.voc.server.Snowflake;
+import com.voc.utils.Convertors;
 import com.voc.utils.Row;
 import com.voc.utils.ThemeTypes;
 
@@ -197,8 +198,12 @@ public class DeckManager {
             WHERE d.user_id_FK = ?
         """;
 
-        SQLResult deckList = DatabaseUtils.sqlPrepareStatement(sql, userid);
-        return deckList.getData();
+        SQLResult ownedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
+        List<Row> rows = ownedDecksList.getData();
+
+        Convertors.convertIdsToString(rows, "deck_id_PK", "user_id_FK", "theme_id_FK", "modifier_id_FK");
+
+        return rows;
     }
 
     /**
@@ -219,10 +224,46 @@ public class DeckManager {
         """;
 
         SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
-        return forkedDecksList.getData();
+        List<Row> rows = forkedDecksList.getData();
+
+        Convertors.convertIdsToString(rows, "deck_id_PK", "user_id_FK", "theme_id_FK", "modifier_id_FK");
+
+        return rows;
     }
 
     /**
+     * Get all cards for a specific deck level
+     *
+     * @param deckId
+     * @param levelId
+     * @return List of cards (joined with themes & modifiers from their level)
+     */
+    public static List<Row> getCardsOfLevel(Long deckId, Long levelId) {
+        String sql = """
+            SELECT c.*, 
+                cl.level_name, cl.level_weight,
+                t.theme_name, t.theme_type, t.theme_url,
+                m.primary_color, m.secondary_color, m.card_pattern
+            FROM cardtb c
+            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+            WHERE cl.deck_id_FK = ? AND cl.level_id_PK = ?
+        """;
+
+        SQLResult cardList = DatabaseUtils.sqlPrepareStatement(sql, deckId, levelId);
+        List<Row> rows = cardList.getData();
+
+        Convertors.convertIdsToString(
+            rows,
+            "card_id_PK", "level_id_FK", "level_id_PK", "deck_id_FK", 
+            "theme_id_FK", "modifier_id_FK"
+        );
+
+        return rows;
+    }
+
+        /**
      * 
      * @param deckId
      * @return
@@ -235,11 +276,15 @@ public class DeckManager {
             FROM card_leveltb cl
             LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
             LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
-            WHERE deck_id_FK = ?
+            WHERE cl.deck_id_FK = ?
         """;
 
-        SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, deckId);
-        return forkedDecksList.getData();
+        SQLResult deckLevelList = DatabaseUtils.sqlPrepareStatement(sql, deckId);
+        List<Row> rows = deckLevelList.getData();
+
+        Convertors.convertIdsToString(rows, "deck_id_FK", "level_id_PK", "theme_id_FK", "modifier_id_FK");
+
+        return rows;
     }
 
     /**
@@ -259,6 +304,14 @@ public class DeckManager {
         return themeId;
     }
 
+    /**
+     * 
+     * @param primaryColor
+     * @param secondaryColor
+     * @param pattern
+     * @param themeType
+     * @return
+     */
     public static Long createNewModifier(String primaryColor, String secondaryColor, String pattern, ThemeTypes themeType){
         Long modifierId = Snowflake.nextId();
         switch (themeType) {
