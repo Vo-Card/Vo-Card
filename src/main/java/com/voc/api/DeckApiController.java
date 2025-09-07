@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
 import com.voc.utils.Row;
+import static com.voc.utils.AnsiColor.*;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -38,6 +39,7 @@ public class DeckApiController {
                 response.put("forkedDecks", forkedDecks);
             }
         }
+        System.err.println(TAG_DEBUG + response);
         response.put("status", "session is valid");
         return ResponseEntity.ok(response);
     }
@@ -78,6 +80,22 @@ public class DeckApiController {
         @PathVariable Long levelId) { 
         Map<String, Object> response = new HashMap<>();
 
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+                
+            String token = authToken.substring(7);
+            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
+
+            // Validate Ownership
+            if(!DeckManager.validateOwnership(optionalUserId.get(), deckId)){
+                response.put("status", "error");
+                return ResponseEntity.ok(response);
+            }
+            
+            if (optionalUserId.isPresent()) {
+                List<Row> deckLevels = DeckManager.getCardsOfLevel(deckId, levelId);
+                response.put("cards", deckLevels);
+            }
+        }
         response.put("status", "session is valid");
         return ResponseEntity.ok(response);
     }
@@ -89,6 +107,8 @@ public class DeckApiController {
         @PathVariable Long levelId,
         @PathVariable Long cardId) { 
         Map<String, Object> response = new HashMap<>();
+
+        
 
         response.put("status", "session is valid");
         return ResponseEntity.ok(response);

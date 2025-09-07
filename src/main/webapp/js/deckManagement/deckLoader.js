@@ -20,7 +20,7 @@ async function loadTemplate(themeUrl){
 
 async function insertDeckContainer(data, target){
     for (let i = 0; i < data.length; i++) {
-
+        console.log(data)
         const template = await loadTemplate(data[i]["theme_url"])
 
         let cardHTML = template
@@ -31,6 +31,7 @@ async function insertDeckContainer(data, target){
         const wrapDeck = document.createElement("div");
         wrapDeck.innerHTML = cardHTML;
         wrapDeck.classList.add('deck-container', "item-interactable");
+        wrapDeck.setAttribute('item-id', data[i]["deck_id_PK"]);
         wrapDeck.style.position = "relative";
 
         const hoverOverlay = document.createElement("div")
@@ -70,6 +71,7 @@ async function insertCardContainer(data, target, id, name){
         const wrapDeck = document.createElement("div");
         wrapDeck.innerHTML = cardHTML;
         wrapDeck.classList.add('deck-container', "item-interactable");
+        wrapDeck.setAttribute('item-id', data[i][id]);
         wrapDeck.style.position = "relative";
 
         const hoverOverlay = document.createElement("div")
@@ -170,6 +172,57 @@ export async function deckDetailLoader(path) {
 
             if(data["deckLevels"] !== undefined){
                 await insertCardContainer(data["deckLevels"], levelContainer, "level_id_PK", "level_name")
+            }
+
+            const wrapDeck = document.createElement("div");
+            wrapDeck.innerHTML = newCardData;
+            wrapDeck.className = 'deck-container';
+            wrapDeck.style.position = "relative";
+
+            const hoverOverlay = document.createElement("div")
+            hoverOverlay.className = "hoverOverlay"
+            hoverOverlay.style.width = "100%";
+            hoverOverlay.style.height = "100%";
+
+            wrapDeck.appendChild(hoverOverlay);
+            levelContainer.appendChild(wrapDeck);
+
+            insertEventActions();
+        } else {
+            window.location.replace("/login");
+        }
+    } catch (err) {
+        window.location.replace("/login");
+    }
+}
+
+
+export async function levelDetailLoader(path) {
+    const levelContainer = document.getElementById("cards-container");
+
+    const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)/);
+    // /^\/workspace\/decks\/[^/]+\/[^/]
+    if (!match) {
+        console.error("Invalid path:", path);
+        return;
+    }
+
+    const deckId = match[1];
+    const levelId = match[2];
+
+    try {
+        const response = await fetchWithAuth(`/api/decks/${deckId}/${levelId}`);
+        
+        const newCard = await fetch("/components/template/new_card.svg", { headers: { "X-Requested-With": "XMLHttpRequest" }});
+
+        if (response.ok) {
+            levelContainer.innerHTML = ""; // Clear innerHTML 
+
+            const data = await response.json();
+            const newCardData = await newCard.text();
+
+            if(data["cards"] !== undefined){
+                await insertCardContainer(data["cards"], levelContainer, "card_id_PK", "card_word")
             }
 
             const wrapDeck = document.createElement("div");
