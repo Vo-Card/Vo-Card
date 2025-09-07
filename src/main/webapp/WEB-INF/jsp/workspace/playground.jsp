@@ -3,11 +3,12 @@
     #content {
         padding: 0;
         overflow: hidden;
+        position: relative;
     }
 
     #background-play {
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         background-color: #0f1017;
         position: absolute;
         z-index: 0;
