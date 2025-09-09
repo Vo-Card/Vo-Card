@@ -59,7 +59,7 @@ public class SessionInterceptor implements HandlerInterceptor {
 
         // Now, handle excluded and protected pages
         String[] excludedPages = {
-                "/home", "/login", "/register", "/css/**", "/js/**",
+                "/home", "/login", "/register", "/css/**", "/js/**", "/fonts/**",
                 "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**",
                 "/components/template/**", "/support/**"
         };

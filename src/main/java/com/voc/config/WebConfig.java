@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**") // Check every page...
                 .excludePathPatterns(
                         "/home", "/index", "/login",
-                        "/register", "/css/**", "/js/**",
+                        "/register", "/css/**", "/js/**", "/fonts/**",
                         "/welcome", "/api/auth/**", "/about",
                         "/contact", "/error/**", "/components/template/**", "/support/**"); // ...except these pages
     }

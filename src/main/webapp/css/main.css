@@ -1,4 +1,5 @@
 @import "https://www.nerdfonts.com/assets/css/webfont.css";
+@import "/css/fontFace.css";
 
 :root {
     --primary-font: 'CodeNewRoman Nerd Font', monospace;
@@ -478,7 +479,7 @@
     height: 100%;
 }
 
-.deck-name{
+.deck-name {
     position: absolute;
     bottom: -5%;
     color: var(--primary-font-color);
@@ -486,7 +487,7 @@
     pointer-events: auto;
 }
 
-.level-name{
+.level-name {
     position: absolute;
     color: var(--primary-font-color);
     font-weight: bold;
