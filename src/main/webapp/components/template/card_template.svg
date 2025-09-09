@@ -7,13 +7,66 @@
     <line x1="165" y1="25.5" x2="122" y2="25.5" stroke="white"/>
     <rect x="158" y="11" width="7" height="7" fill="#D9D9D9"/>
     <rect x="158" y="222" width="7" height="7" fill="#D9D9D9"/>
-    <defs>
-        <radialGradient id="paint_radial_{card_id}" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(87.585 119.465) rotate(135.227) scale(187.47 329.921)">
-            <stop stop-opacity="0"/>
-            <stop offset="1" stop-color="{secondary_color}"/>
-        </radialGradient>
-        <pattern id="card_pattern_{card_id}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="2" fill="white" />
-        </pattern>
-    </defs>
+    <text id="fit-text"
+        x="50%" y="50%"
+        dominant-baseline="middle"
+        text-anchor="middle"
+        fill="white"
+        font-size="20"
+        font-family="var(--primary-font)"
+        filter="url(#colored_glow_{card_id})">
+    {word_content}
+    </text>
+
+    <text
+        x="5%" y="10%"
+        dominant-baseline="middle"
+        text-anchor="left"
+        fill="white"
+        font-size="15"
+        font-family="var(--primary-font)"
+        filter="url(#colored_glow_{card_id})">
+    {top_indicator}
+    </text>
+
+    <text
+        x="5%" y="90%"
+        dominant-baseline="middle"
+        text-anchor="left"
+        fill="white"
+        font-size="20"
+        font-family="var(--primary-font)"
+        filter="url(#colored_glow_{card_id})">
+    {ii}
+    </text>
+
+<defs>
+    <radialGradient id="paint_radial_{card_id}" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(87.585 119.465) rotate(135.227) scale(187.47 329.921)">
+        <stop stop-opacity="0"/>
+        <stop offset="1" stop-color="{secondary_color}"/>
+    </radialGradient>
+    <pattern id="card_pattern_{card_id}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="2" fill="white" />
+    </pattern>
+    <filter id="colored_glow_{card_id}" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feFlood flood-color="#ffffff" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="coloredBlur"/>
+        <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+    </filter>
+</defs>
 </svg>
+
+<!-- <script>
+  const text = document.getElementById("fit-text");
+  const maxWidth = 160;
+  let fontSize = parseInt(text.getAttribute("font-size"), 10);
+
+  while (text.getBBox().width > maxWidth && fontSize > 5) {
+    fontSize;
+    text.setAttribute("font-size", fontSize);
+  }
+</script> -->
