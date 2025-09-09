@@ -58,11 +58,14 @@ public class DeckApiController {
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
             // Validate Ownership
-            if(!DeckManager.validateOwnership(optionalUserId.get(), deckId)){
+            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
+            if(ownershipType.isEmpty()){
                 response.put("status", "error");
                 return ResponseEntity.ok(response);
             }
             
+            response.put("ownership_type", ownershipType.get());
+                        
             if (optionalUserId.isPresent()) {
                 List<Row> deckLevels = DeckManager.getDeckLevel(deckId);
                 response.put("deckLevels", deckLevels);
@@ -86,11 +89,14 @@ public class DeckApiController {
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
             // Validate Ownership
-            if(!DeckManager.validateOwnership(optionalUserId.get(), deckId)){
+            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
+            if(ownershipType.isEmpty()){
                 response.put("status", "error");
                 return ResponseEntity.ok(response);
             }
             
+            response.put("ownership_type", ownershipType.get());
+
             if (optionalUserId.isPresent()) {
                 List<Row> deckLevels = DeckManager.getCardsOfLevel(deckId, levelId);
                 response.put("cards", deckLevels);
@@ -108,8 +114,25 @@ public class DeckApiController {
         @PathVariable Long cardId) { 
         Map<String, Object> response = new HashMap<>();
 
-        
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+                
+            String token = authToken.substring(7);
+            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
+            // Validate Ownership
+            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
+            if(ownershipType.isEmpty()){
+                response.put("status", "error");
+                return ResponseEntity.ok(response);
+            }
+            
+            response.put("ownership_type", ownershipType.get());
+
+            if (optionalUserId.isPresent()) {
+                Row cardData = DeckManager.getCardInfo(deckId, levelId, cardId);
+                response.put("card_data", cardData);
+            }
+        }
         response.put("status", "session is valid");
         return ResponseEntity.ok(response);
     }

@@ -1,9 +1,13 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.TAG_DEBUG;
+
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -167,19 +171,33 @@ public class DeckManager {
 
         return false;
     }
-    public static boolean validateOwnership(Long userId, Long deckId) {
+
+    /**
+     * Check ownership of a deck and return type ("owned" or "forked").
+     *
+     * @param userId
+     * @param deckId
+     * @return Optional<String> ownershipType
+     */
+    public static Optional<String> getOwnershipType(Long userId, Long deckId) {
         String sql = """
-            SELECT EXISTS (
-                SELECT 1 FROM decktb d
-                WHERE d.user_id_FK = ? AND d.deck_id_PK = ?
-                UNION
-                SELECT 1 FROM forktb f
-                WHERE f.user_id_FK = ? AND f.deck_id_FK = ?
-            ) AS ownership
-            """;
+            SELECT 'owned' AS type
+            FROM decktb d
+            WHERE d.user_id_FK = ? AND d.deck_id_PK = ?
+            UNION
+            SELECT 'forked' AS type
+            FROM forktb f
+            WHERE f.user_id_FK = ? AND f.deck_id_FK = ?
+            LIMIT 1
+        """;
 
         Row row = DatabaseUtils.sqlSingleRowStatement(sql, userId, deckId, userId, deckId);
-        return row != null && ((Number) row.get("ownership")).intValue() == 1;
+
+        if (row != null && row.get("type") != null) {
+            return Optional.of(row.get("type").toString());
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -263,7 +281,60 @@ public class DeckManager {
         return rows;
     }
 
-        /**
+    public static Row getCardInfo(Long deckId, Long levelId, Long cardId) {
+        String sql = """
+            SELECT c.card_id_PK, c.card_word,
+                cl.level_name,
+                p.pos_id_PK, p.part_of_speech,
+                d.definition_id_PK, d.definition
+            FROM cardtb c
+            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+            INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
+            LEFT JOIN postb p ON c.card_id_PK = p.card_id_FK
+            LEFT JOIN definitiontb d ON p.pos_id_PK = d.pos_id_FK
+            WHERE c.card_id_PK = ?
+            AND cl.level_id_PK = ?
+            AND dck.deck_id_PK = ?
+            ORDER BY p.pos_id_PK, d.definition_id_PK
+        """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, cardId, levelId, deckId);
+        List<Row> rows = result.getData();
+        
+        System.err.println(TAG_DEBUG + rows);
+        if (rows.isEmpty()) return null;
+
+
+        Row cardInfo = new Row();
+        cardInfo.put("card_id_PK", rows.get(0).get("card_id_PK").toString());
+        cardInfo.put("card_word", rows.get(0).get("card_word"));
+
+        // POS + definitions
+        Map<String, Row> posMap = new LinkedHashMap<>();
+        for (Row row : rows) {
+            if (row.get("pos_id_PK") == null) continue;
+
+            String posId = row.get("pos_id_PK").toString();
+            Row posRow = posMap.computeIfAbsent(posId, id -> {
+                Row newPos = new Row();
+                newPos.put("pos_id_PK", id);
+                newPos.put("part_of_speech", row.get("part_of_speech"));
+                newPos.put("definitions", new ArrayList<String>());
+                return newPos;
+            });
+
+            if (row.get("definition") != null) {
+                @SuppressWarnings("unchecked")
+                List<String> definitions = (List<String>) posRow.get("definitions");
+                definitions.add((String) row.get("definition"));            
+            }
+        }
+
+        cardInfo.put("pos", new ArrayList<>(posMap.values()));
+        return cardInfo;
+    }
+
+    /**
      * 
      * @param deckId
      * @return
@@ -271,9 +342,11 @@ public class DeckManager {
     public static List<Row> getDeckLevel(Long deckId) {
         String sql = """
             SELECT cl.*,
+                d.deck_name,
                 t.theme_name, t.theme_type, t.theme_url,
                 m.primary_color, m.secondary_color, m.card_pattern
             FROM card_leveltb cl
+            INNER JOIN decktb d ON cl.deck_id_FK = d.deck_id_PK
             LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
             LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
             WHERE cl.deck_id_FK = ?
@@ -418,7 +491,7 @@ public class DeckManager {
     // otherwise add user_id
     public static boolean forkDeck(Long deck_id, Long user_id) {
         // Check if they're trying to fork their own deck
-        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT dekc_id_PK FROM decktb WHERE user_id_FK = ?", user_id);
+        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?", user_id);
 
         if (isOwnDeck != null)
             return false;
