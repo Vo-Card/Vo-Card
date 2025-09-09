@@ -360,6 +360,32 @@ public class DeckManager {
         return rows;
     }
 
+    public static List<Row> getAllCardFromDeck(Long deckId) {
+        String sql = """
+            SELECT 
+                c.card_id_PK,
+                c.card_word,
+                cl.level_name,
+                t.theme_url,
+                m.primary_color,
+                m.secondary_color,
+                m.card_pattern
+            FROM cardtb c
+            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+            WHERE cl.deck_id_FK = ?
+        """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deckId);
+        List<Row> rows = result.getData();
+
+        Convertors.convertIdsToString(rows, "card_id_PK");
+
+        return rows;
+    }
+
+
     /**
      * 
      * @param themeId
