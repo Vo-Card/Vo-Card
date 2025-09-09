@@ -33,8 +33,6 @@
                     font-size: 20px;
                 }
 
-
-
                 .about-us {
                     text-align: center;
                     padding-top: 5px;
