@@ -1,7 +1,7 @@
 @import "https://www.nerdfonts.com/assets/css/webfont.css";
 
 :root {
-    --primary-font: 'Fira Code', monospace;
+    --primary-font: 'CodeNewRoman Nerd Font', monospace;
     --primary-font-color: #d0d7e9;
 
     --brand-color: linear-gradient(35deg, #ffbf76, #76a4f3);
@@ -39,6 +39,10 @@
     --right-container-width: 15px;
 
     --alert: #ff8989;
+}
+
+* {
+    font-family: var(--primary-font);
 }
 
 /* -------------------- */
@@ -393,18 +397,10 @@
     }
 }
 
-.deck-container {
-    width: var(--card-width);
-    height: var(--card-height);
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-}
-
 .hoverOverlay {
     position: relative;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     border-radius: 5px;
     cursor: pointer;
@@ -443,14 +439,6 @@
     }
 }
 
-.deck-container svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
 .deck-editor {
     display: flex;
     flex-direction: row;
@@ -463,6 +451,46 @@
     padding-top: 150 * 0.8px;
     padding-bottom: 150 * 0.8px;
     background-color: #0B0B0B;
+}
+
+/* ---------------------- */
+/*   Specific Style Conf  */
+/* ---------------------- */
+
+.card-item-container {
+    width: var(--card-width);
+    height: var(--card-height);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-item-container svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.deck-name{
+    position: absolute;
+    bottom: -5%;
+    color: var(--primary-font-color);
+    font-weight: bold;
+    pointer-events: auto;
+}
+
+.level-name{
+    position: absolute;
+    color: var(--primary-font-color);
+    font-weight: bold;
+    pointer-events: auto;
+    margin: 0;
+    font-size: 20px;
 }
 
 /* ----------------------- */
