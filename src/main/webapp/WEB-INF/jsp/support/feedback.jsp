@@ -9,6 +9,8 @@
 
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
     <script src="/js/screen_correction.js" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

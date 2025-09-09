@@ -1,3 +1,4 @@
+import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader } from '/js/deckManagement/deckLoader.js';
 import { deckLoader, deckDetailLoader, levelDetailLoader, voteCardLoader } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
 // import { snowfallEffect } from '/js/workspace/snowfall.js';

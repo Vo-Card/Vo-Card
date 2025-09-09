@@ -1,289 +1,155 @@
 import { fetchWithAuth } from '/js/auth/auth.js';
-
 import { insertEventActions } from '/js/deckManagement/cardWatcher.js';
 
 const templateCache = new Map();
 
-async function loadTemplate(themeUrl) {
-    if (templateCache.has(themeUrl))
-        return templateCache.get(themeUrl)
+async function loadTemplate(themeUrl)  {
+    if (templateCache.has(themeUrl)) return templateCache.get(themeUrl);
 
     try {
-        const templateJson = await fetch(themeUrl);
-        const template = await templateJson.text();
+        const template = await (await fetch(themeUrl)).text();
         templateCache.set(themeUrl, template);
         return template;
-    } catch (err) {
+    } catch {
         window.location.replace("/login");
     }
 }
 
-async function insertDeckContainer(data, target) {
-    for (let i = 0; i < data.length; i++) {
-        console.log(data)
-        const template = await loadTemplate(data[i]["theme_url"])
+function createElementFromHTML(html, classes = [], attributes = {}) {
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    classes.filter(cls => cls)
+            .forEach(cls => el.classList.add(cls));
+    Object.entries(attributes).forEach(([key, value]) => el.setAttribute(key, value));
+    return el;
+}
+
+async function populateContainer(data, target, type = 'deck', ownership = null) {
+    for (const item of data) {
+        const template = await loadTemplate(item.theme_url);
 
         let cardHTML = template
-            .replace(/{primary_color}/g, data[i]["primary_color"])
-            .replace(/{secondary_color}/g, data[i]["secondary_color"])
-            .replace(/{deck_id}/g, data[i]["deck_id_PK"]);
+            .replace(/{primary_color}/g, item.primary_color)
+            .replace(/{secondary_color}/g, item.secondary_color);
 
-        const wrapDeck = document.createElement("div");
-        wrapDeck.innerHTML = cardHTML;
-        wrapDeck.classList.add('deck-container', "item-interactable");
-        wrapDeck.setAttribute('item-id', data[i]["deck_id_PK"]);
-        wrapDeck.style.position = "relative";
+        switch (type) {
+            case 'deck':
+                cardHTML = cardHTML
+                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(/{deck_id}/g, item.deck_id_PK)
+                    .replace(/{deck_name}/g, item.deck_name);
+                break;
+            case 'level':
+                cardHTML = cardHTML
+                    .replace(/{card_id}/g, item.level_id_PK)
+                    .replace(/{top_indicator}/g, item.deck_name)
+                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(/{word_content}/g, item.level_name);
+                break;
+            case 'card':
+                cardHTML = cardHTML
+                    .replace(/{card_id}/g, item.card_id_PK)
+                    .replace(/{top_indicator}/g, item.level_name)
+                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(/{word_content}/g, item.card_word);
+                break;
+            default:
+                console.warn('Unknown type:', type);
+                break;
+        }
 
-        const hoverOverlay = document.createElement("div")
-        hoverOverlay.className = "hoverOverlay"
-        hoverOverlay.style.width = "100%";
-        hoverOverlay.style.height = "100%";
+        const container = createElementFromHTML(cardHTML, ['card-item-container', `${type}-container-indicator`, 'item-interactable'], {
+            'item-id': type === 'deck' ? item.deck_id_PK : type === 'level' ? item.level_id_PK : item.card_id_PK
+        });
 
-        const deckName = document.createElement("p");
-        deckName.textContent = data[i]["deck_name"];
-        deckName.className = 'deck-name'
-        deckName.style.position = "absolute";
-        deckName.style.bottom = "-5%";
-        deckName.style.left = "50%";
-        deckName.style.transform = "translate(-50%, -50%)";
-        deckName.style.color = "white";
-        deckName.style.fontWeight = "bold";
-        deckName.style.pointerEvents = "auto";
+        const hoverOverlay = document.createElement("div");
+        hoverOverlay.className = "hoverOverlay";
+        container.appendChild(hoverOverlay);
 
-        wrapDeck.appendChild(hoverOverlay)
-        wrapDeck.appendChild(deckName);
-        target.appendChild(wrapDeck)
-
-        console.log(data[i]);
+        target.appendChild(container);
+        console.log(item);
     }
 }
 
-async function insertCardContainer(data, target, id, name) {
-    for (let i = 0; i < data.length; i++) {
-
-        const template = await loadTemplate(data[i]["theme_url"])
-
-        let cardHTML = template
-            .replace(/{primary_color}/g, data[i]["primary_color"])
-            .replace(/{secondary_color}/g, data[i]["secondary_color"])
-            .replace(/{card_id}/g, data[i][id]);
-
-        const wrapDeck = document.createElement("div");
-        wrapDeck.innerHTML = cardHTML;
-        wrapDeck.classList.add('deck-container', "item-interactable");
-        wrapDeck.setAttribute('item-id', data[i][id]);
-        wrapDeck.style.position = "relative";
-
-        const hoverOverlay = document.createElement("div")
-        hoverOverlay.className = "hoverOverlay"
-        hoverOverlay.style.width = "100%";
-        hoverOverlay.style.height = "100%";
-
-        const deckName = document.createElement("p");
-        deckName.textContent = data[i][name];
-        deckName.className = 'deck-name'
-        deckName.style.position = "absolute";
-        deckName.style.margin = "0";
-        deckName.style.color = "white";
-        deckName.style.fontWeight = "bold";
-        deckName.style.pointerEvents = "auto";
-        deckName.style.fontSize = "35px";
-
-        wrapDeck.appendChild(hoverOverlay)
-        wrapDeck.appendChild(deckName);
-        target.appendChild(wrapDeck)
-
-        console.log(data[i]);
+async function safeFetch(url) {
+    try {
+        const res = await fetchWithAuth(url);
+        if (!res.ok) throw new Error('Unauthorized');
+        return await res.json();
+    } catch {
+        window.location.replace("/login");
     }
-
 }
 
+async function appendTemplate(target, url, id, additionalClass = '') {
+    const html = await (await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })).text();
+    const el = createElementFromHTML(html, [additionalClass], { id });
+    const overlay = document.createElement("div");
+    overlay.className = "hoverOverlay";
+    el.appendChild(overlay);
+    target.appendChild(el);
+}
 
 export async function deckLoader() {
-    const forkedDeckContainer = document.getElementById('forked-decks-container')
-    const ownedDeckContainer = document.getElementById('owned-decks-container')
+    const forkedDeckContainer = document.getElementById('forked-decks-container');
+    const ownedDeckContainer = document.getElementById('owned-decks-container');
 
-    try {
-        const response = await fetchWithAuth("/api/decks/getDecks");
+    const data = await safeFetch("/api/decks/getDecks");
+    if (!data) return;
 
-        const searchDecks = await fetch("/components/template/search_decks.svg", { headers: { "X-Requested-With": "XMLHttpRequest" } });
-        const createDecks = await fetch("/components/template/create_deck.svg", { headers: { "X-Requested-With": "XMLHttpRequest" } });
-        if (response.ok) {
+    await populateContainer(data.forkedDecks, forkedDeckContainer, 'deck', 'forked');
+    await populateContainer(data.ownedDecks, ownedDeckContainer, 'deck', 'owned');
 
-            const data = await response.json();
-            const search = await searchDecks.text();
-            const create = await createDecks.text();
+    await appendTemplate(forkedDeckContainer, "/components/template/search_decks.svg", "searchDeckButton", "card-item-container");
+    await appendTemplate(ownedDeckContainer, "/components/template/create_deck.svg", "createDeckButton", "card-item-container");
 
-            await insertDeckContainer(data["forkedDecks"], forkedDeckContainer)
-            await insertDeckContainer(data["ownedDecks"], ownedDeckContainer)
-
-            const searchDeck = document.createElement("div");
-            searchDeck.innerHTML = search;
-            searchDeck.className = 'deck-container';
-            searchDeck.id = "searchDeckButton";
-            searchDeck.style.position = "relative";
-
-            const createDeck = document.createElement("div");
-            createDeck.innerHTML = create;
-            createDeck.className = 'deck-container';
-            createDeck.id = "createDeckButton";
-            createDeck.style.position = "relative";
-
-            const hoverOverlay = document.createElement("div")
-            hoverOverlay.className = "hoverOverlay"
-            hoverOverlay.style.width = "100%";
-            hoverOverlay.style.height = "100%";
-
-            searchDeck.appendChild(hoverOverlay.cloneNode(true));
-            createDeck.appendChild(hoverOverlay);
-            forkedDeckContainer.appendChild(searchDeck);
-            ownedDeckContainer.appendChild(createDeck);
-
-            insertEventActions();
-        } else {
-            window.location.replace("/login");
-        }
-    } catch (error) {
-        window.location.replace("/login");
-    }
+    insertEventActions(document, {
+        interactableSelector: ".item-interactable, .level-container-indicator",
+        rippleSelector: ".card-item-container"
+    });
 }
 
 export async function deckDetailLoader(path) {
     const levelContainer = document.getElementById("cards-container");
-
     const match = path.match(/^\/workspace\/decks\/([^/]+)/);
-    if (!match) {
-        console.error("Invalid path:", path);
-        return;
-    }
+    if (!match) return console.error("Invalid path:", path);
 
-    const deckId = match[1];
+    const data = await safeFetch(`/api/decks/${match[1]}`);
+    if (!data) return;
 
-    try {
-        const response = await fetchWithAuth(`/api/decks/${deckId}`);
+    levelContainer.innerHTML = "";
+    if (data.deckLevels) await populateContainer(data.deckLevels, levelContainer, 'level', data.ownership_type);
 
-        const newCard = await fetch("/components/template/new_card.svg", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    await appendTemplate(levelContainer, "/components/template/new_card.svg", null, 'deck-container');
 
-        if (response.ok) {
-            levelContainer.innerHTML = ""; // Clear innerHTML 
-
-            const data = await response.json();
-            const newCardData = await newCard.text();
-
-            if (data["deckLevels"] !== undefined) {
-                await insertCardContainer(data["deckLevels"], levelContainer, "level_id_PK", "level_name")
-            }
-
-            const wrapDeck = document.createElement("div");
-            wrapDeck.innerHTML = newCardData;
-            wrapDeck.className = 'deck-container';
-            wrapDeck.style.position = "relative";
-
-            const hoverOverlay = document.createElement("div")
-            hoverOverlay.className = "hoverOverlay"
-            hoverOverlay.style.width = "100%";
-            hoverOverlay.style.height = "100%";
-
-            wrapDeck.appendChild(hoverOverlay);
-            levelContainer.appendChild(wrapDeck);
-
-            insertEventActions();
-        } else {
-            window.location.replace("/login");
-        }
-    } catch (err) {
-        window.location.replace("/login");
-    }
+    insertEventActions(document, {
+        interactableSelector: ".item-interactable, .level-container-indicator",
+        rippleSelector: ".card-item-container",
+    });
 }
-
 
 export async function levelDetailLoader(path) {
-    const levelContainer = document.getElementById("cards-container");
-
+    const cardContainer = document.getElementById("cards-container");
     const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)/);
-    // /^\/workspace\/decks\/[^/]+\/[^/]
-    if (!match) {
-        console.error("Invalid path:", path);
-        return;
-    }
+    if (!match) return console.error("Invalid path:", path);
 
-    const deckId = match[1];
-    const levelId = match[2];
+    const data = await safeFetch(`/api/decks/${match[1]}/${match[2]}`);
+    if (!data) return;
 
-    try {
-        const response = await fetchWithAuth(`/api/decks/${deckId}/${levelId}`);
+    cardContainer.innerHTML = "";
+    if (data.cards) await populateContainer(data.cards, cardContainer, 'card');
 
-        const newCard = await fetch("/components/template/new_card.svg", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    await appendTemplate(cardContainer, "/components/template/new_card.svg", null, 'deck-container');
 
-        if (response.ok) {
-            levelContainer.innerHTML = ""; // Clear innerHTML 
-
-            const data = await response.json();
-            const newCardData = await newCard.text();
-
-            if (data["cards"] !== undefined) {
-                await insertCardContainer(data["cards"], levelContainer, "card_id_PK", "card_word")
-            }
-
-            const wrapDeck = document.createElement("div");
-            wrapDeck.innerHTML = newCardData;
-            wrapDeck.className = 'deck-container';
-            wrapDeck.style.position = "relative";
-
-            const hoverOverlay = document.createElement("div")
-            hoverOverlay.className = "hoverOverlay"
-            hoverOverlay.style.width = "100%";
-            hoverOverlay.style.height = "100%";
-
-            wrapDeck.appendChild(hoverOverlay);
-            levelContainer.appendChild(wrapDeck);
-
-            insertEventActions();
-        } else {
-            window.location.replace("/login");
-        }
-    } catch (err) {
-        window.location.replace("/login");
-    }
+    insertEventActions();
 }
 
-export async function voteCardLoader() {
+export async function cardDetailLoader(path) {
+    const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)\/([^/]+)/);
+    if (!match) return console.error("Invalid path:", path);
 
-    const voteCardContainer = document.getElementById('vote-cards')
-    const cards = [
-        { id: "vote-fail", url: "/components/template/vote-fail.svg" },
-        { id: "vote-hard", url: "/components/template/vote-hard.svg" },
-        { id: "vote-good", url: "/components/template/vote-good.svg" },
-        { id: "vote-easy", url: "/components/template/vote-easy.svg" },
-    ];
+    const data = await safeFetch(`/api/decks/${match[1]}/${match[2]}/${match[3]}`);
+    if (!data) return;
 
-    try {
-        const responses = await Promise.all(cards.map(c => fetch(c.url)));
-
-        responses.forEach((res, i) => {
-            if (!res.ok) throw new Error(`Failed to fetch ${cards[i].url} (${res.status})`);
-        });
-
-        const svgs = await Promise.all(responses.map(res => res.text()));
-
-        svgs.forEach((svgText, i) => {
-            const wrap = document.createElement("div");
-            wrap.classList.add("card-container");
-            wrap.setAttribute("item-id", cards[i].id);
-            wrap.style.position = "relative";
-            wrap.innerHTML = svgText;
-
-            const hoverOverlay = document.createElement("div");
-            hoverOverlay.className = "hoverOverlay";
-            hoverOverlay.style.width = "100%";
-            hoverOverlay.style.height = "100%";
-
-            wrap.appendChild(hoverOverlay);
-            voteCardContainer.appendChild(wrap);
-        });
-
-        console.log("All cards loaded");
-    } catch (err) {
-        console.error("Error loading cards:", err);
-    }
+    console.log(data);
 }
