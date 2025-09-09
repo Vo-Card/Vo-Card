@@ -3,7 +3,7 @@ import { insertEventActions } from '/js/deckManagement/cardWatcher.js';
 
 const templateCache = new Map();
 
-async function loadTemplate(themeUrl)  {
+async function loadTemplate(themeUrl) {
     if (templateCache.has(themeUrl)) return templateCache.get(themeUrl);
 
     try {
