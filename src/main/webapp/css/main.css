@@ -45,7 +45,7 @@
 /* Temporal Interceptor */
 /* -------------------- */
 
-#temporal-interceptor{
+#temporal-interceptor {
     background: rgba(0, 0, 0, 0.5);
     position: absolute;
     width: 100vw;
@@ -368,7 +368,9 @@
     height: 100%;
 }
 
-#forked-decks-container, #owned-decks-container, #cards-container {
+#forked-decks-container,
+#owned-decks-container,
+#cards-container {
     display: grid;
     width: 100%;
     gap: 10px;
@@ -696,4 +698,29 @@
 .sort-option:hover {
     border-radius: 8px;
     background: #f0f0f0;
+}
+
+/* --------------------------- */
+/*   Playground Content Area   */
+/* --------------------------- */
+
+.playground-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.play-card-zone {
+    display: inline-block;
+    width: 100%;
+    height: 300px;
+    text-align: center;
+}
+
+
+#vote-cards {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
