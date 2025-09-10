@@ -19,7 +19,7 @@ function createElementFromHTML(html, classes = [], attributes = {}) {
     const el = document.createElement('div');
     el.innerHTML = html;
     classes.filter(cls => cls)
-            .forEach(cls => el.classList.add(cls));
+        .forEach(cls => el.classList.add(cls));
     Object.entries(attributes).forEach(([key, value]) => el.setAttribute(key, value));
     return el;
 }
@@ -120,7 +120,7 @@ export async function deckDetailLoader(path) {
     levelContainer.innerHTML = "";
     if (data.deckLevels) await populateContainer(data.deckLevels, levelContainer, 'level', data.ownership_type);
 
-    await appendTemplate(levelContainer, "/components/template/new_card.svg", null, 'deck-container');
+    await appendTemplate(levelContainer, "/components/template/new_card.svg", null, 'card-item-container');
 
     insertEventActions(document, {
         interactableSelector: ".item-interactable, .level-container-indicator",
@@ -139,7 +139,7 @@ export async function levelDetailLoader(path) {
     cardContainer.innerHTML = "";
     if (data.cards) await populateContainer(data.cards, cardContainer, 'card');
 
-    await appendTemplate(cardContainer, "/components/template/new_card.svg", null, 'deck-container');
+    await appendTemplate(cardContainer, "/components/template/new_card.svg", null, 'card-item-container');
 
     insertEventActions();
 }
@@ -152,4 +152,32 @@ export async function cardDetailLoader(path) {
     if (!data) return;
 
     console.log(data);
+}
+
+export async function loadVoteCards() {
+    const voteCardContainer = document.getElementById("vote-cards");
+
+    const cards = [
+        { id: "vote-fail", url: "/components/template/vote-fail.svg" },
+        { id: "vote-hard", url: "/components/template/vote-hard.svg" },
+        { id: "vote-good", url: "/components/template/vote-good.svg" },
+        { id: "vote-easy", url: "/components/template/vote-easy.svg" },
+    ];
+
+    try {
+        const responses = await Promise.all(cards.map(c => fetch(c.url)));
+
+        responses.forEach((res, i) => {
+            if (!res.ok) throw new Error(`Failed to fetch ${cards[i].url} (${res.status})`);
+        });
+
+        const svgs = await Promise.all(responses.map(res => res.text()));
+
+        svgs.forEach(async (svgText, i) => {
+            await appendTemplate(voteCardContainer, cards[i].url, cards[i].id, "card-item-container")
+        });
+        console.log("All cards loaded");
+    } catch (err) {
+        console.error("Error loading cards:", err);
+    }
 }
