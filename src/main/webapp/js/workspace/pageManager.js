@@ -1,4 +1,4 @@
-import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader } from '/js/deckManagement/deckLoader.js';
+import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader, loadVoteCards } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
 // import { snowfallEffect } from '/js/workspace/snowfall.js';
 
@@ -46,7 +46,7 @@ export async function loadPage(path, addHistory = true) {
 
     if (path === "/workspace/home") initChartz();
     if (path === "/workspace/stats") statsLoader();
-    if (path === "/workspace/playground") voteCardLoader();
+    if (path === "/workspace/playground") loadVoteCards();
     if (path.startsWith("/workspace/decks")) {
         // /workspace/decks or /workspace/decks/
         if (/^\/workspace\/decks\/?$/.test(path)) {

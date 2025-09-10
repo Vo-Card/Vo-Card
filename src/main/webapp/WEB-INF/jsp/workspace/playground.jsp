@@ -15,6 +15,10 @@
         z-index: 0;
         overflow: hidden;
     }
+
+    .card-item-container svg{
+        position: absolute!important;
+    }
 </style>
 <canvas id="background-play"></canvas>
 <div style="padding: 24px;">
@@ -33,5 +37,5 @@
     <div class="play-card-zone" id="card-placeholder">TEST</div>
 
     <!-- Vote zone -->
-    <div id="vote-cards"></div>
+    <div id="vote-cards" ></div>
 </div>

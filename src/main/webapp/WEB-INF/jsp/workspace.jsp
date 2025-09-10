@@ -38,6 +38,8 @@
 
         <body style="background-color: var(--menu-primary-color);">
 
+            <div id="backdrop"></div>
+
             <jsp:include page="/components/layout/workspace-header.jsp" />
 
             <div class="workspace-container">

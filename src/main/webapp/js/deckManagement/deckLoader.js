@@ -59,7 +59,8 @@ async function populateContainer(data, target, type = 'deck', ownership = null) 
         }
 
         const container = createElementFromHTML(cardHTML, ['card-item-container', `${type}-container-indicator`, 'item-interactable'], {
-            'item-id': type === 'deck' ? item.deck_id_PK : type === 'level' ? item.level_id_PK : item.card_id_PK
+            'item-id': type === 'deck' ? item.deck_id_PK : type === 'level' ? item.level_id_PK : item.card_id_PK,
+            'item-type': type
         });
 
         const hoverOverlay = document.createElement("div");
@@ -173,8 +174,12 @@ export async function loadVoteCards() {
 
         const svgs = await Promise.all(responses.map(res => res.text()));
 
-        svgs.forEach(async (svgText, i) => {
-            await appendTemplate(voteCardContainer, cards[i].url, cards[i].id, "card-item-container")
+        svgs.forEach((svgText, i) => {
+            const el = createElementFromHTML(svgText, ["card-item-container"], {'item-id':cards[i].id});
+            const overlay = document.createElement("div");
+            overlay.className = "hoverOverlay";
+            el.appendChild(overlay);
+            voteCardContainer.appendChild(el);
         });
         console.log("All cards loaded");
     } catch (err) {
