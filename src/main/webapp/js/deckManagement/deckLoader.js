@@ -1,8 +1,21 @@
+// @ts-check
+
 import { fetchWithAuth } from '/js/auth/auth.js';
 import { insertEventActions } from '/js/deckManagement/cardWatcher.js';
 
 const templateCache = new Map();
 
+/**
+ * Load the template from the given URL
+ *
+ * If there is no template with the URL, load the template from the given url,
+ * and if failed sent the user back to login page(placeholder)
+ * 
+ * If the URL exist in `templateCache` then use the template instead of fetch it again.
+ * 
+ * @param {String} themeUrl 
+ * @returns {Promise<String>} template HTML text 
+ */
 async function loadTemplate(themeUrl) {
     if (templateCache.has(themeUrl)) return templateCache.get(themeUrl);
 
@@ -15,6 +28,14 @@ async function loadTemplate(themeUrl) {
     }
 }
 
+/**
+ * 
+ * 
+ * @param {String} html 
+ * @param {Array} classes 
+ * @param {Object} attributes
+ * @return {HTMLDivElement} the element that have been created
+ */
 function createElementFromHTML(html, classes = [], attributes = {}) {
     const el = document.createElement('div');
     el.innerHTML = html;
@@ -24,6 +45,13 @@ function createElementFromHTML(html, classes = [], attributes = {}) {
     return el;
 }
 
+/**
+ * 
+ * @param {Object} data 
+ * @param {HTMLElement} target 
+ * @param {String} type 
+ * @param {String} ownership 
+ */
 async function populateContainer(data, target, type = 'deck', ownership = null) {
     for (const item of data) {
         const template = await loadTemplate(item.theme_url);
@@ -72,6 +100,11 @@ async function populateContainer(data, target, type = 'deck', ownership = null) 
     }
 }
 
+/**
+ * 
+ * @param {String} url 
+ * @returns {Promise<Object>}
+ */
 async function safeFetch(url) {
     try {
         const res = await fetchWithAuth(url);
@@ -82,6 +115,13 @@ async function safeFetch(url) {
     }
 }
 
+/**
+ * 
+ * @param {HTMLElement} target 
+ * @param {String} url 
+ * @param {String} id A string of ID (String because javascript sucks)
+ * @param {String} additionalClass 
+ */
 async function appendTemplate(target, url, id, additionalClass = '') {
     const html = await (await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })).text();
     const el = createElementFromHTML(html, [additionalClass], { id });
@@ -96,6 +136,7 @@ export async function deckLoader() {
     const ownedDeckContainer = document.getElementById('owned-decks-container');
 
     const data = await safeFetch("/api/decks/getDecks");
+    console.log(data)
     if (!data) return;
 
     await populateContainer(data.forkedDecks, forkedDeckContainer, 'deck', 'forked');
@@ -110,6 +151,11 @@ export async function deckLoader() {
     });
 }
 
+/**
+ * 
+ * @param {String} path 
+ * @returns 
+ */
 export async function deckDetailLoader(path) {
     const levelContainer = document.getElementById("cards-container");
     const match = path.match(/^\/workspace\/decks\/([^/]+)/);
@@ -129,6 +175,11 @@ export async function deckDetailLoader(path) {
     });
 }
 
+/**
+ * 
+ * @param {String} path 
+ * @returns 
+ */
 export async function levelDetailLoader(path) {
     const cardContainer = document.getElementById("cards-container");
     const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)/);
@@ -145,6 +196,11 @@ export async function levelDetailLoader(path) {
     insertEventActions();
 }
 
+/**
+ * 
+ * @param {String} path 
+ * @returns 
+ */
 export async function cardDetailLoader(path) {
     const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)\/([^/]+)/);
     if (!match) return console.error("Invalid path:", path);
@@ -155,6 +211,9 @@ export async function cardDetailLoader(path) {
     console.log(data);
 }
 
+/**
+ * 
+ */
 export async function loadVoteCards() {
     const voteCardContainer = document.getElementById("vote-cards");
 

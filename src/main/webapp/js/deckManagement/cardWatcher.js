@@ -1,5 +1,10 @@
 import { loadPage } from "/js/workspace/pageManager.js";
 
+/**
+ * 
+ * @param {*} containerSelector 
+ * @param {*} options 
+ */
 export function insertEventActions(containerSelector = document, options = {}) {
     const interactableSelector = options.interactableSelector || ".item-interactable";
     const rippleSelector = options.rippleSelector || ".deck-container";
@@ -9,6 +14,7 @@ export function insertEventActions(containerSelector = document, options = {}) {
 
     // Handle single / double click
     Array.from(containerSelector.querySelectorAll(interactableSelector)).forEach(element => {
+        
         element.addEventListener("click", (event) => {
             if (clickTimer === null) {
                 clickTimer = setTimeout(() => {

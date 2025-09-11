@@ -7,13 +7,20 @@ const cache = new Map();
 
 let currentController = null;
 
-export async function fetchPage(path, signal) {
+/**
+ * 
+ * 
+ * @param {String} path 
+ * @param {AbortController} signal 
+ * @returns 
+ */
+export async function fetchPage(path, signal = null) {
     if (cache.has(path)) return cache.get(path);
 
     try {
         const res = await fetch(path, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
-            signal
+            signal: signal.signal
         });
 
         if (!res.ok) throw new Error("404");
@@ -29,12 +36,18 @@ export async function fetchPage(path, signal) {
     }
 }
 
+/**
+ * 
+ * @param {String} path 
+ * @param {Boolean} addHistory 
+ * @returns 
+ */
 export async function loadPage(path, addHistory = true) {
     // Cancel previous request
     if (currentController) currentController.abort();
     currentController = new AbortController();
 
-    const html = await fetchPage(path, currentController.signal);
+    const html = await fetchPage(path, currentController);
 
     if (!html) {
         window.location.href = "/error/404";
@@ -75,8 +88,11 @@ export async function loadPage(path, addHistory = true) {
 
 // Preload on hover
 document.addEventListener("mouseover", e => {
-    const link = e.target.closest("a[data-workspace]");
-    if (link && !cache.has(link.getAttribute("href"))) {
-        fetchPage(link.getAttribute("href")); // preload
+    const target = e.target;
+    if (target instanceof Element) {
+        const link = target.closest("a[data-workspace]");
+        if (link && !cache.has(link.getAttribute("href"))) {
+            fetchPage(link.getAttribute("href")); // preload
+        }
     }
 });

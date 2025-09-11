@@ -29,7 +29,9 @@ export async function statsLoader() {
         barContainer.appendChild(progress);
     }
 
-    var myCanvas = document.getElementById('stats-bar').getContext('2d');
+    var myCanvas = /** @type {HTMLCanvasElement} */ (
+        document.getElementById('stats-bar')
+    ).getContext('2d');
 
     let datetime = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     var chart = {
@@ -74,5 +76,4 @@ export async function statsLoader() {
         }
 
     };
-    var statChart = new Chart(myCanvas, chart);
 }

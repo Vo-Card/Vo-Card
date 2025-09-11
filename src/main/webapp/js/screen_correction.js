@@ -39,7 +39,7 @@ function updateBackground() {
     var width = window.innerWidth;
     if (card_preview != null){
         var scale = width / 1080 / 2.5;
-        card_preview.style.scale = scale;
+        card_preview.style.scale = `${scale}`;
     }
 }
 // Initial background setup

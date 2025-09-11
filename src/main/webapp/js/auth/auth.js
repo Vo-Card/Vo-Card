@@ -2,6 +2,9 @@ export const TokenManager = {
     getAccessToken: () => {
         return sessionStorage.getItem('access_token');
     },
+    /**
+     * @param {String} token 
+     */
     setAccessToken: (token) => {
         sessionStorage.setItem('access_token', token);
     },

@@ -3,13 +3,25 @@ import { TokenManager } from '/js/auth/auth.js';
 document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     const messageDiv = document.getElementById("message");
-    const submitBtn = document.getElementById("loginButton");
+
+    const submitBtn = /** @type {HTMLButtonElement} */ (
+        document.getElementById("loginButton")
+    );
+    
     submitBtn.disabled = true;
 
     const payload = {
-        username: document.getElementById("username").value.trim(),
-        password: document.getElementById("password").value.trim(),
-        rememberMe: document.getElementById("rememberMe").checked
+        username: /** @type {HTMLInputElement} */ (
+            document.getElementById("username")
+        ).value.trim(),
+
+        password: /** @type {HTMLInputElement} */ (
+            document.getElementById("password")
+        ).value.trim(),
+
+        rememberMe: /** @type {HTMLInputElement} */ (
+            document.getElementById("rememberMe")
+        ).checked
     };
 
     try {

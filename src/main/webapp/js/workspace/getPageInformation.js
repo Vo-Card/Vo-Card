@@ -2,18 +2,11 @@ import { TokenManager, fetchWithAuth } from '/js/auth/auth.js';
 
 //TODO: Make a proper documentation for this file
 
-import { fetchPage, loadPage } from '/js/workspace/pageManager.js';
+import { loadPage } from '/js/workspace/pageManager.js';
 
-document.addEventListener("click", e => {
-    const link = e.target.closest("a[data-workspace]");
-    if (link) {
-        e.preventDefault();
-        loadPage(link.getAttribute("href"), document.location.pathname == link.getAttribute("href") ? false : true);
-    }
-});
-
-
-
+/**
+ * Save the previous page URL
+ */
 window.addEventListener("popstate", (event) => {
     const path = event.state?.path || window.location.pathname;
     loadPage(path, false); // false = don’t pushState again
@@ -34,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         window.location.replace("/login");
     }
-    // temporalInterceptor()
     loadPage(document.location.pathname);
 });
 
@@ -44,8 +36,9 @@ function startHideTimer() {
     }, 3000);
 }
 
+// @ts-ignore
 window.openSortOption = function openSortOption() {
-    const el = document.getElementById('sort-options');
-    el.style.display = el.style.display === "block" ? "none" : "block";
-    startHideTimer();
+  const el = /** @type {HTMLElement} */ (document.getElementById('sort-options'));
+  el.style.display = el.style.display === "block" ? "none" : "block";
+  startHideTimer();
 };

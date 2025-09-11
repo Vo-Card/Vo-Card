@@ -1,12 +1,25 @@
-document.getElementById("registerForm").addEventListener("submit", async function(e) {
+document.getElementById("registerForm")
+    .addEventListener("submit", async function(e) {
     e.preventDefault();
 
     const payload = {
-        displayName: document.getElementById("displayName").value,
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value,
-        confirmPassword: document.getElementById("confirmPassword").value
+        displayName: /** @type {HTMLInputElement} */ (
+            document.getElementById("displayName")
+        ).value.trim(),
+
+        username: /** @type {HTMLInputElement} */ (
+            document.getElementById("username")
+        ).value.trim(),
+
+        password: /** @type {HTMLInputElement} */ (
+            document.getElementById("password")
+        ).value.trim(),
+
+        confirmPassword: /** @type {HTMLInputElement} */ (
+            document.getElementById("confirmPassword")
+        ).value.trim()
     };
+
 
     try {
         const response = await fetch("/api/auth/register", {

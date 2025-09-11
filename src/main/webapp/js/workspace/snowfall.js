@@ -1,5 +1,5 @@
 export async function snowfallEffect() {
-    const canvas = document.getElementById('background-play');
+    const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('background-play'));
     const ctx = canvas.getContext('2d');
 
     function resizeCanvas() {

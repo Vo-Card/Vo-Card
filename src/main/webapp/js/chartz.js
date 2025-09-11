@@ -4,7 +4,9 @@
 // temporary mock up data for now
 
 function initChartz() {
-    var myCanvas = document.getElementById('chartz').getContext('2d');
+    var myCanvas = /** @type {HTMLCanvasElement} */ (
+        document.getElementById('chartz')
+    ).getContext('2d');
     // get month/day
     let datetime = [];
     
@@ -57,5 +59,4 @@ function initChartz() {
         }
     
     };
-    var statChart = new Chart(myCanvas, chart);
 }
