@@ -123,7 +123,7 @@ async function safeFetch(url) {
  * @param {String} additionalClass 
  */
 async function appendTemplate(target, url, id, additionalClass = '') {
-    const html = await (await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })).text();
+    const html = await loadTemplate(url);
     const el = createElementFromHTML(html, [additionalClass], { id });
     const overlay = document.createElement("div");
     overlay.className = "hoverOverlay";

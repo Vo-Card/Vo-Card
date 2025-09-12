@@ -1,0 +1,16 @@
+/* --------------------------- */
+/*   Playground Content Area   */
+/* --------------------------- */
+
+.playground-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.play-card-zone {
+    display: inline-block;
+    width: 100%;
+    height: 300px;
+    text-align: center;
+}

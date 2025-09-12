@@ -1,18 +1,50 @@
 import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader, loadVoteCards } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
-// import { snowfallEffect } from '/js/workspace/snowfall.js';
 
 // Use to cache pages
 const cache = new Map();
+// Cache for CSS
+const cssCache = new Set();
 
 let currentController = null;
 
+// Map top-level pages to optional JS + CSS
+const pageComponents = {
+    "/workspace/home": { js: () => initChartz(), css: "/css/workspace/home.css" },
+    "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
+    "/workspace/playground": { js: loadVoteCards, css: "/css/workspace/playground.css" },
+    "/workspace/review": { js: null, css: "/css/workspace/review.css" },
+    "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
+};
+
 /**
- * 
- * 
+ * Dynamically load CSS if not already loaded (returns a Promise)
+ * @param {String} href
+ * @returns {Promise}
+ */
+function loadCSS(href) {
+    return new Promise(resolve => {
+        if (cssCache.has(href)) {
+            resolve();
+            return;
+        }
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.onload = () => {
+            cssCache.add(href);
+            resolve();
+        };
+        link.onerror = () => resolve();
+        document.head.appendChild(link);
+    });
+}
+
+/**
+ * Fetch page content (AJAX)
  * @param {String} path 
  * @param {AbortController} signal 
- * @returns 
+ * @returns {Promise<string|null>}
  */
 export async function fetchPage(path, signal = null) {
     if (cache.has(path)) return cache.get(path);
@@ -20,7 +52,7 @@ export async function fetchPage(path, signal = null) {
     try {
         const res = await fetch(path, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
-            signal: signal.signal
+            signal: signal?.signal
         });
 
         if (!res.ok) throw new Error("404");
@@ -37,10 +69,9 @@ export async function fetchPage(path, signal = null) {
 }
 
 /**
- * 
+ * Load a page with AJAX, inject CSS before showing content
  * @param {String} path 
  * @param {Boolean} addHistory 
- * @returns 
  */
 export async function loadPage(path, addHistory = true) {
     // Cancel previous request
@@ -48,51 +79,52 @@ export async function loadPage(path, addHistory = true) {
     currentController = new AbortController();
 
     const html = await fetchPage(path, currentController);
-
     if (!html) {
         window.location.href = "/error/404";
         return;
     }
 
     const contentEl = document.getElementById("content");
-    if (contentEl) contentEl.innerHTML = html;
+    if (!contentEl) return;
 
-    if (path === "/workspace/home") initChartz();
-    if (path === "/workspace/stats") statsLoader();
-    if (path === "/workspace/playground") loadVoteCards();
+    // Initialize JS + CSS based on mapping
+    const component = Object.keys(pageComponents).find(p => path.startsWith(p));
+    let cssPromise = Promise.resolve();
+    let jsFn = null;
+
+    if (component) {
+        const { js, css } = pageComponents[component];
+        if (css) cssPromise = loadCSS(css);
+        if (js) jsFn = js;
+    }
+    
+    // wait for CSS load (or cached)
+    await cssPromise;
+
+    contentEl.innerHTML = html;
+
+    if (jsFn) jsFn(path);
+
+    // Deck-specific AJAX loader
     if (path.startsWith("/workspace/decks")) {
-        // /workspace/decks or /workspace/decks/
-        if (/^\/workspace\/decks\/?$/.test(path)) {
-            deckLoader();
-        }
-        // /workspace/decks/{deckId} or /workspace/decks/{deckId}/
-        else if (/^\/workspace\/decks\/[^/]+\/?$/.test(path)) {
-            deckDetailLoader(path);
-        }
-        // /workspace/decks/{deckId}/{levelId} or with trailing slash
-        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path)) {
-            levelDetailLoader(path);
-        }
-        // /workspace/decks/{deckId}/{levelId}/{cardId} or with trailing slash
-        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path)) {
-            cardDetailLoader(path);
-        }
+        if (/^\/workspace\/decks\/?$/.test(path)) deckLoader();
+        else if (/^\/workspace\/decks\/[^/]+\/?$/.test(path)) deckDetailLoader(path);
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path)) levelDetailLoader(path);
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path)) cardDetailLoader(path);
     }
 
-    console.log(path)
-
-    if (addHistory) {
-        window.history.pushState({ path }, "", path);
-    }
+    if (addHistory) window.history.pushState({ path }, "", path);
+    console.log("Loaded via AJAX:", path);
 }
 
-// Preload on hover
-document.addEventListener("mouseover", e => {
-    const target = e.target;
+// Preload pages on hover
+document.addEventListener("mouseover", event => {
+    const target = event.target;
     if (target instanceof Element) {
         const link = target.closest("a[data-workspace]");
-        if (link && !cache.has(link.getAttribute("href"))) {
-            fetchPage(link.getAttribute("href")); // preload
+        if (link) {
+            const href = link.getAttribute("href");
+            if (href && !cache.has(href)) fetchPage(href);
         }
     }
 });

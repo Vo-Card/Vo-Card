@@ -1,0 +1,61 @@
+@import "https://www.nerdfonts.com/assets/css/webfont.css";
+
+@font-face {
+    font-family: "CodeNewRoman Nerd Font";
+    src: url("/fonts/CodeNewRoman/CodeNewRomanNerdFont-Regular.otf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "CodeNewRoman Nerd Font";
+    src: url("/fonts/CodeNewRoman/CodeNewRomanNerdFont-Bold.otf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+:root {
+    --primary-font: 'CodeNewRoman Nerd Font', monospace;
+    --primary-font-color: #d0d7e9;
+
+    --brand-color: linear-gradient(35deg, #ffbf76, #76a4f3);
+
+    --theme-color: #d8974d;
+
+    --primary-color: #1b1d24;
+
+    --menu-primary-color: #0f1114;
+    --menu-button-hover: rgba(255, 255, 255, 0.1);
+    --menu-button-active: rgba(255, 255, 255, 0.5);
+
+    --splitter-hover: rgb(210, 235, 255);
+
+    --light-dotted-background:
+        radial-gradient(circle, rgba(85, 104, 119, 0.326) 0%, rgba(33, 34, 46, 0) 70%) -500px -500px / 1500px 1500px no-repeat,
+        linear-gradient(transparent 750px, var(--primary-color) 1000px),
+        radial-gradient(ellipse 150% 50%, var(--primary-color) 60%, transparent 75%) center -50vh / 100vw 500vh no-repeat,
+        radial-gradient(rgb(255, 255, 255) 2px, transparent 0) -25px -25px / 25px 25px repeat,
+        radial-gradient(ellipse 150% 50%, var(--primary-color) 65%,
+            var(--theme-color) 85%) center -50vh / 100vw 500vh no-repeat, rgb(27, 29, 36);
+
+    --content-border-radius: 20px 20px 0 0;
+    --content-shadow-color: rgba(159, 165, 192, 0.473);
+    --content-border: 2px solid rgba(159, 165, 192, 0.473);
+
+    --content-container-bg: #111112;
+
+    --card-width: 174px;
+    --card-height: 237px;
+
+    --header-height: 56px;
+    --menu-width: 250px;
+    --splitter-width: 5px;
+    
+    --information-container-width-close: 15px;
+
+    --alert: #ff8989;
+}
+
+* {
+    font-family: var(--primary-font);
+}

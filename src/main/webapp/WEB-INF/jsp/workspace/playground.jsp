@@ -16,12 +16,12 @@
         overflow: hidden;
     }
 
-    .card-item-container svg{
-        position: absolute!important;
+    .card-item-container svg {
+        position: absolute !important;
     }
 </style>
 <canvas id="background-play"></canvas>
-<div style="padding: 24px;">
+<div style="padding: 24px; display: flex; height: 100%; flex-direction: column; justify-content: space-between;">
 
     <!-- Timer and Card -->
     <div class="playground-header">
@@ -34,8 +34,8 @@
     </div>
 
     <!-- Showing Card Zone -->
-    <div class="play-card-zone" id="card-placeholder">TEST</div>
+    <div class="play-card-zone" id="card-placeholder">Ello</div>
 
     <!-- Vote zone -->
-    <div id="vote-cards" ></div>
+    <div id="vote-cards"></div>
 </div>

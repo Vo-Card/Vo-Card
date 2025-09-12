@@ -1,0 +1,113 @@
+/* ------------------------- */
+/*  Home Decks Content Area  */
+/* ------------------------- */
+
+.cover-search-decks {
+    width: 40%;
+}
+
+.cover-search-decks input {
+    padding: 7px;
+    width: 100%;
+}
+
+.decks {
+    padding-left: 5px;
+    padding-right: 5px;
+    width: 100%;
+}
+
+.decks-header {
+    width: 100%;
+    height: fit-content;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.decks-text h5 {
+    border-bottom-style: solid;
+    border-width: 2px;
+    border-color: white;
+    padding-left: 2px;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.deck-loader-container {
+    width: 100%;
+    height: 100%;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.hoverOverlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hoverOverlay::before {
+    position: absolute;
+    content: "";
+    width: calc(var(--card-width) + 100px);
+    height: calc(var(--card-height) + 100px);
+    top: -50px;
+    left: -50px;
+    z-index: 1;
+    background: linear-gradient(45deg, transparent 40%, #ffffff 40%,
+            #ffffff 50%, transparent 50%,
+            transparent 60%, #ffffff 60%,
+            #ffffff 62%, transparent 62%);
+    background-position-y: -150px;
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity 0.5s;
+    animation: verticalOverlay 1s ease infinite;
+}
+
+.hoverOverlay:hover::before {
+    opacity: 1;
+}
+
+@keyframes verticalOverlay {
+    0% {
+        background-position-y: -150px;
+    }
+
+    100% {
+        background-position-y: calc(var(--card-height) + 100px - 150px);
+    }
+}
+
+.deck-editor {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.deck-cover {
+    margin-top: 25px;
+    text-align: center;
+    padding-top: 150 * 0.8px;
+    padding-bottom: 150 * 0.8px;
+    background-color: #0B0B0B;
+}
