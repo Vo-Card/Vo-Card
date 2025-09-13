@@ -1,5 +1,11 @@
-import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader, loadVoteCards } from '/js/deckManagement/deckLoader.js';
-import { statsLoader } from '/js/workspace/statsLoader.js';
+import {
+    deckLoader,
+    deckDetailLoader,
+    levelDetailLoader,
+    cardDetailLoader,
+    loadVoteCards,
+} from "/js/deckManagement/deckLoader.js";
+import { statsLoader } from "/js/workspace/statsLoader.js";
 import { sendPackDeckId, cardSessionPlay } from '/js/workspace/review.js'
 import { snowfallEffect } from '/js/workspace/snowfall.js';
 
@@ -12,7 +18,10 @@ let currentController = null;
 
 // Map top-level pages to optional JS + CSS
 const pageComponents = {
-    "/workspace/home": { js: () => initChartz(), css: "/css/workspace/home.css" },
+    "/workspace/home": {
+        js: () => initChartz(),
+        css: "/css/workspace/home.css",
+    },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
     "/workspace/playground": { js: () => { sendPackDeckId(["752111449966383104"]); loadVoteCards(); snowfallEffect(); }, css: "/css/workspace/playground.css" },
     "/workspace/review": { js: null, css: "/css/workspace/review.css" },
@@ -25,7 +34,7 @@ const pageComponents = {
  * @returns {Promise}
  */
 function loadCSS(href) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         if (cssCache.has(href)) {
             resolve();
             return;
@@ -43,18 +52,33 @@ function loadCSS(href) {
 }
 
 /**
+ *
+ * @param {String} headerName
+ */
+function changePageHeader(headerName) {
+    headerName = headerName.charAt(0).toUpperCase() + headerName.slice(1);
+
+    const pagePlaceholder = document.querySelector(
+        "[current-page-placeholder]"
+    );
+    if (pagePlaceholder) {
+        pagePlaceholder.textContent = headerName;
+    }
+}
+
+/**
  * Fetch page content (AJAX)
- * @param {String} path 
- * @param {AbortController} signal 
+ * @param {String} path
+ * @param {AbortController} signal
  * @returns {Promise<string|null>}
  */
-export async function fetchPage(path, signal = null) {
+async function fetchPage(path, signal = null) {
     if (cache.has(path)) return cache.get(path);
 
     try {
         const res = await fetch(path, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
-            signal: signal?.signal
+            signal: signal?.signal,
         });
 
         if (!res.ok) throw new Error("404");
@@ -63,8 +87,7 @@ export async function fetchPage(path, signal = null) {
         cache.set(path, html);
         return html;
     } catch (err) {
-        if (err.name === "AbortError")
-            return null;
+        if (err.name === "AbortError") return null;
         console.error(err);
         return null;
     }
@@ -72,8 +95,8 @@ export async function fetchPage(path, signal = null) {
 
 /**
  * Load a page with AJAX, inject CSS before showing content
- * @param {String} path 
- * @param {Boolean} addHistory 
+ * @param {String} path
+ * @param {Boolean} addHistory
  */
 export async function loadPage(path, addHistory = true) {
     // Cancel previous request
@@ -90,7 +113,9 @@ export async function loadPage(path, addHistory = true) {
     if (!contentEl) return;
 
     // Initialize JS + CSS based on mapping
-    const component = Object.keys(pageComponents).find(p => path.startsWith(p));
+    const component = Object.keys(pageComponents).find((p) =>
+        path.startsWith(p)
+    );
     let cssPromise = Promise.resolve();
     let jsFn = null;
 
@@ -110,23 +135,45 @@ export async function loadPage(path, addHistory = true) {
     // Deck-specific AJAX loader
     if (path.startsWith("/workspace/decks")) {
         if (/^\/workspace\/decks\/?$/.test(path)) deckLoader();
-        else if (/^\/workspace\/decks\/[^/]+\/?$/.test(path)) deckDetailLoader(path);
-        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path)) levelDetailLoader(path);
-        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path)) cardDetailLoader(path);
+        else if (/^\/workspace\/decks\/[^/]+\/?$/.test(path))
+            deckDetailLoader(path);
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path))
+            levelDetailLoader(path);
+        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path))
+            cardDetailLoader(path);
     }
+    const match = path.match(/^\/workspace\/([^\/]+)/);
+
+    changePageHeader(match ? match[1] + " Page" : "unknown Page");
 
     if (addHistory) window.history.pushState({ path }, "", path);
     console.log("Loaded via AJAX:", path);
 }
 
 // Preload pages on hover
-document.addEventListener("mouseover", event => {
+document.addEventListener("mouseover", (event) => {
     const target = event.target;
     if (target instanceof Element) {
         const link = target.closest("a[data-workspace]");
         if (link) {
             const href = link.getAttribute("href");
             if (href && !cache.has(href)) fetchPage(href);
+        }
+    }
+});
+
+document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target instanceof Element) {
+        const link = target.closest("a[data-workspace]");
+        if (link) {
+            event.preventDefault();
+            loadPage(
+                link.getAttribute("href"),
+                document.location.pathname == link.getAttribute("href")
+                    ? false
+                    : true
+            );
         }
     }
 });

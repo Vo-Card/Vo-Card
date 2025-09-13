@@ -64,8 +64,13 @@ public class SessionManager {
      * @return new sessionid
      */
     public static Optional<Row> refreshSession(String sessionId, String rawRefreshToken) {
-        // Checking if refreshed_token is already expire now
-        String sql = "SELECT user_id_FK, refresh_token_hash, remember_me, ip_address, user_agent FROM sessiontb WHERE session_id_PK = ? AND expires_at > NOW()";
+        // Step 1: Validate the session from the database.
+        String sql = """
+                    SELECT s.user_id_FK, s.refresh_token_hash, s.remember_me, s.ip_address, s.user_agent, u.username, u.display_name
+                    FROM sessiontb s
+                    JOIN usertb u ON s.user_id_FK = u.user_id_PK
+                    WHERE s.session_id_PK = ? AND s.expires_at > NOW()
+                """;
         Row sessionRow = DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
 
         // if there any session row in table : return invalid if session is null
@@ -85,6 +90,7 @@ public class SessionManager {
 
         Long userId = ((Number) sessionRow.get("user_id_FK")).longValue();
         String username = (String) sessionRow.get("username");
+        String displayName = (String) sessionRow.get("display_name");
         boolean rememberMe = (boolean) sessionRow.get("remember_me");
         String ipAddress = (String) sessionRow.get("ip_address");
         String userAgent = (String) sessionRow.get("user_agent");

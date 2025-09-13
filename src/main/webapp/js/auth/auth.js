@@ -1,16 +1,44 @@
 export const TokenManager = {
     getAccessToken: () => {
-        return sessionStorage.getItem('access_token');
+        return sessionStorage.getItem("access_token");
     },
     /**
-     * @param {String} token 
+     * @param {String} token
      */
     setAccessToken: (token) => {
-        sessionStorage.setItem('access_token', token);
+        sessionStorage.setItem("access_token", token);
     },
     clearAccessToken: () => {
-        sessionStorage.removeItem('access_token');
-    }
+        sessionStorage.removeItem("access_token");
+    },
+    getTokenHeader: () => {
+        const token = sessionStorage.getItem("access_token");
+        if (!token) return null;
+        try {
+            const [header] = token.split(".");
+            return JSON.parse(atob(header));
+        } catch (e) {
+            return null;
+        }
+    },
+    getTokenPayload: () => {
+        const token = sessionStorage.getItem("access_token");
+        if (!token) return null;
+        try {
+            const [, payload] = token.split(".");
+            return JSON.parse(atob(payload));
+        } catch (e) {
+            return null;
+        }
+    },
+    getUserData: () => {
+        const payload = TokenManager.getTokenPayload();
+        return {
+            username: payload?.username,
+            display_name: payload?.display_name,
+            uid: payload?.sub,
+        };
+    },
 };
 
 /**
@@ -22,7 +50,7 @@ export async function refreshToken() {
     try {
         const response = await fetch("/api/auth/refresh", {
             method: "POST",
-            credentials: "include"
+            credentials: "include",
         });
 
         if (!response.ok) {
@@ -40,7 +68,6 @@ export async function refreshToken() {
             TokenManager.clearAccessToken();
             return null;
         }
-
     } catch (error) {
         console.error("Error refreshing token:", error);
         TokenManager.clearAccessToken();
@@ -68,29 +95,31 @@ export async function fetchWithAuth(url, options = {}) {
 
     const headers = {
         ...options.headers,
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
     };
 
     let response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
         try {
-            const refreshResponse = await fetch("/api/auth/refresh", { 
+            const refreshResponse = await fetch("/api/auth/refresh", {
                 method: "POST",
-                credentials: "include"
-             });
-            
+                credentials: "include",
+            });
+
             if (refreshResponse.ok) {
                 const data = await refreshResponse.json();
                 TokenManager.setAccessToken(data.access_token);
-                
+
                 const newAccessToken = TokenManager.getAccessToken();
                 const newHeaders = {
                     ...options.headers,
-                    'Authorization': `Bearer ${newAccessToken}`
+                    Authorization: `Bearer ${newAccessToken}`,
                 };
-                response = await fetch(url, { ...options, headers: newHeaders });
-                
+                response = await fetch(url, {
+                    ...options,
+                    headers: newHeaders,
+                });
             } else {
                 TokenManager.clearAccessToken();
                 window.location.replace("/login");
@@ -100,6 +129,6 @@ export async function fetchWithAuth(url, options = {}) {
             window.location.replace("/login");
         }
     }
-    
+
     return response;
 }
