@@ -1,5 +1,7 @@
 import { deckLoader, deckDetailLoader, levelDetailLoader, cardDetailLoader, loadVoteCards } from '/js/deckManagement/deckLoader.js';
 import { statsLoader } from '/js/workspace/statsLoader.js';
+import { sendPackDeckId, cardSessionPlay } from '/js/workspace/review.js'
+import { snowfallEffect } from '/js/workspace/snowfall.js';
 
 // Use to cache pages
 const cache = new Map();
@@ -12,7 +14,7 @@ let currentController = null;
 const pageComponents = {
     "/workspace/home": { js: () => initChartz(), css: "/css/workspace/home.css" },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
-    "/workspace/playground": { js: loadVoteCards, css: "/css/workspace/playground.css" },
+    "/workspace/playground": { js: () => { sendPackDeckId(["752111449966383104"]); loadVoteCards(); snowfallEffect(); }, css: "/css/workspace/playground.css" },
     "/workspace/review": { js: null, css: "/css/workspace/review.css" },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
 };
@@ -97,7 +99,7 @@ export async function loadPage(path, addHistory = true) {
         if (css) cssPromise = loadCSS(css);
         if (js) jsFn = js;
     }
-    
+
     // wait for CSS load (or cached)
     await cssPromise;
 
