@@ -1,7 +1,5 @@
 // TODO: <creating recently 7 days stat>
 // This files currently use in welcome.jsp
-// getting data by java
-// temporary mock up data for now
 
 function initChartz() {
     var myCanvas = /** @type {HTMLCanvasElement} */ (
@@ -9,13 +7,13 @@ function initChartz() {
     ).getContext('2d');
     // get month/day
     let datetime = [];
-    
+
     for (let i = 0; i < 7; i++) {
         let today = new Date();
         today.setDate(today.getDate() - i);
         datetime.push(today.toISOString().split("T")[0].slice(5));
     }
-    
+
     // chart 
     var chart = {
         type: "bar",
@@ -29,7 +27,7 @@ function initChartz() {
                 ],
                 borderColor: [
                     'rgba(108, 162, 51, 1)',
-    
+
                 ],
                 borderWidth: 1
             }]
@@ -57,6 +55,10 @@ function initChartz() {
                 beginAtZero: true
             }
         }
-    
+
     };
+    // Creating chart function 
+    // dont delete this and dont care the error (if you see)
+    // @ts-ignore 
+    new Chart(myCanvas, chart)
 }

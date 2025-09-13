@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,20 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/review")
 public class ReviewApiController {
 
-    public static class reviewRequest {
-        ArrayList<Long> allCards = new ArrayList<>();
-    }
-
     /**
-     * TODO<> continue this
-     * Javascript POST Array contain deck_id
+     * Javascript send Array of deck_id
      * GET cards from each deck_id
      * then randomize later
      * 
-     * @return
+     * @return cards in specific decks
      */
     @GetMapping("/getCards")
-    public static ResponseEntity<Map<String, Object>> reviewCard(@RequestParam ArrayList<Long> arrayDeckId) {
+    public static ResponseEntity<Map<String, Object>> getDeckCards(@RequestParam ArrayList<Long> arrayDeckId) {
         Map<String, Object> response = new HashMap<>();
         // It's still an array
         if (arrayDeckId != null) {
@@ -50,4 +44,28 @@ public class ReviewApiController {
         System.out.println(arrayDeckId);
         return null;
     }
+
+    /**
+     * deckId levelId cardId for GET current word's definition
+     * 
+     * @param req
+     * @return current card_word definition
+     */
+    @GetMapping("/getDefinition")
+    public static ResponseEntity<Map<String, Object>> cardDefinition(@RequestParam String deckId,
+            @RequestParam String levelId, @RequestParam String cardId) {
+        Map<String, Object> response = new HashMap<>();
+
+        Long covertedDeckId = Long.parseLong(deckId);
+        Long covertedCardId = Long.parseLong(cardId);
+        Long covertedLevelId = Long.parseLong(levelId);
+
+        if (covertedCardId != null && covertedDeckId != null && covertedLevelId != null) {
+            Object cardInfo = DeckManager.getCardInfo(covertedDeckId, covertedLevelId, covertedCardId);
+            response.put("Definition", cardInfo);
+            return ResponseEntity.ok(response);
+        }
+        return null;
+    }
+
 }

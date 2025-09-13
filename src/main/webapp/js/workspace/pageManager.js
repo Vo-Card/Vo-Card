@@ -6,6 +6,8 @@ import {
     loadVoteCards,
 } from "/js/deckManagement/deckLoader.js";
 import { statsLoader } from "/js/workspace/statsLoader.js";
+import { sendPackDeckId, cardSessionPlay } from '/js/workspace/review.js'
+import { snowfallEffect } from '/js/workspace/snowfall.js';
 
 // Use to cache pages
 const cache = new Map();
@@ -21,10 +23,7 @@ const pageComponents = {
         css: "/css/workspace/home.css",
     },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
-    "/workspace/playground": {
-        js: loadVoteCards,
-        css: "/css/workspace/playground.css",
-    },
+    "/workspace/playground": { js: () => { sendPackDeckId(["752111449966383104"]); loadVoteCards(); snowfallEffect(); }, css: "/css/workspace/playground.css" },
     "/workspace/review": { js: null, css: "/css/workspace/review.css" },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
 };
