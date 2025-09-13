@@ -14,7 +14,8 @@ import java.util.UUID;
 public class SessionManager {
 
     /** Generate a new session with JWT access token and a refresh token. */
-    public static Row createSession(Long userId, String username, boolean rememberMe, String ipAddress, String userAgent) {
+    public static Row createSession(Long userId, String username, boolean rememberMe, String ipAddress,
+            String userAgent) {
         String sessionId = UUID.randomUUID().toString();
         String rawRefreshToken = UUID.randomUUID().toString();
         String hashedRefreshToken = BCrypt.hashpw(rawRefreshToken, BCrypt.gensalt(12));
@@ -23,7 +24,8 @@ public class SessionManager {
         Instant expiresAt = Instant.now().plus(daysToExpire, ChronoUnit.DAYS);
 
         String sql = "INSERT INTO sessiontb (session_id_PK, user_id_FK, refresh_token_hash, remember_me, expires_at, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt), ipAddress, userAgent);
+        DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt),
+                ipAddress, userAgent);
 
         String accessToken = JwtManager.signJwt(userId.toString(), username);
 
@@ -36,12 +38,18 @@ public class SessionManager {
     }
 
     /**
-     * Refresh an existing session. This includes refresh token rotation and sliding session expiration.
+     * Refresh an existing session. This includes refresh token rotation and sliding
+     * session expiration.
      * Returns a new JWT access token and a new refresh token.
      */
     public static Optional<Row> refreshSession(String sessionId, String rawRefreshToken) {
         // Step 1: Validate the session from the database.
-        String sql = "SELECT user_id_FK, refresh_token_hash, remember_me, ip_address, user_agent FROM sessiontb WHERE session_id_PK = ? AND expires_at > NOW()";
+        String sql = """
+                    SELECT s.user_id_FK, s.refresh_token_hash, s.remember_me, s.ip_address, s.user_agent, u.username
+                    FROM sessiontb s
+                    JOIN users u ON s.user_id_FK = u.user_id
+                    WHERE s.session_id_PK = ? AND s.expires_at > NOW()
+                """;
         Row sessionRow = DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
 
         if (sessionRow == null) {

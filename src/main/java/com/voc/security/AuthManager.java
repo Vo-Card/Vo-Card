@@ -38,7 +38,7 @@ public class AuthManager {
             String hashedPassword = PasswordUtils.generateSecretKey(password);
             String sql = "INSERT INTO usertb (user_id_PK, display_name, username, password) VALUES (?, ?, ?, ?)";
             Long userId = Snowflake.nextId();
-            
+
             DatabaseUtils.sqlPrepareStatement(sql, userId, displayName, username, hashedPassword);
 
             // Initialize default deck from the root user.
@@ -57,9 +57,10 @@ public class AuthManager {
      * @param browserMetaData Browser metadata
      * @return Session token if login succeeds, or null if authentication fails
      */
-    public static Row loginUser(String username, String password, boolean rememberMe, String ipAddress, String userAgent) {
+    public static Row loginUser(String username, String password, boolean rememberMe, String ipAddress,
+            String userAgent) {
         // Fetch user
-        String sql = "SELECT user_id_PK, password FROM usertb WHERE username = ?";
+        String sql = "SELECT user_id_PK, password, display_name FROM usertb WHERE username = ?";
         Row user = DatabaseUtils.sqlSingleRowStatement(sql, username);
 
         if (user == null)
@@ -67,11 +68,13 @@ public class AuthManager {
 
         Long userId = ((Number) user.get("user_id_PK")).longValue();
         String storedPassword = (String) user.get("password");
+        String displayName = (String) user.get("display_name");
         if (!PasswordUtils.verifyPassword(password, storedPassword))
             return null;
 
         try {
-            Row sessionId = SessionManager.createSession(userId, username, rememberMe, ipAddress, userAgent);
+            Row sessionId = SessionManager.createSession(userId, username, displayName, rememberMe, ipAddress,
+                    userAgent);
             return sessionId;
         } catch (Exception e) {
             System.err.println("Encryption error: " + e.getMessage());
@@ -80,7 +83,8 @@ public class AuthManager {
     }
 
     /**
-     * Checks if a session is valid by validating both the session ID and refresh token.
+     * Checks if a session is valid by validating both the session ID and refresh
+     * token.
      *
      * @param sessionId       The session ID from the cookie.
      * @param rawRefreshToken The raw refresh token from the cookie.
@@ -88,19 +92,18 @@ public class AuthManager {
      */
     public static boolean validateSession(String sessionId, String rawRefreshToken) {
         String sql = "SELECT refresh_token_hash FROM sessiontb WHERE session_id_PK = ? AND expires_at > ?";
-        
+
         Row sessionData = DatabaseUtils.sqlSingleRowStatement(sql, sessionId, LocalDateTime.now());
-        
+
         if (sessionData == null) {
             return false;
         }
-        
+
         String hashedToken = (String) sessionData.get("refresh_token_hash");
-        
+
         boolean isValid = BCrypt.checkpw(rawRefreshToken, hashedToken);
         return isValid;
     }
-
 
     /**
      * Checks if a username already exists in the database.

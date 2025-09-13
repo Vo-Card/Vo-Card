@@ -19,14 +19,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * JwtManager handles the creation, signing, and validation of JSON Web Tokens (JWTs).
+ * JwtManager handles the creation, signing, and validation of JSON Web Tokens
+ * (JWTs).
  * <p>
- * JWT is used for stateless authentication, allowing secure transmission of user information.
+ * JWT is used for stateless authentication, allowing secure transmission of
+ * user information.
  * </p>
  * <p>
- * The class manages a cache of active signing keys, supports key rotation, and ensures
- * that tokens are signed with a valid key. It also validates incoming tokens against the
- * appropriate signing key based on the {@code key ID} (kid) in the token header.
+ * The class manages a cache of active signing keys, supports key rotation, and
+ * ensures
+ * that tokens are signed with a valid key. It also validates incoming tokens
+ * against the
+ * appropriate signing key based on the {@code key ID} (kid) in the token
+ * header.
  * </p>
  */
 public class JwtManager {
@@ -88,32 +93,30 @@ public class JwtManager {
         Instant expireAt = Instant.now().plus(KEY_EXP_DAYS, ChronoUnit.DAYS);
 
         DatabaseUtils.sqlPrepareStatement(
-            "INSERT INTO jwt_keys (kid, secret_key, expire_at, is_primary) VALUES (?, ?, ?, 1)",
-            kid, encodedSecret, Date.from(expireAt)
-        );
+                "INSERT INTO jwt_keys (kid, secret_key, expire_at, is_primary) VALUES (?, ?, ?, 1)",
+                kid, encodedSecret, Date.from(expireAt));
 
         DatabaseUtils.sqlPrepareStatement(
-        "DELETE FROM jwt_keys WHERE expire_at < NOW()"
-        );
+                "DELETE FROM jwt_keys WHERE expire_at < NOW()");
 
         initializeKeys();
     }
 
     /**
      * Creates a new JWT using the current primary key.
-     * The method includes a check to ensure the key will not expire during the JWT's lifetime.
+     * The method includes a check to ensure the key will not expire during the
+     * JWT's lifetime.
      *
-     * @param userId The user ID to embed in the JWT.
+     * @param userId   The user ID to embed in the JWT.
      * @param username The username to embed in the JWT.
      * @return A signed JWT string.
      */
-    public static String signJwt(String userId, String username) {
+    public static String signJwt(String userId, String username, String displayName) {
         if (primaryKid == null) {
             rotateKey();
         } else {
             Row primaryKeyRow = DatabaseUtils.sqlSingleRowStatement(
-                "SELECT expire_at FROM jwt_keys WHERE kid = ?", primaryKid
-            );
+                    "SELECT expire_at FROM jwt_keys WHERE kid = ?", primaryKid);
             if (primaryKeyRow != null) {
                 Date expireAt = (Date) primaryKeyRow.get("expire_at");
                 if (expireAt.toInstant().isBefore(Instant.now().plus(JWT_EXP_MINUTES, ChronoUnit.MINUTES))) {
@@ -128,25 +131,28 @@ public class JwtManager {
         Instant now = Instant.now();
 
         return Jwts.builder()
-            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-            .setHeaderParam("kid", primaryKid)
-            .setSubject(userId)
-            .claim("username", username)
-            .setIssuedAt(Date.from(now))
-            .setExpiration(Date.from(now.plus(JWT_EXP_MINUTES, ChronoUnit.MINUTES)))
-            .signWith(signingKey)
-            .compact();
+                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+                .setHeaderParam("kid", primaryKid)
+                .setSubject(userId)
+                .claim("username", username)
+                .claim("display_name", displayName)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plus(JWT_EXP_MINUTES, ChronoUnit.MINUTES)))
+                .signWith(signingKey)
+                .compact();
     }
 
     /**
      * Validates a JWT using its key ID and returns the user ID if valid.
      * <p>
-     * If the token is invalid, expired, or the key ID does not match any active keys,
+     * If the token is invalid, expired, or the key ID does not match any active
+     * keys,
      * an empty Optional is returned.
      * </p>
      *
      * @param token The JWT to validate.
-     * @return An Optional containing the user ID if the token is valid, otherwise an empty Optional.
+     * @return An Optional containing the user ID if the token is valid, otherwise
+     *         an empty Optional.
      */
     public static Optional<Long> validateJwt(String token) {
         try {
@@ -157,8 +163,8 @@ public class JwtManager {
 
             String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]));
             Map<String, Object> headerMap = objectMapper.readValue(
-                headerJson, new TypeReference<Map<String, Object>>() {}
-            );
+                    headerJson, new TypeReference<Map<String, Object>>() {
+                    });
 
             String kid = (String) headerMap.get("kid");
 
@@ -172,9 +178,9 @@ public class JwtManager {
             }
 
             Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(verificationKey)
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(verificationKey)
+                    .build()
+                    .parseClaimsJws(token);
 
             String subject = claims.getBody().getSubject();
             return Optional.ofNullable(subject).map(Long::parseLong);
