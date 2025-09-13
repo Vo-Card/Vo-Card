@@ -14,7 +14,8 @@ import java.util.UUID;
 public class SessionManager {
 
     /** Generate a new session with JWT access token and a refresh token. */
-    public static Row createSession(Long userId, String username, boolean rememberMe, String ipAddress,
+    public static Row createSession(Long userId, String username, String displayName, boolean rememberMe,
+            String ipAddress,
             String userAgent) {
         String sessionId = UUID.randomUUID().toString();
         String rawRefreshToken = UUID.randomUUID().toString();
@@ -27,7 +28,7 @@ public class SessionManager {
         DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt),
                 ipAddress, userAgent);
 
-        String accessToken = JwtManager.signJwt(userId.toString(), username);
+        String accessToken = JwtManager.signJwt(userId.toString(), username, displayName);
 
         Row sessionData = new Row();
         sessionData.put("session_id", sessionId);
@@ -45,9 +46,9 @@ public class SessionManager {
     public static Optional<Row> refreshSession(String sessionId, String rawRefreshToken) {
         // Step 1: Validate the session from the database.
         String sql = """
-                    SELECT s.user_id_FK, s.refresh_token_hash, s.remember_me, s.ip_address, s.user_agent, u.username
+                    SELECT s.user_id_FK, s.refresh_token_hash, s.remember_me, s.ip_address, s.user_agent, u.username, u.display_name
                     FROM sessiontb s
-                    JOIN users u ON s.user_id_FK = u.user_id
+                    JOIN usertb u ON s.user_id_FK = u.user_id_PK
                     WHERE s.session_id_PK = ? AND s.expires_at > NOW()
                 """;
         Row sessionRow = DatabaseUtils.sqlSingleRowStatement(sql, sessionId);
@@ -68,11 +69,12 @@ public class SessionManager {
 
         Long userId = ((Number) sessionRow.get("user_id_FK")).longValue();
         String username = (String) sessionRow.get("username");
+        String displayName = (String) sessionRow.get("display_name");
         boolean rememberMe = (boolean) sessionRow.get("remember_me");
         String ipAddress = (String) sessionRow.get("ip_address");
         String userAgent = (String) sessionRow.get("user_agent");
 
-        return Optional.of(createSession(userId, username, rememberMe, ipAddress, userAgent));
+        return Optional.of(createSession(userId, username, displayName, rememberMe, ipAddress, userAgent));
     }
 
     /** Optionally delete a session (logout) */
