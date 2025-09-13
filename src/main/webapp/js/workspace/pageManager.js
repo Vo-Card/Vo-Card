@@ -53,12 +53,27 @@ function loadCSS(href) {
 }
 
 /**
+ *
+ * @param {String} headerName
+ */
+function changePageHeader(headerName) {
+    headerName = headerName.charAt(0).toUpperCase() + headerName.slice(1);
+
+    const pagePlaceholder = document.querySelector(
+        "[current-page-placeholder]"
+    );
+    if (pagePlaceholder) {
+        pagePlaceholder.textContent = headerName;
+    }
+}
+
+/**
  * Fetch page content (AJAX)
  * @param {String} path
  * @param {AbortController} signal
  * @returns {Promise<string|null>}
  */
-export async function fetchPage(path, signal = null) {
+async function fetchPage(path, signal = null) {
     if (cache.has(path)) return cache.get(path);
 
     try {
@@ -128,6 +143,9 @@ export async function loadPage(path, addHistory = true) {
         else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path))
             cardDetailLoader(path);
     }
+    const match = path.match(/^\/workspace\/([^\/]+)/);
+
+    changePageHeader(match ? match[1] + " Page" : "unknown Page");
 
     if (addHistory) window.history.pushState({ path }, "", path);
     console.log("Loaded via AJAX:", path);
