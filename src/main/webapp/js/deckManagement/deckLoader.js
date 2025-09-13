@@ -52,7 +52,7 @@ function createElementFromHTML(html, classes = [], attributes = {}) {
  * @param {String} type 
  * @param {String} ownership 
  */
-async function populateContainer(data, target, type = 'deck', ownership = null) {
+export async function populateContainer(data, target, type = 'deck', ownership = null) {
     for (const item of data) {
         const template = await loadTemplate(item.theme_url);
 
@@ -234,7 +234,7 @@ export async function loadVoteCards() {
         const svgs = await Promise.all(responses.map(res => res.text()));
 
         svgs.forEach((svgText, i) => {
-            const el = createElementFromHTML(svgText, ["card-item-container"], {'item-id':cards[i].id});
+            const el = createElementFromHTML(svgText, ["card-item-container"], { 'item-id': cards[i].id });
             const overlay = document.createElement("div");
             overlay.className = "hoverOverlay";
             el.appendChild(overlay);
