@@ -34,7 +34,7 @@ export async function statsLoader() {
     ).getContext('2d');
 
     let datetime = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    var chart = {
+    var chartConfig = {
         type: "bar",
         data: {
             labels: datetime,
@@ -76,4 +76,8 @@ export async function statsLoader() {
         }
 
     };
+    // Creating chart function 
+    // dont delete this and dont care the error (if you see)
+    // @ts-ignore
+    new Chart(myCanvas, chartConfig);
 }
