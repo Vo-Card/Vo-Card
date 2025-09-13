@@ -1,7 +1,7 @@
 // @ts-check
 
-import { fetchWithAuth } from '/js/auth/auth.js';
-import { insertEventActions } from '/js/deckManagement/cardWatcher.js';
+import { fetchWithAuth } from "/js/auth/auth.js";
+import { insertEventActions } from "/js/deckManagement/cardWatcher.js";
 
 const templateCache = new Map();
 
@@ -10,11 +10,11 @@ const templateCache = new Map();
  *
  * If there is no template with the URL, load the template from the given url,
  * and if failed sent the user back to login page(placeholder)
- * 
+ *
  * If the URL exist in `templateCache` then use the template instead of fetch it again.
- * 
- * @param {String} themeUrl 
- * @returns {Promise<String>} template HTML text 
+ *
+ * @param {String} themeUrl
+ * @returns {Promise<String>} template HTML text
  */
 async function loadTemplate(themeUrl) {
     if (templateCache.has(themeUrl)) return templateCache.get(themeUrl);
@@ -29,30 +29,36 @@ async function loadTemplate(themeUrl) {
 }
 
 /**
- * 
- * 
- * @param {String} html 
- * @param {Array} classes 
+ *
+ *
+ * @param {String} html
+ * @param {Array} classes
  * @param {Object} attributes
  * @return {HTMLDivElement} the element that have been created
  */
 function createElementFromHTML(html, classes = [], attributes = {}) {
-    const el = document.createElement('div');
+    const el = document.createElement("div");
     el.innerHTML = html;
-    classes.filter(cls => cls)
-        .forEach(cls => el.classList.add(cls));
-    Object.entries(attributes).forEach(([key, value]) => el.setAttribute(key, value));
+    classes.filter((cls) => cls).forEach((cls) => el.classList.add(cls));
+    Object.entries(attributes).forEach(([key, value]) =>
+        el.setAttribute(key, value)
+    );
     return el;
 }
 
 /**
- * 
- * @param {Object} data 
- * @param {HTMLElement} target 
- * @param {String} type 
- * @param {String} ownership 
+ *
+ * @param {Object} data
+ * @param {HTMLElement} target
+ * @param {String} type
+ * @param {String} ownership
  */
-async function populateContainer(data, target, type = 'deck', ownership = null) {
+async function populateContainer(
+    data,
+    target,
+    type = "deck",
+    ownership = null
+) {
     for (const item of data) {
         const template = await loadTemplate(item.theme_url);
 
@@ -61,20 +67,20 @@ async function populateContainer(data, target, type = 'deck', ownership = null) 
             .replace(/{secondary_color}/g, item.secondary_color);
 
         switch (type) {
-            case 'deck':
+            case "deck":
                 cardHTML = cardHTML
                     .replace(/{ii}/g, ownership === "forked" ? "" : "")
                     .replace(/{deck_id}/g, item.deck_id_PK)
                     .replace(/{deck_name}/g, item.deck_name);
                 break;
-            case 'level':
+            case "level":
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.level_id_PK)
                     .replace(/{top_indicator}/g, item.deck_name)
                     .replace(/{ii}/g, ownership === "forked" ? "" : "")
                     .replace(/{word_content}/g, item.level_name);
                 break;
-            case 'card':
+            case "card":
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.card_id_PK)
                     .replace(/{top_indicator}/g, item.level_name)
@@ -82,14 +88,27 @@ async function populateContainer(data, target, type = 'deck', ownership = null) 
                     .replace(/{word_content}/g, item.card_word);
                 break;
             default:
-                console.warn('Unknown type:', type);
+                console.warn("Unknown type:", type);
                 break;
         }
 
-        const container = createElementFromHTML(cardHTML, ['card-item-container', `${type}-container-indicator`, 'item-interactable'], {
-            'item-id': type === 'deck' ? item.deck_id_PK : type === 'level' ? item.level_id_PK : item.card_id_PK,
-            'item-type': type
-        });
+        const container = createElementFromHTML(
+            cardHTML,
+            [
+                "card-item-container",
+                `${type}-container-indicator`,
+                "item-interactable",
+            ],
+            {
+                "item-id":
+                    type === "deck"
+                        ? item.deck_id_PK
+                        : type === "level"
+                        ? item.level_id_PK
+                        : item.card_id_PK,
+                "item-type": type,
+            }
+        );
 
         const hoverOverlay = document.createElement("div");
         hoverOverlay.className = "hoverOverlay";
@@ -101,14 +120,14 @@ async function populateContainer(data, target, type = 'deck', ownership = null) 
 }
 
 /**
- * 
- * @param {String} url 
+ *
+ * @param {String} url
  * @returns {Promise<Object>}
  */
 async function safeFetch(url) {
     try {
         const res = await fetchWithAuth(url);
-        if (!res.ok) throw new Error('Unauthorized');
+        if (!res.ok) throw new Error("Unauthorized");
         return await res.json();
     } catch {
         window.location.replace("/login");
@@ -116,13 +135,13 @@ async function safeFetch(url) {
 }
 
 /**
- * 
- * @param {HTMLElement} target 
- * @param {String} url 
+ *
+ * @param {HTMLElement} target
+ * @param {String} url
  * @param {String} id A string of ID (String because javascript sucks)
- * @param {String} additionalClass 
+ * @param {String} additionalClass
  */
-async function appendTemplate(target, url, id, additionalClass = '') {
+async function appendTemplate(target, url, id, additionalClass = "") {
     const html = await loadTemplate(url);
     const el = createElementFromHTML(html, [additionalClass], { id });
     const overlay = document.createElement("div");
@@ -132,29 +151,51 @@ async function appendTemplate(target, url, id, additionalClass = '') {
 }
 
 export async function deckLoader() {
-    const forkedDeckContainer = document.getElementById('forked-decks-container');
-    const ownedDeckContainer = document.getElementById('owned-decks-container');
+    const forkedDeckContainer = document.getElementById(
+        "forked-decks-container"
+    );
+    const ownedDeckContainer = document.getElementById("owned-decks-container");
 
     const data = await safeFetch("/api/decks/getDecks");
-    console.log(data)
+    console.log(data);
     if (!data) return;
 
-    await populateContainer(data.forkedDecks, forkedDeckContainer, 'deck', 'forked');
-    await populateContainer(data.ownedDecks, ownedDeckContainer, 'deck', 'owned');
+    await populateContainer(
+        data.forkedDecks,
+        forkedDeckContainer,
+        "deck",
+        "forked"
+    );
+    await populateContainer(
+        data.ownedDecks,
+        ownedDeckContainer,
+        "deck",
+        "owned"
+    );
 
-    await appendTemplate(forkedDeckContainer, "/components/template/search_decks.svg", "searchDeckButton", "card-item-container");
-    await appendTemplate(ownedDeckContainer, "/components/template/create_deck.svg", "createDeckButton", "card-item-container");
+    await appendTemplate(
+        forkedDeckContainer,
+        "/components/template/search_decks.svg",
+        "searchDeckButton",
+        "card-item-container"
+    );
+    await appendTemplate(
+        ownedDeckContainer,
+        "/components/template/create_deck.svg",
+        "createDeckButton",
+        "card-item-container"
+    );
 
     insertEventActions(document, {
         interactableSelector: ".item-interactable, .level-container-indicator",
-        rippleSelector: ".card-item-container"
+        rippleSelector: ".card-item-container",
     });
 }
 
 /**
- * 
- * @param {String} path 
- * @returns 
+ *
+ * @param {String} path
+ * @returns
  */
 export async function deckDetailLoader(path) {
     const levelContainer = document.getElementById("cards-container");
@@ -165,9 +206,20 @@ export async function deckDetailLoader(path) {
     if (!data) return;
 
     levelContainer.innerHTML = "";
-    if (data.deckLevels) await populateContainer(data.deckLevels, levelContainer, 'level', data.ownership_type);
+    if (data.deckLevels)
+        await populateContainer(
+            data.deckLevels,
+            levelContainer,
+            "level",
+            data.ownership_type
+        );
 
-    await appendTemplate(levelContainer, "/components/template/new_card.svg", null, 'card-item-container');
+    await appendTemplate(
+        levelContainer,
+        "/components/template/new_card.svg",
+        null,
+        "card-item-container"
+    );
 
     insertEventActions(document, {
         interactableSelector: ".item-interactable, .level-container-indicator",
@@ -176,9 +228,9 @@ export async function deckDetailLoader(path) {
 }
 
 /**
- * 
- * @param {String} path 
- * @returns 
+ *
+ * @param {String} path
+ * @returns
  */
 export async function levelDetailLoader(path) {
     const cardContainer = document.getElementById("cards-container");
@@ -189,30 +241,40 @@ export async function levelDetailLoader(path) {
     if (!data) return;
 
     cardContainer.innerHTML = "";
-    if (data.cards) await populateContainer(data.cards, cardContainer, 'card');
+    if (data.cards) await populateContainer(data.cards, cardContainer, "card");
 
-    await appendTemplate(cardContainer, "/components/template/new_card.svg", null, 'card-item-container');
+    await appendTemplate(
+        cardContainer,
+        "/components/template/new_card.svg",
+        null,
+        "card-item-container"
+    );
 
-    insertEventActions();
+    insertEventActions(document, {
+        interactableSelector: ".item-interactable, .level-container-indicator",
+        rippleSelector: ".card-item-container",
+    });
 }
 
 /**
- * 
- * @param {String} path 
- * @returns 
+ *
+ * @param {String} path
+ * @returns
  */
 export async function cardDetailLoader(path) {
     const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)\/([^/]+)/);
     if (!match) return console.error("Invalid path:", path);
 
-    const data = await safeFetch(`/api/decks/${match[1]}/${match[2]}/${match[3]}`);
+    const data = await safeFetch(
+        `/api/decks/${match[1]}/${match[2]}/${match[3]}`
+    );
     if (!data) return;
 
     console.log(data);
 }
 
 /**
- * 
+ *
  */
 export async function loadVoteCards() {
     const voteCardContainer = document.getElementById("vote-cards");
@@ -225,16 +287,21 @@ export async function loadVoteCards() {
     ];
 
     try {
-        const responses = await Promise.all(cards.map(c => fetch(c.url)));
+        const responses = await Promise.all(cards.map((c) => fetch(c.url)));
 
         responses.forEach((res, i) => {
-            if (!res.ok) throw new Error(`Failed to fetch ${cards[i].url} (${res.status})`);
+            if (!res.ok)
+                throw new Error(
+                    `Failed to fetch ${cards[i].url} (${res.status})`
+                );
         });
 
-        const svgs = await Promise.all(responses.map(res => res.text()));
+        const svgs = await Promise.all(responses.map((res) => res.text()));
 
         svgs.forEach((svgText, i) => {
-            const el = createElementFromHTML(svgText, ["card-item-container"], {'item-id':cards[i].id});
+            const el = createElementFromHTML(svgText, ["card-item-container"], {
+                "item-id": cards[i].id,
+            });
             const overlay = document.createElement("div");
             overlay.className = "hoverOverlay";
             el.appendChild(overlay);
