@@ -7,10 +7,10 @@
             progess .</p>
         <div class="px-3 pb-2">
             <div class="d-flex gap-2">
-                <a href="#">
+                <a href="/workspace/review">
                     <p>[ Get Started ]</p>
                 </a>
-                <a href="#">
+                <a href="/workspace/decks">
                     <p>[ Create your own deck ]</p>
                 </a>
             </div>
