@@ -53,7 +53,7 @@ function createElementFromHTML(html, classes = [], attributes = {}) {
  * @param {String} type
  * @param {String} ownership
  */
-async function populateContainer(
+export async function populateContainer(
     data,
     target,
     type = "deck",
@@ -104,8 +104,8 @@ async function populateContainer(
                     type === "deck"
                         ? item.deck_id_PK
                         : type === "level"
-                        ? item.level_id_PK
-                        : item.card_id_PK,
+                            ? item.level_id_PK
+                            : item.card_id_PK,
                 "item-type": type,
             }
         );
