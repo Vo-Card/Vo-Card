@@ -7,12 +7,10 @@
         <h1>VoCard</h1>
     </div>
 
-    <h5>{current_page}</h5>
+    <h5 current-page-placeholder style="color: var(--primary-font-color); margin: 0;">current_page</h5>
 
-    <div class="user-info">
-        <div class="user-box">
-            <img src="/imgs/profileTemplate.png" alt="" style="width: 24px; height: 24px;">
-            <div>${username}</div>
-        </div>
+    <div class="user-box" style="display: flex;">
+        <i class="nf nf-fa-user" style="font-size: 20px; color: var(--primary-font-color); margin-right: 5px;"></i>
+        <p username-placeholder style="color: var(--primary-font-color); margin: 0;">username</p>
     </div>
 </header>
