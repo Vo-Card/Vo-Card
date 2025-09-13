@@ -27,7 +27,8 @@ public class SessionManager {
      * @param userAgent
      * @return new sessionid
      */
-    public static Row createSession(Long userId, String username, boolean rememberMe, String ipAddress,
+    public static Row createSession(Long userId, String username, String displayName, boolean rememberMe,
+            String ipAddress,
             String userAgent) {
         // post userid, username, remember me, ip adrdress, user agent
         String sessionId = UUID.randomUUID().toString();
@@ -43,7 +44,7 @@ public class SessionManager {
         DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt),
                 ipAddress, userAgent);
         // checking user Jwt key
-        String accessToken = JwtManager.signJwt(userId.toString(), username);
+        String accessToken = JwtManager.signJwt(userId.toString(), username, displayName);
 
         Row sessionData = new Row();
         sessionData.put("session_id", sessionId);
@@ -95,7 +96,7 @@ public class SessionManager {
         String ipAddress = (String) sessionRow.get("ip_address");
         String userAgent = (String) sessionRow.get("user_agent");
         // create new session for user
-        return Optional.of(createSession(userId, username, rememberMe, ipAddress, userAgent));
+        return Optional.of(createSession(userId, username, displayName, rememberMe, ipAddress, userAgent));
     }
 
     /** Optionally delete a session (logout) */
