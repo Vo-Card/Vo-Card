@@ -65,11 +65,12 @@
                     </div>
                 </div>
 
-                <div class="information-container">
+                <div id="information-container">
                     <!-- 
-                    Information of the selection here
-                    It will load from information component which contain informations
-                    -->
+                        Information of the selection here
+                        It will load from information component which contain informations
+                        -->
+                    <jsp:include page="/components/layout/workspace-rightbar.jsp" />
                 </div>
 
             </div>
