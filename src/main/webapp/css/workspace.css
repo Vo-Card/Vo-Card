@@ -118,6 +118,54 @@
     margin-right: -6px;
 }
 
+/* ----------------- */
+/* Right bar Styles  */
+/* ----------------- */
+#workspace-right-bar {
+    display: block;
+    padding: 10px;
+    color: white;
+}
+
+.right-decks-style,
+.right-card-session,
+.right-font-size,
+.start-review {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    padding-top: 15px;
+    border-bottom: #ffffff solid 1px;
+}
+
+.right-auto-timer,
+.review-mode {
+    display: block;
+    padding: 5px;
+    padding-top: 15px;
+    border-bottom: #ffffff solid 1px;
+
+}
+
+.review-options,
+.timer-options {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.auto-timer,
+.review-selection {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#auto-time-changer,
+#review-changer {
+    display: flex;
+    gap: 5px;
+}
+
 /* ------------------- */
 /* Workspace Container */
 /* ------------------- */
@@ -244,4 +292,46 @@
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.hoverOverlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hoverOverlay::before {
+    position: absolute;
+    content: "";
+    width: calc(var(--card-width) + 100px);
+    height: calc(var(--card-height) + 100px);
+    top: -50px;
+    left: -50px;
+    z-index: 1;
+    background: linear-gradient(45deg, transparent 40%, #ffffff 40%,
+            #ffffff 50%, transparent 50%,
+            transparent 60%, #ffffff 60%,
+            #ffffff 62%, transparent 62%);
+    background-position-y: -150px;
+    mix-blend-mode: overlay;
+    opacity: 0;
+    transition: opacity 0.5s;
+    animation: verticalOverlay 1s ease infinite;
+}
+
+.hoverOverlay:hover::before {
+    opacity: 1;
+}
+
+@keyframes verticalOverlay {
+    0% {
+        background-position-y: -150px;
+    }
+
+    100% {
+        background-position-y: calc(var(--card-height) + 100px - 150px);
+    }
 }
