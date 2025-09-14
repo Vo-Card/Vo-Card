@@ -25,7 +25,6 @@
             <style>
                 :root {
                     --theme-color: #1b1d24;
-                    --primary-color: rgba(23, 23, 23, 0.2);
                     --alert: #ff8989;
                 }
 
@@ -38,7 +37,17 @@
 
         <body style="background-color: var(--menu-primary-color);">
 
-            <div id="backdrop"></div>
+            <div id="backdrop">
+                <div id="popup-container">
+                    <div id="popup-title" style="display: flex;">
+                        <h1 id="popup-title-text" style="font-size: 20px;"></h1>
+                        <i class="nf nf-fa-close"></i>
+                    </div>
+                    <div id="popup-content-container">
+
+                    </div>
+                </div>
+            </div>
 
             <jsp:include page="/components/layout/workspace-header.jsp" />
 
