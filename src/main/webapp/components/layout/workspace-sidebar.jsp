@@ -32,25 +32,13 @@
     <div class="user selection">
         <ul class="user menu">
             <li>
-                <a href="/workspace/home" data-workspace>
+                <a sidebar-popup popup-type="setting">
                     <i class="nf nf-cod-settings_gear"></i>Settings
                 </a>
             </li>
 
             <li>
-                <a href="/workspace/home" data-workspace>
-                    <i class="nf nf-md-information_outline"></i>About Us
-                </a>
-            </li>
-
-            <li>
-                <a href="/workspace/home" data-workspace>
-                    <i class="nf nf-md-contacts_outline"></i>Contacts
-                </a>
-            </li>
-
-            <li>
-                <a href="/workspace/home" data-workspace>
+                <a href="/logout">
                     <i class="nf nf-md-logout_variant"></i>Logout
                 </a>
             </li>
