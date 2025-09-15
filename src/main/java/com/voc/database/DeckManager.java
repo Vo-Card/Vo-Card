@@ -1,7 +1,5 @@
 package com.voc.database;
 
-import static com.voc.utils.AnsiColor.TAG_DEBUG;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -53,7 +51,8 @@ public class DeckManager {
 
         Long themeModifierId = createNewModifier("#0f1114", "#C38A39", null, ThemeTypes.Deck);
 
-        Long deckId = createNewDeck("Default", "This is the VoCard official default deck.", true, themeId, themeModifierId, rootUserID);
+        Long deckId = createNewDeck("Default", "This is the VoCard official default deck.", true, themeId,
+                themeModifierId, rootUserID);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -79,34 +78,41 @@ public class DeckManager {
                 Long levelThemeModifierId = null;
                 switch (weight) {
                     case 1:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#0f1114", "#395B8E", "dots", ThemeTypes.Card);
                         break;
                     case 2:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#000000", "#26226B", "dots", ThemeTypes.Card);
                         break;
                     case 3:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#000000", "#6B1D42", "dots", ThemeTypes.Card);
                         break;
                     case 4:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#000000", "#AF3935", "dots", ThemeTypes.Card);
                         break;
                     case 5:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#000000", "#6CA233", "dots", ThemeTypes.Card);
                         break;
                     case 6:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card, "/components/template/card_template.svg");
+                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
                         levelThemeModifierId = createNewModifier("#000000", "#277243", "dots", ThemeTypes.Card);
                         break;
                     default:
                         break;
                 }
-                    
-                levelBatch.add(new Object[] { levelId, levelData.getKey(), weight, levelThemeId, levelThemeModifierId, deckId });
+
+                levelBatch.add(new Object[] { levelId, levelData.getKey(), weight, levelThemeId, levelThemeModifierId,
+                        deckId });
 
                 weight++;
                 for (Map.Entry<String, Map<String, List<String>>> cardData : levelData.getValue().entrySet()) {
@@ -127,9 +133,9 @@ public class DeckManager {
 
             // Execute batches
             DatabaseUtils.sqlExecuteBatch(
-                "INSERT INTO card_leveltb "+
-                "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "+
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO card_leveltb " +
+                            "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) " +
+                            "VALUES (?, ?, ?, ?, ?, ?)",
                     levelBatch);
             DatabaseUtils.sqlExecuteBatch(
                     "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)", cardBatch);
@@ -147,21 +153,22 @@ public class DeckManager {
      * @param userId
      * @return True if successfilly fork the default deck to new user.
      */
-    public static boolean initializeForkedDeck(Long userId){
-        
-        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement("SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername()).get("user_id_PK")).longValue();
+    public static boolean initializeForkedDeck(Long userId) {
+
+        Long rootUserID = ((Number) DatabaseUtils.sqlSingleRowStatement(
+                "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername()).get("user_id_PK"))
+                .longValue();
 
         boolean isRoot = (rootUserID == userId);
-        
-        if (!isRoot){
+
+        if (!isRoot) {
             SQLResult rootDecks = DatabaseUtils.sqlPrepareStatement(
-                "SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
-                rootUserID
-                );
-            if(rootDecks.isSuccess()){
-                for (Row deck: rootDecks.getData()){
+                    "SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
+                    rootUserID);
+            if (rootDecks.isSuccess()) {
+                for (Row deck : rootDecks.getData()) {
                     Long rootDeckId = ((Number) deck.get("deck_id_PK")).longValue();
-                    if(!forkDeck(rootDeckId, userId)){
+                    if (!forkDeck(rootDeckId, userId)) {
                         return false;
                     }
                 }
@@ -181,15 +188,15 @@ public class DeckManager {
      */
     public static Optional<String> getOwnershipType(Long userId, Long deckId) {
         String sql = """
-            SELECT 'owned' AS type
-            FROM decktb d
-            WHERE d.user_id_FK = ? AND d.deck_id_PK = ?
-            UNION
-            SELECT 'forked' AS type
-            FROM forktb f
-            WHERE f.user_id_FK = ? AND f.deck_id_FK = ?
-            LIMIT 1
-        """;
+                    SELECT 'owned' AS type
+                    FROM decktb d
+                    WHERE d.user_id_FK = ? AND d.deck_id_PK = ?
+                    UNION
+                    SELECT 'forked' AS type
+                    FROM forktb f
+                    WHERE f.user_id_FK = ? AND f.deck_id_FK = ?
+                    LIMIT 1
+                """;
 
         Row row = DatabaseUtils.sqlSingleRowStatement(sql, userId, deckId, userId, deckId);
 
@@ -207,14 +214,14 @@ public class DeckManager {
      */
     public static List<Row> getOwnedDecks(Long userid) {
         String sql = """
-            SELECT d.*, 
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM decktb d
-            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
-            WHERE d.user_id_FK = ?
-        """;
+                    SELECT d.*,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM decktb d
+                    LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+                    WHERE d.user_id_FK = ?
+                """;
 
         SQLResult ownedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
         List<Row> rows = ownedDecksList.getData();
@@ -231,15 +238,15 @@ public class DeckManager {
      */
     public static List<Row> getForkedDecks(Long userid) {
         String sql = """
-            SELECT d.*, 
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM forktb f
-            INNER JOIN decktb d ON f.deck_id_FK = d.deck_id_PK
-            LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
-            WHERE f.user_id_FK = ?
-        """;
+                    SELECT d.*,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM forktb f
+                    INNER JOIN decktb d ON f.deck_id_FK = d.deck_id_PK
+                    LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+                    WHERE f.user_id_FK = ?
+                """;
 
         SQLResult forkedDecksList = DatabaseUtils.sqlPrepareStatement(sql, userid);
         List<Row> rows = forkedDecksList.getData();
@@ -258,75 +265,78 @@ public class DeckManager {
      */
     public static List<Row> getCardsOfLevel(Long deckId, Long levelId) {
         String sql = """
-            SELECT c.*, 
-                cl.level_name, cl.level_weight,
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM cardtb c
-            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
-            WHERE cl.deck_id_FK = ? AND cl.level_id_PK = ?
-        """;
+                    SELECT c.*,
+                        cl.level_name, cl.level_weight,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+                    WHERE cl.deck_id_FK = ? AND cl.level_id_PK = ?
+                """;
 
         SQLResult cardList = DatabaseUtils.sqlPrepareStatement(sql, deckId, levelId);
         List<Row> rows = cardList.getData();
 
         Convertors.convertIdsToString(
-            rows,
-            "card_id_PK", "level_id_FK", "level_id_PK", "deck_id_FK", 
-            "theme_id_FK", "modifier_id_FK"
-        );
+                rows,
+                "card_id_PK", "level_id_FK", "level_id_PK", "deck_id_FK",
+                "theme_id_FK", "modifier_id_FK");
 
         return rows;
     }
 
     public static Row getCardInfo(Long deckId, Long levelId, Long cardId) {
         String sql = """
-            SELECT c.card_id_PK, c.card_word,
-                cl.level_name,
-                p.pos_id_PK, p.part_of_speech,
-                d.definition_id_PK, d.definition
-            FROM cardtb c
-            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-            INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
-            LEFT JOIN postb p ON c.card_id_PK = p.card_id_FK
-            LEFT JOIN definitiontb d ON p.pos_id_PK = d.pos_id_FK
-            WHERE c.card_id_PK = ?
-            AND cl.level_id_PK = ?
-            AND dck.deck_id_PK = ?
-            ORDER BY p.pos_id_PK, d.definition_id_PK
-        """;
+                    SELECT c.card_id_PK, c.card_word,
+                        cl.level_name,
+                        p.pos_id_PK, p.part_of_speech,
+                        d.definition_id_PK, d.definition
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
+                    LEFT JOIN postb p ON c.card_id_PK = p.card_id_FK
+                    LEFT JOIN definitiontb d ON p.pos_id_PK = d.pos_id_FK
+                    WHERE c.card_id_PK = ?
+                    AND cl.level_id_PK = ?
+                    AND dck.deck_id_PK = ?
+                    ORDER BY p.pos_id_PK, d.definition_id_PK
+                """;
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, cardId, levelId, deckId);
         List<Row> rows = result.getData();
-        
-        System.err.println(TAG_DEBUG + rows);
-        if (rows.isEmpty()) return null;
 
+        if (rows.isEmpty())
+            return null;
 
         Row cardInfo = new Row();
         cardInfo.put("card_id_PK", rows.get(0).get("card_id_PK").toString());
         cardInfo.put("card_word", rows.get(0).get("card_word"));
 
-        // POS + definitions
         Map<String, Row> posMap = new LinkedHashMap<>();
         for (Row row : rows) {
-            if (row.get("pos_id_PK") == null) continue;
+            if (row.get("pos_id_PK") == null)
+                continue;
 
             String posId = row.get("pos_id_PK").toString();
             Row posRow = posMap.computeIfAbsent(posId, id -> {
                 Row newPos = new Row();
                 newPos.put("pos_id_PK", id);
                 newPos.put("part_of_speech", row.get("part_of_speech"));
-                newPos.put("definitions", new ArrayList<String>());
+                newPos.put("definitions", new ArrayList<Row>()); // <-- now list of Rows
                 return newPos;
             });
 
-            if (row.get("definition") != null) {
+            if (row.get("definition_id_PK") != null && row.get("definition") != null) {
                 @SuppressWarnings("unchecked")
-                List<String> definitions = (List<String>) posRow.get("definitions");
-                definitions.add((String) row.get("definition"));            
+                List<Row> definitions = (List<Row>) posRow.get("definitions");
+
+                Row defRow = new Row();
+                defRow.put("definition_id_PK", row.get("definition_id_PK").toString());
+                defRow.put("definition", row.get("definition"));
+
+                definitions.add(defRow);
             }
         }
 
@@ -341,16 +351,16 @@ public class DeckManager {
      */
     public static List<Row> getDeckLevel(Long deckId) {
         String sql = """
-            SELECT cl.*,
-                d.deck_name,
-                t.theme_name, t.theme_type, t.theme_url,
-                m.primary_color, m.secondary_color, m.card_pattern
-            FROM card_leveltb cl
-            INNER JOIN decktb d ON cl.deck_id_FK = d.deck_id_PK
-            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
-            WHERE cl.deck_id_FK = ?
-        """;
+                    SELECT cl.*,
+                        d.deck_name,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM card_leveltb cl
+                    INNER JOIN decktb d ON cl.deck_id_FK = d.deck_id_PK
+                    LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+                    WHERE cl.deck_id_FK = ?
+                """;
 
         SQLResult deckLevelList = DatabaseUtils.sqlPrepareStatement(sql, deckId);
         List<Row> rows = deckLevelList.getData();
@@ -362,20 +372,20 @@ public class DeckManager {
 
     public static List<Row> getAllCardFromDeck(Long deckId) {
         String sql = """
-            SELECT 
-                c.card_id_PK,
-                c.card_word,
-                cl.level_name,
-                t.theme_url,
-                m.primary_color,
-                m.secondary_color,
-                m.card_pattern
-            FROM cardtb c
-            INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-            LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
-            LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
-            WHERE cl.deck_id_FK = ?
-        """;
+                    SELECT
+                        c.card_id_PK,
+                        c.card_word,
+                        cl.level_name,
+                        t.theme_url,
+                        m.primary_color,
+                        m.secondary_color,
+                        m.card_pattern
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+                    WHERE cl.deck_id_FK = ?
+                """;
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deckId);
         List<Row> rows = result.getData();
@@ -385,7 +395,6 @@ public class DeckManager {
         return rows;
     }
 
-
     /**
      * 
      * @param themeId
@@ -393,13 +402,13 @@ public class DeckManager {
      * @param themeType
      * @param themeURL
      */
-    public static Long createNewTheme(String themeName, ThemeTypes themeType, String themeURL){
+    public static Long createNewTheme(String themeName, ThemeTypes themeType, String themeURL) {
 
         Long themeId = Snowflake.nextId();
 
         DatabaseUtils.sqlPrepareStatement(
-                    "INSERT INTO themetb (theme_id_PK, theme_name, theme_type, theme_url) VALUES (?, ?, ?, ?)", 
-                    themeId, themeName, themeType.getValue(), themeURL);
+                "INSERT INTO themetb (theme_id_PK, theme_name, theme_type, theme_url) VALUES (?, ?, ?, ?)",
+                themeId, themeName, themeType.getValue(), themeURL);
         return themeId;
     }
 
@@ -411,18 +420,19 @@ public class DeckManager {
      * @param themeType
      * @return
      */
-    public static Long createNewModifier(String primaryColor, String secondaryColor, String pattern, ThemeTypes themeType){
+    public static Long createNewModifier(String primaryColor, String secondaryColor, String pattern,
+            ThemeTypes themeType) {
         Long modifierId = Snowflake.nextId();
         switch (themeType) {
             case Card:
                 DatabaseUtils.sqlPrepareStatement(
-                    "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color, card_pattern) VALUES (?, ?, ?, ?)", 
-                    modifierId, primaryColor, secondaryColor, pattern);
+                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color, card_pattern) VALUES (?, ?, ?, ?)",
+                        modifierId, primaryColor, secondaryColor, pattern);
                 break;
             case Deck:
                 DatabaseUtils.sqlPrepareStatement(
-                    "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color) VALUES (?, ?, ?)", 
-                    modifierId, primaryColor, secondaryColor);
+                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color) VALUES (?, ?, ?)",
+                        modifierId, primaryColor, secondaryColor);
                 break;
             default:
                 break;
@@ -439,22 +449,22 @@ public class DeckManager {
      * @param userId
      */
     public static Long createNewDeck(
-        String name,
-        String description, Boolean isPublic,
-        Long themeId, Long modifierId,
-        Long userId) {
-        
+            String name,
+            String description, Boolean isPublic,
+            Long themeId, Long modifierId,
+            Long userId) {
+
         Long deckId = Snowflake.nextId();
 
-        String sql ="INSERT INTO decktb " +
-                    "(deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK) " + 
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
+        String sql = "INSERT INTO decktb " +
+                "(deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
         DatabaseUtils.sqlSingleRowStatement(
-            sql,
-            deckId,
-            name, description, isPublic,
-            themeId, modifierId, userId);
+                sql,
+                deckId,
+                name, description, isPublic,
+                themeId, modifierId, userId);
 
         return deckId;
     }
@@ -466,11 +476,12 @@ public class DeckManager {
      * @param levelWeight
      * @param deckId
      */
-    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long themeId, Long modifierId, Long deckId) {
+    public static void createNewLevel(Long levelId, String levelName, int levelWeight, Long themeId, Long modifierId,
+            Long deckId) {
         DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO card_leveltb "+
-                "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "+
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO card_leveltb " +
+                        "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)",
                 levelId != null ? levelId : Snowflake.nextId(), levelName, levelWeight,
                 themeId, modifierId, deckId);
     }
@@ -517,7 +528,8 @@ public class DeckManager {
     // otherwise add user_id
     public static boolean forkDeck(Long deck_id, Long user_id) {
         // Check if they're trying to fork their own deck
-        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?", user_id);
+        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
+                user_id);
 
         if (isOwnDeck != null)
             return false;
