@@ -130,7 +130,7 @@
 .right-decks-style,
 .right-card-session,
 .right-font-size,
-.start-review {
+#start-review {
     display: flex;
     justify-content: space-between;
     padding: 5px;

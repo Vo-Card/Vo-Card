@@ -54,5 +54,5 @@
         </div>
     </div>
 
-    <div class="start-review">Review Deck(s)</div>
+    <div id="start-review">Review Deck(s)</div>
 </div>
