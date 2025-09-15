@@ -376,6 +376,8 @@ public class DeckManager {
                         c.card_id_PK,
                         c.card_word,
                         cl.level_name,
+                        cl.level_id_PK,
+                        cl.deck_id_FK,
                         t.theme_url,
                         m.primary_color,
                         m.secondary_color,
@@ -390,7 +392,7 @@ public class DeckManager {
         SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deckId);
         List<Row> rows = result.getData();
 
-        Convertors.convertIdsToString(rows, "card_id_PK");
+        Convertors.convertIdsToString(rows, "card_id_PK", "level_id_PK", "deck_id_FK");
 
         return rows;
     }

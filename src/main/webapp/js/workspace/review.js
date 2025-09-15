@@ -23,7 +23,7 @@ export async function sendPackDeckId(ids) {
         const res = await fetchWithAuth("/api/review/getCards?" + text)
         if (res.ok) {
             const data = await res.json();
-            return data;
+            return data.Cards;
 
         }
     } catch (err) {
@@ -32,14 +32,19 @@ export async function sendPackDeckId(ids) {
 }
 
 async function randomizer(usrDecks) {
-    console.log(usrDecks);
 
     // starting randomization
     const whichDeck = Math.floor(Math.random() * usrDecks.length)
+    console.log(usrDecks[whichDeck]);
     const whichCard = Math.floor(Math.random() * usrDecks[whichDeck].length)
+    console.log(usrDecks[whichDeck][whichCard]);
+
     return usrDecks[whichDeck][whichCard];
     // cardStage.textContent(packArray.Cards[whichDeck][whichCard]);
 }
+
+
+// Toilet ~~
 
 // TODO:<> Loop function for play
 /**
@@ -48,15 +53,13 @@ async function randomizer(usrDecks) {
  */
 export async function cardSessionPlay(sessionPlay) {
     // start
-    const usrCards = sendPackDeckId(["752111449966383104"]);
-    console.log(usrCards);
-
+    const usrCards = await sendPackDeckId(["752111449966383104"]);
 
     for (let i = 0; i < sessionPlay; i++) {
         console.log("IT'S STARTED");
 
-        let whatCard = randomizer(usrCards);
-        console.log(usrCards);
+        let whatCard = await randomizer(usrCards);
+        console.log(whatCard);
 
         try {
             const cardDefinition = await fetchWithAuth(`/api/review/getDefinition?levelId=${whatCard.level_id_PK}&deckId=${whatCard.deck_id_FK}&cardId=${whatCard.card_id_PK}`);
