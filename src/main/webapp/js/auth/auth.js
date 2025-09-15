@@ -7,19 +7,14 @@ export const TokenManager = {
      */
     setAccessToken: (token) => {
         sessionStorage.setItem("access_token", token);
+        const [, payload] = token.split(".");
+        const payloadJSON = JSON.parse(atob(payload));
+        sessionStorage.setItem("username", payloadJSON?.username);
+        sessionStorage.setItem("display_name", payloadJSON?.display_name);
+        sessionStorage.setItem("uid", payloadJSON?.sub);
     },
     clearAccessToken: () => {
         sessionStorage.removeItem("access_token");
-    },
-    getTokenHeader: () => {
-        const token = sessionStorage.getItem("access_token");
-        if (!token) return null;
-        try {
-            const [header] = token.split(".");
-            return JSON.parse(atob(header));
-        } catch (e) {
-            return null;
-        }
     },
     getTokenPayload: () => {
         const token = sessionStorage.getItem("access_token");
@@ -31,13 +26,28 @@ export const TokenManager = {
             return null;
         }
     },
-    getUserData: () => {
-        const payload = TokenManager.getTokenPayload();
-        return {
-            username: payload?.username,
-            display_name: payload?.display_name,
-            uid: payload?.sub,
-        };
+    getUsername: () => {
+        return sessionStorage.getItem("username");
+    },
+    getUserId: () => {
+        return sessionStorage.getItem("uid");
+    },
+    getDisplayName: () => {
+        return sessionStorage.getItem("display_name");
+    },
+    /**
+     * @param {{ username?: string, display_name?: string }} UpdatedUserData
+     */
+    setUserData: (UpdatedUserData) => {
+        if (UpdatedUserData.username) {
+            sessionStorage.setItem("username", UpdatedUserData.username);
+        }
+        if (UpdatedUserData.display_name) {
+            sessionStorage.setItem(
+                "display_name",
+                UpdatedUserData.display_name
+            );
+        }
     },
 };
 

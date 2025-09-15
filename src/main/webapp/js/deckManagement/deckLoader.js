@@ -24,7 +24,7 @@ async function loadTemplate(themeUrl) {
         templateCache.set(themeUrl, template);
         return template;
     } catch {
-        window.location.replace("/login");
+        console.error("Error loading template");
     }
 }
 
@@ -104,8 +104,8 @@ export async function populateContainer(
                     type === "deck"
                         ? item.deck_id_PK
                         : type === "level"
-                            ? item.level_id_PK
-                            : item.card_id_PK,
+                        ? item.level_id_PK
+                        : item.card_id_PK,
                 "item-type": type,
             }
         );
@@ -130,7 +130,7 @@ async function safeFetch(url) {
         if (!res.ok) throw new Error("Unauthorized");
         return await res.json();
     } catch {
-        window.location.replace("/login");
+        console.log("Error Fetching Page");
     }
 }
 
@@ -253,24 +253,9 @@ export async function levelDetailLoader(path) {
     insertEventActions(document, {
         interactableSelector: ".item-interactable, .level-container-indicator",
         rippleSelector: ".card-item-container",
+        deckId: match[1],
+        levelId: match[2],
     });
-}
-
-/**
- *
- * @param {String} path
- * @returns
- */
-export async function cardDetailLoader(path) {
-    const match = path.match(/^\/workspace\/decks\/([^/]+)\/([^/]+)\/([^/]+)/);
-    if (!match) return console.error("Invalid path:", path);
-
-    const data = await safeFetch(
-        `/api/decks/${match[1]}/${match[2]}/${match[3]}`
-    );
-    if (!data) return;
-
-    console.log(data);
 }
 
 /**

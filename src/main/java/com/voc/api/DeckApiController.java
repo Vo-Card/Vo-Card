@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
 import com.voc.utils.Row;
-import static com.voc.utils.AnsiColor.*;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -28,7 +27,7 @@ public class DeckApiController {
         Map<String, Object> response = new HashMap<>();
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
-            
+
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
@@ -39,33 +38,31 @@ public class DeckApiController {
                 response.put("forkedDecks", forkedDecks);
             }
         }
-        System.err.println(TAG_DEBUG + response);
         response.put("status", "session is valid");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{deckId}")
     public ResponseEntity<Map<String, Object>> getDeckData(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
-        @PathVariable Long deckId) { 
-        
-            
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+
         Map<String, Object> response = new HashMap<>();
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
-                
+
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
             // Validate Ownership
             Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if(ownershipType.isEmpty()){
+            if (ownershipType.isEmpty()) {
                 response.put("status", "error");
                 return ResponseEntity.ok(response);
             }
-            
+
             response.put("ownership_type", ownershipType.get());
-                        
+
             if (optionalUserId.isPresent()) {
                 List<Row> deckLevels = DeckManager.getDeckLevel(deckId);
                 response.put("deckLevels", deckLevels);
@@ -78,23 +75,23 @@ public class DeckApiController {
 
     @GetMapping("/{deckId}/{levelId}")
     public ResponseEntity<Map<String, Object>> getLevelData(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
-        @PathVariable Long deckId,
-        @PathVariable Long levelId) { 
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
-                
+
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
             // Validate Ownership
             Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if(ownershipType.isEmpty()){
+            if (ownershipType.isEmpty()) {
                 response.put("status", "error");
                 return ResponseEntity.ok(response);
             }
-            
+
             response.put("ownership_type", ownershipType.get());
 
             if (optionalUserId.isPresent()) {
@@ -108,24 +105,24 @@ public class DeckApiController {
 
     @GetMapping("/{deckId}/{levelId}/{cardId}")
     public ResponseEntity<Map<String, Object>> getDeck(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
-        @PathVariable Long deckId,
-        @PathVariable Long levelId,
-        @PathVariable Long cardId) { 
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId,
+            @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
-                
+
             String token = authToken.substring(7);
             Optional<Long> optionalUserId = JwtManager.validateJwt(token);
 
             // Validate Ownership
             Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if(ownershipType.isEmpty()){
+            if (ownershipType.isEmpty()) {
                 response.put("status", "error");
                 return ResponseEntity.ok(response);
             }
-            
+
             response.put("ownership_type", ownershipType.get());
 
             if (optionalUserId.isPresent()) {
