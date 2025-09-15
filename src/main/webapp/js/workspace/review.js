@@ -23,46 +23,55 @@ export async function sendPackDeckId(ids) {
         const res = await fetchWithAuth("/api/review/getCards?" + text)
         if (res.ok) {
             const data = await res.json();
-            tempData = data.Cards;
-            console.log(tempData);
-            randomizer()
+            return data.Cards;
+
         }
     } catch (err) {
         console.log("Failed to send Deck ID: ", err);
     }
 }
 
-async function randomizer() {
-    const packArray = tempData;
+async function randomizer(usrDecks) {
+
     // starting randomization
-    const whichDeck = Math.floor(Math.random() * packArray.length)
-    const whichCard = Math.floor(Math.random() * packArray[whichDeck].length)
+    const whichDeck = Math.floor(Math.random() * usrDecks.length)
+    console.log(usrDecks[whichDeck]);
+    const whichCard = Math.floor(Math.random() * usrDecks[whichDeck].length)
+    console.log(usrDecks[whichDeck][whichCard]);
 
-    const chosenCard = packArray[whichDeck][whichCard];
-    console.log("Chosen card:", chosenCard);
-
-    try {
-        const cardDefinition = await fetchWithAuth(`/api/review/getDefinition?levelId=${chosenCard.level_id_PK}&deckId=${chosenCard.deck_id_FK}&cardId=${chosenCard.card_id_PK}`);
-        const data = await cardDefinition.json();
-
-        console.log(data);
-        const cardStage = document.getElementById('card-placeholder');
-        populateContainer([chosenCard], cardStage, "card", null);
-
-    } catch (err) {
-        console.error(err);
-    }
+    return usrDecks[whichDeck][whichCard];
     // cardStage.textContent(packArray.Cards[whichDeck][whichCard]);
 }
 
+
+// Toilet ~~
+
 // TODO:<> Loop function for play
 /**
- * 
- * @param {number} sessionPlay 
+ *
+ * @param {number} sessionPlay
  */
 export async function cardSessionPlay(sessionPlay) {
     // start
+    const usrCards = await sendPackDeckId(["752111449966383104"]);
+
     for (let i = 0; i < sessionPlay; i++) {
-        console.log(i);
+        console.log("IT'S STARTED");
+
+        let whatCard = await randomizer(usrCards);
+        console.log(whatCard);
+
+        try {
+            const cardDefinition = await fetchWithAuth(`/api/review/getDefinition?levelId=${whatCard.level_id_PK}&deckId=${whatCard.deck_id_FK}&cardId=${whatCard.card_id_PK}`);
+            const data = await cardDefinition.json();
+
+            console.log(data);
+            const cardStage = document.getElementById('card-placeholder');
+            populateContainer([whatCard], cardStage, "card", null);
+
+        } catch (err) {
+            console.error(err);
+        }
     }
 }
+
