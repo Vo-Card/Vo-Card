@@ -2,12 +2,11 @@ import {
     deckLoader,
     deckDetailLoader,
     levelDetailLoader,
-    cardDetailLoader,
     loadVoteCards,
 } from "/js/deckManagement/deckLoader.js";
 import { statsLoader } from "/js/workspace/statsLoader.js";
-import { sendPackDeckId, cardSessionPlay } from '/js/workspace/review.js'
-import { snowfallEffect } from '/js/workspace/snowfall.js';
+import { sendPackDeckId, cardSessionPlay } from "/js/workspace/review.js";
+import { snowfallEffect } from "/js/workspace/snowfall.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -23,7 +22,14 @@ const pageComponents = {
         css: "/css/workspace/home.css",
     },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
-    "/workspace/playground": { js: () => { sendPackDeckId(["752111449966383104"]); loadVoteCards(); snowfallEffect(); }, css: "/css/workspace/playground.css" },
+    "/workspace/playground": {
+        js: () => {
+            sendPackDeckId(["752111449966383104"]);
+            loadVoteCards();
+            snowfallEffect();
+        },
+        css: "/css/workspace/playground.css",
+    },
     "/workspace/review": { js: null, css: "/css/workspace/review.css" },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
 };
@@ -33,7 +39,7 @@ const pageComponents = {
  * @param {String} href
  * @returns {Promise}
  */
-function loadCSS(href) {
+export function loadCSS(href) {
     return new Promise((resolve) => {
         if (cssCache.has(href)) {
             resolve();
@@ -81,6 +87,8 @@ async function fetchPage(path, signal = null) {
             signal: signal?.signal,
         });
 
+        console.log(res);
+
         if (!res.ok) throw new Error("404");
 
         const html = await res.text();
@@ -105,7 +113,8 @@ export async function loadPage(path, addHistory = true) {
 
     const html = await fetchPage(path, currentController);
     if (!html) {
-        window.location.href = "/error/404";
+        // window.location.href = "/error/404";
+        console.log("Failed to load page");
         return;
     }
 
@@ -139,8 +148,6 @@ export async function loadPage(path, addHistory = true) {
             deckDetailLoader(path);
         else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path))
             levelDetailLoader(path);
-        else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/[^/]+\/?$/.test(path))
-            cardDetailLoader(path);
     }
     const match = path.match(/^\/workspace\/([^\/]+)/);
 
@@ -174,6 +181,18 @@ document.addEventListener("click", (event) => {
                     ? false
                     : true
             );
+        }
+        const popup = target.closest("a[sidebar-popup]");
+        if (popup) {
+            const popupType = popup.getAttribute("popup-type");
+            switch (popupType) {
+                case "setting":
+                    // A fucking place holder
+                    break;
+                default:
+                    console.error("Invalid popup type.");
+                    break;
+            }
         }
     }
 });

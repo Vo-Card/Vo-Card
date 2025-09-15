@@ -277,6 +277,7 @@
 
 #backdrop.active > #popup-container{
     border: rgb(217, 217, 217) 1px solid;
+    transition: all 0.2s ease-in-out;
 }
 
 #popup-container{
@@ -289,6 +290,7 @@
     transition: all 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
+    border: rgb(217, 217, 217) 0px solid;
 }
 
 #popup-title{
@@ -297,6 +299,7 @@
     padding: 5px;
     display: flex;
     justify-content: space-between;
+    border-bottom: #4C5259 2px solid;
 }
 
 #popup-title-text{

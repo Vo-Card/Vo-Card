@@ -4,6 +4,8 @@ import { TokenManager, fetchWithAuth } from "/js/auth/auth.js";
 
 import { loadPage } from "/js/workspace/pageManager.js";
 
+import {} from "/js/workspace/popupManager.js";
+
 /**
  * Save the previous page URL
  */
@@ -20,17 +22,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (response.ok) {
             mainContent.style.display = "block";
         } else {
-            window.location.replace("/login");
+            console.log("response error : " + response);
+            // window.location.replace("/login");
         }
     } catch (error) {
-        window.location.replace("/login");
+        console.log("fetch failed");
+        // window.location.replace("/login");
     }
 
-    const userData = TokenManager.getUserData();
-
-    const username = userData.username;
-    const displayName = userData.display_name;
-    const uid = userData.uid;
+    const displayName = TokenManager.getDisplayName();
 
     const usernamePlaceholder = document.querySelector(
         "[username-placeholder]"
@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         usernamePlaceholder.textContent = displayName;
     }
 
-    console.log(TokenManager.getUserData());
     loadPage(document.location.pathname);
 });
 
