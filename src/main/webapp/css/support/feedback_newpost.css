@@ -1,0 +1,30 @@
+.textarea {
+    padding: 16px; 
+    width: 100%; 
+    max-width: 1000px; 
+    height: 300px; 
+    border-radius: 8px; 
+    border: none; 
+    margin: auto; 
+    margin-bottom: 10px; 
+    color: black;
+}
+
+.input-text {
+    padding: 16px; 
+    width: 100%; 
+    max-width: 1000px;  
+    border-radius: 8px; 
+    border: none; 
+    margin: auto; 
+    margin-bottom: 10px; 
+    color: black;
+}
+
+.submit {
+    background-color: #e1c89d; 
+    padding: 13px 28px; 
+    border: none; 
+    border-radius: 10px; 
+    color: black;
+}
