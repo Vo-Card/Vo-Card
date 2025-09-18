@@ -6,9 +6,9 @@
     <title>Feedback</title>
 
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/support/feedback.css">
 
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
     <link rel="stylesheet" type="text/css" href="/css/global.css">
 
     <script src="/js/screen_correction.js" defer></script>
@@ -43,37 +43,6 @@
 
         }
 
-        .feedback-container {
-            margin: auto;     
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px 80px;      
-            text-align: center;
-        }
-
-        .feedback {
-            display: flex;     
-            justify-content: center;  
-            gap: 30px;
-            margin: auto;
-            max-width: 600px;
-        }
-
-        .feedback a {
-            display: flex;             
-            flex-direction: column;   
-            justify-content: space-between;  
-            
-            background-color: #e1c89d;
-            padding: 25px 30px;
-            border-radius: 12px;
-            min-width: 250px;
-            min-height: 150px;
-            box-sizing: border-box;
-            margin: auto;
-            font-size: 20px;
-        }
-
     </style>
 </head>
 
@@ -86,10 +55,10 @@
         <h1>Feedback</h1>
         
         <div >
-            <p><input type="text" placeholder="Search" style="padding: 16px; width: 100%; max-width: 1000px; border-radius: 8px; border: none; margin: auto;"/></p>
+            <p><input type="text" placeholder="Search" class="feedback-input"/></p>
         </div>
 
-        <select style="padding: 14px;width: 15%; margin: 12px; margin-bottom: 120px; border-radius: 8px; border: none;">
+        <select class="heading-topic">
             <option>
                 Heading Topic
             </option>
@@ -97,7 +66,7 @@
 
         
         <div class="feedback">  
-            <a href="#">
+            <a href="feedback_page?type=1">
                 <div>
                     <p>Performance & Accessibility</p>
                 </div>
@@ -107,7 +76,7 @@
                 </div>
             </a>
 
-            <a href="#">
+            <a href="feedback_page?type=2">
                 <div>
                     <p>Features</p>
                 </div>
@@ -117,7 +86,7 @@
                 </div>
             </a>
 
-            <a href="#">
+            <a href="feedback_page?type=3">
                 <div>
                     <p>Overall Satisfaction</p>
                 </div>
@@ -135,7 +104,7 @@
         </div>  
         
         <div style="padding-top: 10px; padding-bottom: 10px;"></div>
-            <a href="#" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
+            <a href="feedback_newpost" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
                 New Post
             </a>
         </div>

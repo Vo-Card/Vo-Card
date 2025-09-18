@@ -6,13 +6,13 @@
     <title>Feedback_page</title>
 
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/support/feedback_page.css">
 
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
     <link rel="stylesheet" type="text/css" href="/css/global.css">
 
     <script src="/js/screen_correction.js" defer></script>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -42,37 +42,14 @@
             font-family: Sansita;
 
         }
-
-        .feedback-container {
-            margin: auto;     
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px 80px;      
-            text-align: center;
-        }
-
-        .feedback {
-            display: flex;     
-            justify-content: center;  
-            gap: 30px;
-            margin: auto;
-            max-width: 600px;
-        }
-
-        .feedback a {
-            display: flex;             
-            flex-direction: column;   
-            justify-content: space-between;  
-            
-            background-color: #e1c89d;
-            padding: 25px 30px;
-            border-radius: 12px;
-            min-width: 250px;
-            min-height: 150px;
-            box-sizing: border-box;
-            margin: auto;
+        span {
+            font-family: sarabun;
             font-size: 20px;
         }
+
+    
+
+
 
     </style>
 </head>
@@ -83,59 +60,102 @@
     </jsp:include>
 
     <div class="feedback-container">
-        <h1>Feedback</h1>
+        <c:choose>
+            <c:when test="${param.type == '1'}">
+                <h1>Performance & Accessibility</h1>
+
+                <div class="group-title">
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                </div>
+            </c:when>
+
+
+            <c:when test="${param.type == '2'}">
+                <h1>Features</h1>
+
+                <div class="group-title">
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                </div>
+            </c:when>
+
+
+            <c:when test="${param.type == '3'}">
+                <h1>Overall Satisfaction</h1>
+
+                <div class="group-title">
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                    <a href="#" class="title-feedback">
+                        <span class="left">title</span> <span class="middle">Vote 1</span> <span class="right">Comment 0</span>
+                    </a>
+
+                </div>
+            </c:when>
+
+
+        </c:choose>
         
-        <div >
-            <p><input type="text" placeholder="Search" style="padding: 16px; width: 100%; max-width: 1000px; border-radius: 8px; border: none; margin: auto;"/></p>
-        </div>
-
-        <select style="padding: 14px;width: 15%; margin: 12px; margin-bottom: 120px; border-radius: 8px; border: none;">
-            <option>
-                Heading Topic
-            </option>
-        </select>
-
         
-        <div class="feedback">  
-            <a href="#">
-                <div>
-                    <p>Performance & Accessibility</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
-            <a href="#">
-                <div>
-                    <p>Features</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
-            <a href="#">
-                <div>
-                    <p>Overall Satisfaction</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
-        </div>
-        
-
-        <div style="padding-top: 100px; padding-bottom: 10px; ">
+           
+  
+        <div style="padding-top: 70px; padding-bottom: 10px; ">
             <p style="color: white;">Not find, what you were looking for?</p>
         </div>  
         
         <div style="padding-top: 10px; padding-bottom: 10px;"></div>
-            <a href="#" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
+            <a href="feedback_newpost" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
                 New Post
             </a>
         </div>

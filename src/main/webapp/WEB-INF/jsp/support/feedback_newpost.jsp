@@ -6,9 +6,10 @@
     <title>Feedback</title>
 
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/support/feedback_newpost.css">
+    <link rel="stylesheet" type="text/css" href="/css/support/feedback.css">
 
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
     <link rel="stylesheet" type="text/css" href="/css/global.css">
 
     <script src="/js/screen_correction.js" defer></script>
@@ -27,12 +28,24 @@
             --alert: #ff8989;
         }
 
-        p{
-            color: black;
+        h3  {
+            color: rgb(255, 255, 255);
             box-sizing: border-box;
+            padding-top: 5px; 
+            padding-bottom: 10px; 
+            text-align: left ;
             margin: auto;
             font-family: sarabun;
-            font-size: 20px;
+        }
+        p {
+            color: white;
+            padding-top: 5px; 
+            padding-bottom: 10px; 
+            text-align: left ;
+            margin: auto;
+            font-family: sarabun;
+            font-size: 16px;
+            
         }
         h1 {
             color: white;
@@ -41,37 +54,6 @@
             padding-top: 100px;
             font-family: Sansita;
 
-        }
-
-        .feedback-container {
-            margin: auto;     
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px 80px;      
-            text-align: center;
-        }
-
-        .feedback {
-            display: flex;     
-            justify-content: center;  
-            gap: 30px;
-            margin: auto;
-            max-width: 600px;
-        }
-
-        .feedback a {
-            display: flex;             
-            flex-direction: column;   
-            justify-content: space-between;  
-            
-            background-color: #e1c89d;
-            padding: 25px 30px;
-            border-radius: 12px;
-            min-width: 250px;
-            min-height: 150px;
-            box-sizing: border-box;
-            margin: auto;
-            font-size: 20px;
         }
 
     </style>
@@ -85,30 +67,35 @@
     <div class="feedback-container">
         <h1>Feedback</h1>
         
+
+        <h3>What your post is about?</h3>
+
+        <p>Title</p>
         <div >
-            <p><input type="text" placeholder="Search" style="padding: 16px; width: 100%; max-width: 1000px; border-radius: 8px; border: none; margin: auto;"/></p>
+            <input type="text" placeholder="Title" class="input-text"/>
         </div>
 
-        <select style="padding: 14px;width: 15%; margin: 12px; margin-bottom: 120px; border-radius: 8px; border: none;">
-            <option>
-                Heading Topic
-            </option>
-        </select>
 
-        
-        <div class="feedback">  
-            
-
+        <p>Description</p>
+        <div >
+            <textarea placeholder="Description" class="textarea"></textarea>
         </div>
+
+
+        <p>Topic</p>
+        <div >
+            <input type="text" placeholder="Topic" class="input-text"/>
+        </div>
+
         
 
-        <div style="padding-top: 100px; padding-bottom: 10px; ">
-            <p style="color: white;">Not find, what you were looking for?</p>
-        </div>  
         
-        <div style="padding-top: 10px; padding-bottom: 10px;"></div>
-            <a href="#" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
-                New Post
+
+          
+        
+        <div style="padding-top: 50px; padding-bottom: 10px;"></div>
+            <a href="feedback" class="submit">
+                Submit
             </a>
         </div>
     </div>
