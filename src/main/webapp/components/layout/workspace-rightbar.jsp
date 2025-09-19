@@ -54,5 +54,6 @@
         </div>
     </div>
 
-    <div id="start-review">Review Deck(s)</div>
+    <a style="cursor: pointer; user-select: none;" id="start-review">
+        Review Deck(s)</a>
 </div>
