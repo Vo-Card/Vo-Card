@@ -1,7 +1,7 @@
 // @ts-check
 
 import { fetchWithAuth } from "/js/auth/auth.js";
-import { insertEventActions } from "/js/deckManagement/cardWatcher.js";
+import { insertEventActions } from "../event/card-event-handler.js";
 
 const templateCache = new Map();
 
@@ -69,7 +69,14 @@ export async function populateContainer(
         switch (type) {
             case "deck":
                 cardHTML = cardHTML
-                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(
+                        /{ii}/g,
+                        ownership === "forked"
+                            ? ""
+                            : ownership === "owned"
+                            ? ""
+                            : ""
+                    )
                     .replace(/{deck_id}/g, item.deck_id_PK)
                     .replace(/{deck_name}/g, item.deck_name);
                 break;
@@ -77,14 +84,28 @@ export async function populateContainer(
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.level_id_PK)
                     .replace(/{top_indicator}/g, item.deck_name)
-                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(
+                        /{ii}/g,
+                        ownership === "forked"
+                            ? ""
+                            : ownership === "owned"
+                            ? ""
+                            : ""
+                    )
                     .replace(/{word_content}/g, item.level_name);
                 break;
             case "card":
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.card_id_PK)
                     .replace(/{top_indicator}/g, item.level_name)
-                    .replace(/{ii}/g, ownership === "forked" ? "" : "")
+                    .replace(
+                        /{ii}/g,
+                        ownership === "forked"
+                            ? ""
+                            : ownership === "owned"
+                            ? ""
+                            : ""
+                    )
                     .replace(/{word_content}/g, item.card_word);
                 break;
             default:
@@ -179,6 +200,7 @@ export async function deckLoader() {
         "searchDeckButton",
         "card-item-container"
     );
+
     await appendTemplate(
         ownedDeckContainer,
         "/components/template/create_deck.svg",

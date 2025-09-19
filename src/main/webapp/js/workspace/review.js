@@ -1,6 +1,6 @@
-import { loadPage } from './pageManager.js';
-import { fetchWithAuth } from '/js/auth/auth.js';
-import { populateContainer } from '/js/deckManagement/deckLoader.js';
+import { loadPage } from "/js/workspace/module/page-manager.js";
+import { fetchWithAuth } from "/js/auth/auth.js";
+import { populateContainer } from "/js/workspace/content/deck-loader.js";
 
 // TODO<>: create random func then put in loop function for playing
 // 1. random array(if has more than 1 deck) then random card
@@ -8,23 +8,22 @@ import { populateContainer } from '/js/deckManagement/deckLoader.js';
 // 3. let user guessing the definition (not showing vote cards and definition yet) let user click on div or space-bar to continue
 // 4. showing definition
 // 5. let user voting for their memory (No FSRS yet)
-// 6. back to step 1. until complete the session 
+// 6. back to step 1. until complete the session
 let tempData = null;
 
 /**
  * Send array of deck_id for get all cards in decks
- * then continue to randomize 
- * @param {Array} ids 
+ * then continue to randomize
+ * @param {Array} ids
  */
 export async function sendPackDeckId(ids) {
-    const text = ids.map(id => "arrayDeckId=" + id).join("&");
+    const text = ids.map((id) => "arrayDeckId=" + id).join("&");
 
     try {
-        const res = await fetchWithAuth("/api/review/getCards?" + text)
+        const res = await fetchWithAuth("/api/review/getCards?" + text);
         if (res.ok) {
             const data = await res.json();
             return data.Cards;
-
         }
     } catch (err) {
         console.log("Failed to send Deck ID: ", err);
@@ -33,13 +32,12 @@ export async function sendPackDeckId(ids) {
 
 async function randomizer(usrDecks) {
     // starting randomization
-    const whichDeck = Math.floor(Math.random() * usrDecks.length)
-    const whichCard = Math.floor(Math.random() * usrDecks[whichDeck].length)
+    const whichDeck = Math.floor(Math.random() * usrDecks.length);
+    const whichCard = Math.floor(Math.random() * usrDecks[whichDeck].length);
 
     return usrDecks[whichDeck][whichCard];
     // cardStage.textContent(packArray.Cards[whichDeck][whichCard]);
 }
-
 
 // Toilet ~~
 
@@ -53,21 +51,18 @@ export async function cardSessionPlay(sessionPlay) {
     const usrCards = await sendPackDeckId(["752111449966383104"]);
 
     for (let i = 0; i < sessionPlay; i++) {
-
         let whatCard = await randomizer(usrCards);
-        const cardStage = document.getElementById('card-placeholder');
+        const cardStage = document.getElementById("card-placeholder");
 
         try {
-            const cardDefinition = await fetchWithAuth(`/api/review/getDefinition?levelId=${whatCard.level_id_PK}&deckId=${whatCard.deck_id_FK}&cardId=${whatCard.card_id_PK}`);
+            const cardDefinition = await fetchWithAuth(
+                `/api/review/getDefinition?levelId=${whatCard.level_id_PK}&deckId=${whatCard.deck_id_FK}&cardId=${whatCard.card_id_PK}`
+            );
             const data = await cardDefinition.json();
 
             populateContainer([whatCard], cardStage, "card", null);
-
         } catch (err) {
             console.error(err);
         }
-
-        
     }
 }
-

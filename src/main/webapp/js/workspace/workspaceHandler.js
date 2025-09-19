@@ -4,14 +4,12 @@ import { TokenManager, fetchWithAuth } from "/js/auth/auth.js";
 
 import { loadPage } from "./module/page-manager.js";
 
-import {} from "./handler/popup-handler.js";
-
 /**
  * Save the previous page URL
  */
 window.addEventListener("popstate", (event) => {
     const path = event.state?.path || window.location.pathname;
-    loadPage(path, false); // false = don’t pushState again
+    loadPage(path, false);
 });
 
 document.addEventListener("DOMContentLoaded", async () => {

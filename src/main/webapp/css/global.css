@@ -63,7 +63,7 @@
     --splitter-width: 5px;
     
     --information-container-width-close: 15px;
-
+    --information-container-width-open : 250px;
     --alert: #ff8989;
 }
 

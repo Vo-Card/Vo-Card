@@ -1,6 +1,6 @@
-import { createPopupBox } from "/js/workspace/popupManager.js";
-import { loadPage } from "/js/workspace/pageManager.js";
-import { fetchWithAuth } from "../auth/auth.js";
+import { createPopupBox } from "../handler/popup-handler.js";
+import { loadPage } from "../module/page-manager.js";
+import { fetchWithAuth } from "../../auth/auth.js";
 
 // Cache until update
 const contentCatch = new Map();

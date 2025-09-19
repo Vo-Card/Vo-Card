@@ -1,4 +1,4 @@
-// Module Script
+// This is a module Script
 
 const backdrop = document.getElementById("backdrop");
 const popupBox = document.getElementById("popup-container");

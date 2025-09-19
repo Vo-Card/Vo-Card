@@ -1,12 +1,15 @@
+import { sendPackDeckId, cardSessionPlay } from "/js/workspace/review.js";
+import { snowfallEffect } from "/js/workspace/snowfall.js";
+import {
+    homePageChart,
+    statsLoader,
+} from "/js/workspace/handler/charts-handler.js";
 import {
     deckLoader,
     deckDetailLoader,
     levelDetailLoader,
     loadVoteCards,
-} from "/js/deckManagement/deckLoader.js";
-import { statsLoader } from "/js/workspace/statsLoader.js";
-import { sendPackDeckId, cardSessionPlay } from "/js/workspace/review.js";
-import { snowfallEffect } from "/js/workspace/snowfall.js";
+} from "../content/deck-loader.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -18,7 +21,7 @@ let currentController = null;
 // Map top-level pages to optional JS + CSS
 const pageComponents = {
     "/workspace/home": {
-        js: () => initChartz(),
+        js: () => homePageChart(),
         css: "/css/workspace/home.css",
     },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
@@ -33,6 +36,29 @@ const pageComponents = {
     "/workspace/review": { js: null, css: "/css/workspace/review.css" },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
 };
+
+/**
+ *
+ * @param {String} path
+ */
+function displayRightSidebar(path) {
+    const informationPages = ["/workspace/decks", "/workspace/review"];
+
+    let match = false;
+
+    const sidebarId = document.getElementById("information-container");
+    informationPages.forEach((page, _) => {
+        console.log("Sidebar page : ", path, page, path.startsWith(page));
+        if (path.startsWith(page) && !match) {
+            sidebarId.setAttribute("active", "");
+            match = true;
+        } else if (!match) {
+            sidebarId.removeAttribute("active");
+        }
+    });
+
+    return;
+}
 
 /**
  * Dynamically load CSS if not already loaded (returns a Promise)
@@ -154,6 +180,9 @@ export async function loadPage(path, addHistory = true) {
     changePageHeader(match ? match[1] + " Page" : "unknown Page");
 
     if (addHistory) window.history.pushState({ path }, "", path);
+
+    displayRightSidebar(path);
+
     console.log("Loaded via AJAX:", path);
 }
 

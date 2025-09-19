@@ -12,6 +12,7 @@
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             <link rel="stylesheet" type="text/css" href="/css/workspace.css">
 
+            <!-- Imported modules -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
                 crossorigin="anonymous">
@@ -19,18 +20,14 @@
                 integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
                 crossorigin="anonymous"></script>
             <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-            <script src="/js/chartz.js" defer></script>
+
             <script type="module" src="/js/workspace/getPageInformation.js"></script>
-            <!-- temp -->
+
+            <!-- Override css -->
             <style>
                 :root {
                     --theme-color: #1b1d24;
                     --alert: #ff8989;
-                }
-
-                a {
-                    text-decoration: none;
-                    color: var(--primary-font-color);
                 }
             </style>
         </head>
