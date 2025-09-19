@@ -62,13 +62,7 @@
                     </div>
                 </div>
 
-                <div id="information-container">
-                    <!-- 
-                        Information of the selection here
-                        It will load from information component which contain informations
-                        -->
-                    <jsp:include page="/components/layout/workspace-rightbar.jsp" />
-                </div>
+                <div id="information-container" style="visibility: hidden;"></div>
 
             </div>
         </body>
