@@ -30,6 +30,17 @@ async function templateLoader(path, data) {
             btn.setAttribute("part-of-speech-selector", "");
             btn.textContent = pos.part_of_speech;
             btn.dataset.posId = pos.pos_id_PK;
+            btn.addEventListener('click', () => {
+                const definitionContainer =/**@type {HTMLElement} */ temp.querySelector("div[definition-container]")
+                // Prevent javascript show error by itself.
+                Array.from(definitionContainer.children).forEach(element => {
+                    if (pos.pos_id_PK === element.getAttribute('part-of-speech')) {
+                    /**@type {HTMLElement} */ (element).style.display = 'block';
+                    } else {
+                    /**@type {HTMLElement} */ (element).style.display = 'none';
+                    }
+                });
+            })
             posBox.appendChild(btn);
         });
     }
@@ -45,11 +56,12 @@ async function templateLoader(path, data) {
                 p.classList.add("definition");
                 p.textContent = def.definition;
                 p.dataset.defId = def.definition_id_PK;
-                defContainer.appendChild(p);
+                div.appendChild(p)
+                defContainer.appendChild(div);
             });
+
         });
     }
-
     return temp;
 }
 
@@ -96,8 +108,8 @@ export function insertEventActions(containerSelector = document, options = {}) {
                 if (itemType != "card") {
                     loadPage(
                         document.location.pathname +
-                            "/" +
-                            element.getAttribute("item-id")
+                        "/" +
+                        element.getAttribute("item-id")
                     );
                 } else if (deckId != null && levelId != null) {
                     const cardId = element.getAttribute("item-id");
