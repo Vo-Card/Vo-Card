@@ -1,0 +1,49 @@
+.feedback-container {
+    margin: auto;     
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px 80px;      
+    text-align: center;
+}
+
+.feedback {
+    display: flex;     
+    justify-content: center;  
+    gap: 30px;
+     margin: auto;
+    max-width: 600px;
+}
+
+.feedback a {
+    display: flex;             
+    flex-direction: column;   
+    justify-content: space-between;  
+            
+    background-color: #e1c89d;
+    padding: 25px 30px;
+    border-radius: 12px;
+    min-width: 250px;
+    min-height: 150px;
+    box-sizing: border-box;
+    margin: auto;
+    font-size: 20px;
+}
+
+.feedback-input {
+    padding: 16px; 
+    width: 100%; 
+    max-width: 1000px; 
+    border-radius: 8px; 
+    border: none; 
+    margin: auto;
+}
+
+.heading-topic {
+    padding: 14px;
+    width: 15%; 
+    margin: 12px; 
+    margin-bottom: 120px; 
+    border-radius: 8px; 
+    border: none; 
+    color: black;
+}

@@ -6,6 +6,7 @@
     <title>Feedback</title>
 
     <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/support/feedback_newpost.css">
     <link rel="stylesheet" type="text/css" href="/css/support/feedback.css">
 
     <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
@@ -27,12 +28,24 @@
             --alert: #ff8989;
         }
 
-        p{
-            color: black;
+        h3  {
+            color: rgb(255, 255, 255);
             box-sizing: border-box;
+            padding-top: 5px; 
+            padding-bottom: 10px; 
+            text-align: left ;
             margin: auto;
             font-family: sarabun;
-            font-size: 20px;
+        }
+        p {
+            color: white;
+            padding-top: 5px; 
+            padding-bottom: 10px; 
+            text-align: left ;
+            margin: auto;
+            font-family: sarabun;
+            font-size: 16px;
+            
         }
         h1 {
             color: white;
@@ -54,58 +67,35 @@
     <div class="feedback-container">
         <h1>Feedback</h1>
         
+
+        <h3>What your post is about?</h3>
+
+        <p>Title</p>
         <div >
-            <p><input type="text" placeholder="Search" class="feedback-input"/></p>
+            <input type="text" placeholder="Title" class="input-text"/>
         </div>
 
-        <select class="heading-topic">
-            <option>
-                Heading Topic
-            </option>
-        </select>
 
-        
-        <div class="feedback">  
-            <a href="feedback_page?type=1">
-                <div>
-                    <p>Performance & Accessibility</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
-            <a href="feedback_page?type=2">
-                <div>
-                    <p>Features</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
-            <a href="feedback_page?type=3">
-                <div>
-                    <p>Overall Satisfaction</p>
-                </div>
-
-                <div>
-                    <p>{P&A Post}</p>
-                </div>
-            </a>
-
+        <p>Description</p>
+        <div >
+            <textarea placeholder="Description" class="textarea"></textarea>
         </div>
+
+
+        <p>Topic</p>
+        <div >
+            <input type="text" placeholder="Topic" class="input-text"/>
+        </div>
+
         
 
-        <div style="padding-top: 100px; padding-bottom: 10px; ">
-            <p style="color: white;">Not find, what you were looking for?</p>
-        </div>  
         
-        <div style="padding-top: 10px; padding-bottom: 10px;"></div>
-            <a href="feedback_newpost" style="background-color: #e1c89d; padding: 13px 28px; border: none; border-radius: 10px; color: black;">
-                New Post
+
+          
+        
+        <div style="padding-top: 50px; padding-bottom: 10px;"></div>
+            <a href="feedback" class="submit">
+                Submit
             </a>
         </div>
     </div>
