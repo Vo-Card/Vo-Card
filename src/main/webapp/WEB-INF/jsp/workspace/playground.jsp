@@ -34,8 +34,15 @@
     </div>
 
     <!-- Showing Card Zone -->
-    <div class="play-card-zone" id="card-placeholder">Ello</div>
+    <div class="play-card-zone" id="card-placeholder"></div>
 
+
+    <div class="play-definition">
+        <div>Definition placeholder</div>
+    </div>
     <!-- Vote zone -->
-    <div id="vote-cards"></div>
+    <div class="vote-container">
+        <div id="vote-cover"></div>
+        <div id="vote-cards"></div>
+    </div>
 </div>
