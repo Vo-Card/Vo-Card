@@ -5,6 +5,10 @@ import com.voc.security.AuthManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import static com.voc.utils.AnsiColor.TAG_ERROR;
+import static com.voc.utils.AnsiColor.TAG_SUCCESS;
+
 import java.util.Optional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +48,10 @@ public class SessionInterceptor implements HandlerInterceptor {
                             String sessionId = parts[0];
                             String rawRefreshToken = parts[1];
                             if (AuthManager.validateSession(sessionId, rawRefreshToken)) {
+                                System.out.println(TAG_SUCCESS + "Successfully to validate user session token");
                                 hasSession = true;
+                            } else {
+                                System.out.println(TAG_ERROR + "Failed to validate user session token");
                             }
                         }
                     }
@@ -73,8 +80,11 @@ public class SessionInterceptor implements HandlerInterceptor {
         if (!hasSession) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             if (currentPage.startsWith("/api/")) {
+                System.out.println(TAG_ERROR + "The user is missing JWT key");
                 response.getWriter().write("JWT is invalid or missing.");
             } else {
+                System.out.println(TAG_ERROR + "The user doesnt have permission for this page");
+                System.out.println(TAG_ERROR + "User cookie : " + request.getCookies());
                 response.sendRedirect("/login");
             }
             return false;
