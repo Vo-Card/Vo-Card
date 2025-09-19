@@ -27,7 +27,7 @@ const pageComponents = {
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
     "/workspace/playground": {
         js: () => {
-            sendPackDeckId(["752111449966383104"]);
+            sendPackDeckId(['752111449966383104'])
             loadVoteCards();
             snowfallEffect();
         },
@@ -222,6 +222,11 @@ document.addEventListener("click", (event) => {
                     console.error("Invalid popup type.");
                     break;
             }
+        }
+        const startReview = target.closest('a#start-review')
+        if (startReview) {
+            loadPage('/workspace/playground');
+            cardSessionPlay(1);
         }
     }
 });
