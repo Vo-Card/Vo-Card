@@ -42,22 +42,37 @@ const pageComponents = {
  * @param {String} path
  */
 function displayRightSidebar(path) {
-    const informationPages = ["/workspace/decks", "/workspace/review"];
+    const informationPages = {
+        "/workspace/decks": {
+            template: "/components/content/card-selection.jsp",
+        },
+        "/workspace/review": {
+            template: "/components/layout/workspace-rightbar.jsp",
+        },
+    };
 
     let match = false;
-
     const sidebarId = document.getElementById("information-container");
-    informationPages.forEach((page, _) => {
-        console.log("Sidebar page : ", path, page, path.startsWith(page));
-        if (path.startsWith(page) && !match) {
+
+    Object.keys(informationPages).forEach(async (pageKey) => {
+        console.log("Sidebar page : ", path, pageKey, path.startsWith(pageKey));
+
+        if (path.startsWith(pageKey) && !match) {
             sidebarId.setAttribute("active", "");
             match = true;
+
+            // Get the template for this key
+            const template = informationPages[pageKey].template;
+            if (template && !cache.has(template)) await fetchPage(template);
+            sidebarId.innerHTML = cache.get(template);
+            console.log("Matched template:", template);
+
+            sidebarId.style.visibility = "visible";
         } else if (!match) {
             sidebarId.removeAttribute("active");
+            sidebarId.style.visibility = "hidden";
         }
     });
-
-    return;
 }
 
 /**
