@@ -319,3 +319,9 @@ export async function loadVoteCards() {
         console.error("Error loading cards:", err);
     }
 }
+
+async function showBasicDeckinfomation() {
+    const infomationContainer = document.querySelector("deck-data-container");
+
+    
+}
