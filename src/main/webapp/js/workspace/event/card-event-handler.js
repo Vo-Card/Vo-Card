@@ -1,4 +1,4 @@
-import { createPopupBox } from "../handler/popup-handler.js";
+import { createPopupBox, updatePopup } from "../handler/popup-handler.js";
 import { loadPage } from "../module/page-manager.js";
 import { fetchWithAuth } from "../../auth/auth.js";
 
@@ -11,7 +11,9 @@ const contentCatch = new Map();
  * @param {Object} data - object like your Java result (card_word, pos, definitions, etc.)
  * @returns {Promise<HTMLElement>}
  */
-async function templateLoader(path, data) {
+async function viewerLoader(path, data) {
+    console.log(data);
+
     const cardData = data.card_data;
     const temp = document.createElement("div");
     const template = await (await fetch(path)).text();
@@ -19,49 +21,107 @@ async function templateLoader(path, data) {
 
     // Fill top-level fields
     temp.querySelector("[card-word]").textContent = cardData.card_word ?? "";
-    temp.querySelector("[is-owned]").textContent = cardData.is_owned ?? "false";
+    temp.querySelector("[is-owned]").textContent =
+        data.ownership_type ?? "Unknown";
     temp.querySelector("[card-level]").textContent = cardData.level_name ?? "";
-
-    // POS buttons
-    const posBox = temp.querySelector("[post-selector]");
-    if (cardData.pos && cardData.pos.length > 0) {
-        cardData.pos.forEach((pos) => {
-            const btn = document.createElement("button");
-            btn.setAttribute("part-of-speech-selector", "");
-            btn.textContent = pos.part_of_speech;
-            btn.dataset.posId = pos.pos_id_PK;
-            btn.addEventListener('click', () => {
-                const definitionContainer =/**@type {HTMLElement} */ temp.querySelector("div[definition-container]")
-                // Prevent javascript show error by itself.
-                Array.from(definitionContainer.children).forEach(element => {
-                    if (pos.pos_id_PK === element.getAttribute('part-of-speech')) {
-                    /**@type {HTMLElement} */ (element).style.display = 'block';
-                    } else {
-                    /**@type {HTMLElement} */ (element).style.display = 'none';
-                    }
-                });
-            })
-            posBox.appendChild(btn);
-        });
-    }
 
     // Definitions
     const defContainer = temp.querySelector("[definition-container]");
     if (cardData.pos) {
         cardData.pos.forEach((pos) => {
-            const div = document.createElement("div");
-            div.setAttribute("part-of-speech", pos.pos_id_PK);
-            pos.definitions.forEach((def) => {
-                const p = document.createElement("p");
-                p.classList.add("definition");
-                p.textContent = def.definition;
-                p.dataset.defId = def.definition_id_PK;
-                div.appendChild(p)
-                defContainer.appendChild(div);
-            });
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.classList.add("part-of-speech");
+            summary.textContent = pos.part_of_speech;
+            details.appendChild(summary);
 
+            const ol = document.createElement("ol");
+            ol.setAttribute("part-of-speech", pos.pos_id_PK);
+
+            pos.definitions.forEach((def) => {
+                const li = document.createElement("li");
+                li.classList.add("definition");
+                li.textContent = def.definition;
+                li.dataset.defId = def.definition_id_PK;
+                ol.appendChild(li);
+                details.appendChild(ol);
+            });
+            defContainer.append(details);
         });
     }
+
+    const EContent =
+        /**@type {HTMLElement} */ temp.querySelector("[edit-content]");
+    if (data.ownership_type != "owned") {
+        EContent.remove();
+    } else {
+        EContent.addEventListener("click", async () => {
+            updatePopup(
+                "60vw",
+                "60vh",
+                "Card Information: Edit Mode",
+                await editLoader(
+                    "/components/content/popup/card-edit.jsp",
+                    data
+                )
+            );
+        });
+    }
+
+    return temp;
+}
+
+/**
+ *
+ * @param {String} path  - path to template file
+ * @param {Object} data - object like your Java result (card_word, pos, definitions, etc.)
+ * @returns {Promise<HTMLElement>}
+ */
+async function editLoader(path, data) {
+    console.log(data);
+
+    const cardData = data.card_data;
+    const temp = document.createElement("div");
+    const template = await (await fetch(path)).text();
+    temp.innerHTML = template;
+
+    // Fill top-level fields
+    temp.querySelector("[card-word]").textContent = cardData.card_word ?? "";
+    temp.querySelector("[is-owned]").textContent =
+        data.ownership_type ?? "Unknown";
+    temp.querySelector("[card-level]").textContent = cardData.level_name ?? "";
+
+    // Definitions
+    const defContainer = temp.querySelector("[definition-container]");
+    if (cardData.pos) {
+        cardData.pos.forEach((pos) => {
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.classList.add("part-of-speech");
+            summary.textContent = pos.part_of_speech;
+            details.appendChild(summary);
+
+            const ol = document.createElement("ol");
+            ol.setAttribute("part-of-speech", pos.pos_id_PK);
+
+            pos.definitions.forEach((def) => {
+                const li = document.createElement("li");
+                li.classList.add("definition");
+                li.textContent = def.definition;
+                li.dataset.defId = def.definition_id_PK;
+                ol.appendChild(li);
+                details.appendChild(ol);
+            });
+            defContainer.append(details);
+        });
+    }
+
+    const EContent =
+        /**@type {HTMLElement} */ temp.querySelector("[edit-content]");
+    if (data.ownership_type != "owned") {
+        EContent.remove();
+    }
+
     return temp;
 }
 
@@ -108,8 +168,8 @@ export function insertEventActions(containerSelector = document, options = {}) {
                 if (itemType != "card") {
                     loadPage(
                         document.location.pathname +
-                        "/" +
-                        element.getAttribute("item-id")
+                            "/" +
+                            element.getAttribute("item-id")
                     );
                 } else if (deckId != null && levelId != null) {
                     const cardId = element.getAttribute("item-id");
@@ -123,7 +183,7 @@ export function insertEventActions(containerSelector = document, options = {}) {
                         "60vw",
                         "60vh",
                         "Card Information: View Mode",
-                        await templateLoader(
+                        await viewerLoader(
                             "/components/content/popup/card-detail.jsp",
                             data
                         )

@@ -26,6 +26,16 @@ export async function createPopupBox(width, height, title, contentElement) {
     contentContainer.appendChild(contentElement);
 }
 
+export async function updatePopup(width, height, title, contentElement) {
+    popupTitleBox.textContent = title;
+
+    popupBox.style.width = width;
+    popupBox.style.height = height;
+
+    contentContainer.innerHTML = "";
+    contentContainer.appendChild(contentElement);
+}
+
 // Javasceipt was tweaking with me so i had to come up with this
 
 let mouseDownOnBackdrop = false;
