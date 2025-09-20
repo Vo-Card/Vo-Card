@@ -1,5 +1,4 @@
 package com.voc.api;
-// TODO:<request get cookie send to DeckManager>
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
 import com.voc.utils.Row;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -134,5 +134,25 @@ public class DeckApiController {
         return ResponseEntity.ok(response);
     }
 
+    // TODO: create deck info API js later
+    @GetMapping("/edit")
+    public ResponseEntity<Map<String, Object>> getDeckInformation(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestParam Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+
+            String token = authToken.substring(7);
+            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
+
+            if (optionalUserId.isPresent()) {
+                List<Row> deckInformation = DeckManager.getDeckInformation(deckId);
+                response.put("deckInformation", deckInformation);
+                System.out.println(deckInformation);
+            }
+            return ResponseEntity.ok(response);
+        }
+        return null;
+    }
 }
-// TODO:<api for create Empty deck>

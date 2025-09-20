@@ -147,12 +147,31 @@ export function insertEventActions(containerSelector = document, options = {}) {
     ).forEach((element) => {
         element.addEventListener("click", async (event) => {
             if (clickTimer === null) {
-                clickTimer = setTimeout(() => {
+                clickTimer = setTimeout(async () => {
                     // Single click logic WIP
                     console.log(
                         "Single click detected:",
                         element.getAttribute("item-id")
                     );
+
+                    const temp = document.createElement("div")
+                    const deckId = element.getAttribute("item-id");
+                    const deckInformation = await fetchWithAuth(`/api/decks/edit?deckId=${deckId}`)
+                    const deckData = await deckInformation.json();
+
+                    console.log(deckData);
+                    console.log(deckData.deckInformation[0].deck_contain_card);
+
+                    const dataContainer = await temp.querySelector("deck-data-container")
+
+                    const currentDeck = document.createElement("current-deck")
+                    if (deckData.deckInformation) {
+                        deckData.deckInformation.forEach((content) => {
+                            const data = content.deck_contain_card;
+                            currentDeck.textContent = (data);
+                        });
+                    }
+
                     clickTimer = null;
                 }, doubleClickThreshold);
             } else {
@@ -168,8 +187,8 @@ export function insertEventActions(containerSelector = document, options = {}) {
                 if (itemType != "card") {
                     loadPage(
                         document.location.pathname +
-                            "/" +
-                            element.getAttribute("item-id")
+                        "/" +
+                        element.getAttribute("item-id")
                     );
                 } else if (deckId != null && levelId != null) {
                     const cardId = element.getAttribute("item-id");
