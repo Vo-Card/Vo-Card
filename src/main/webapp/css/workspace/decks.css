@@ -70,3 +70,23 @@
     padding-bottom: 150 * 0.8px;
     background-color: #0B0B0B;
 }
+
+/* ------------------------- */
+/*  Deck Popup Content Area  */
+/* ------------------------- */
+
+.part-of-speech {
+    background: #35383c;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 3px;
+    padding-left: 10px;
+}
+
+.definition {
+    background: #454a51;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 3px;
+    padding-left: 10px;
+}

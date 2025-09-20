@@ -263,7 +263,13 @@ export async function levelDetailLoader(path) {
     if (!data) return;
 
     cardContainer.innerHTML = "";
-    if (data.cards) await populateContainer(data.cards, cardContainer, "card");
+    if (data.cards)
+        await populateContainer(
+            data.cards,
+            cardContainer,
+            "card",
+            data.ownership_type
+        );
 
     await appendTemplate(
         cardContainer,
