@@ -39,8 +39,6 @@ async function randomizer(usrDecks) {
     // cardStage.textContent(packArray.Cards[whichDeck][whichCard]);
 }
 
-// Toilet ~~
-
 // TODO:<> Loop function for play
 /**
  *
@@ -48,7 +46,7 @@ async function randomizer(usrDecks) {
  */
 export async function cardSessionPlay(sessionPlay) {
     // start
-    const usrCards = await sendPackDeckId(["752111449966383104"]);
+    const usrCards = await sendPackDeckId(["757225684526436352"]);
 
     for (let i = 0; i < sessionPlay; i++) {
         let whatCard = await randomizer(usrCards);
