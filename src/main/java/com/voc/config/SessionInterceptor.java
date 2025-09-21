@@ -28,6 +28,18 @@ public class SessionInterceptor implements HandlerInterceptor {
         // Assume no session exists by default
         boolean hasSession = false;
 
+        // Now, handle excluded and protected pages
+        String[] excludedPages = {
+                "/home", "/login", "/register", "/css/**", "/js/**", "/fonts/**",
+                "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**",
+                "/components/template/**", "/support/**"
+        };
+        for (String page : excludedPages) {
+            if (currentPage.matches(page.replace("**", ".*"))) {
+                return true;
+            }
+        }
+
         // Check for JWT authentication first
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
@@ -62,18 +74,6 @@ public class SessionInterceptor implements HandlerInterceptor {
         // Set the attribute based on the result of the checks
         if (hasSession) {
             request.setAttribute("hasSession", true);
-        }
-
-        // Now, handle excluded and protected pages
-        String[] excludedPages = {
-                "/home", "/login", "/register", "/css/**", "/js/**", "/fonts/**",
-                "/resources/**", "/api/auth/**", "/about", "/contact", "/error/**",
-                "/components/template/**", "/support/**"
-        };
-        for (String page : excludedPages) {
-            if (currentPage.matches(page.replace("**", ".*"))) {
-                return true;
-            }
         }
 
         // If the page is not excluded, it must have a session
