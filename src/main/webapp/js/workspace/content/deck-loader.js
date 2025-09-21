@@ -16,7 +16,7 @@ const templateCache = new Map();
  * @param {String} themeUrl
  * @returns {Promise<String>} template HTML text
  */
-async function loadTemplate(themeUrl) {
+export async function loadTemplate(themeUrl) {
     if (templateCache.has(themeUrl)) return templateCache.get(themeUrl);
 
     try {
@@ -128,6 +128,7 @@ export async function populateContainer(
                         ? item.level_id_PK
                         : item.card_id_PK,
                 "item-type": type,
+                "item-data": JSON.stringify(item),
             }
         );
 
@@ -328,6 +329,4 @@ export async function loadVoteCards() {
 
 async function showBasicDeckinfomation() {
     const infomationContainer = document.querySelector("deck-data-container");
-
-    
 }

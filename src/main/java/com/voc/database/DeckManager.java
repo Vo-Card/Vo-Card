@@ -80,7 +80,7 @@ public class DeckManager {
                     case 1:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card,
                                 "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#0f1114", "#395B8E", "dots", ThemeTypes.Card);
+                        levelThemeModifierId = createNewModifier("#000000", "#395B8E", "dots", ThemeTypes.Card);
                         break;
                     case 2:
                         levelThemeId = createNewTheme("Default", ThemeTypes.Card,
@@ -143,6 +143,7 @@ public class DeckManager {
                     "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
             DatabaseUtils.sqlExecuteBatch(
                     "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
+            updateContainCard(deckId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -649,53 +650,28 @@ public class DeckManager {
     }
 
     /**
-     * Get deck information after deck is selected
-     * 
-     * @param deck_id
-     * @return Current deck information
-     */
-    public static List<Row> getDeckInformation(Long deck_id) {
-        String sql = """
-                SELECT
-                    deck_name,
-                    deck_description,
-                    deck_created_date,
-                    deck_contain_card,
-                    deck_lastest_updated,
-                    deck_clone_perm,
-                    deck_is_public
-                    FROM decktb
-                    WHERE deck_id_PK = ?""";
-
-        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deck_id);
-        if (result.isSuccess()) {
-            return result.getData();
-
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * Summarize all cards in current deck
-     * 
+     *
      * @param deck_id
      * @return number in deck_contain_card from decktb
      */
     private static String updateContainCard(Long deck_id) {
         String sql = """
                 UPDATE decktb d
-                    SET deck_contain_card =
-                    SELECT COUNT c.level_id_FK
+                SET deck_contain_card = (
+                    SELECT COUNT(c.level_id_FK)
                     FROM cardtb c
                     INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
                     WHERE cl.deck_id_FK = d.deck_id_PK
-                    WHERE d.deck_id_PK = ?
-                    """;
+                )
+                WHERE d.deck_id_PK = ?
+                """;
+
         SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deck_id);
         if (result.isSuccess()) {
             return "deck_contain_card has been updated";
         }
         return "Cannot find current deck";
     }
+
 }

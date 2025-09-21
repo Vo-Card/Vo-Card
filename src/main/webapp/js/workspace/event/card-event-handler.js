@@ -1,6 +1,7 @@
 import { createPopupBox, updatePopup } from "../handler/popup-handler.js";
 import { loadPage } from "../module/page-manager.js";
 import { fetchWithAuth } from "../../auth/auth.js";
+import { loadTemplate } from "../content/deck-loader.js";
 
 // Cache until update
 const contentCatch = new Map();
@@ -145,38 +146,49 @@ export function insertEventActions(containerSelector = document, options = {}) {
     Array.from(
         containerSelector.querySelectorAll(interactableSelector)
     ).forEach((element) => {
-        element.addEventListener("click", async (event) => {
+        element.addEventListener("click", async () => {
+            const itemType = element.getAttribute("item-type");
+            const itemData = JSON.parse(element.getAttribute("item-data"));
+            const selectionContainer = document.getElementById(
+                "card-selection-container"
+            );
+
             if (clickTimer === null) {
                 clickTimer = setTimeout(async () => {
-                    // Single click logic WIP
+                    switch (itemType) {
+                        case "deck":
+                            showDeckInformation(
+                                selectionContainer,
+                                itemData,
+                                element
+                            );
+                            break;
+                        case "level":
+                            showLevelInformation(
+                                selectionContainer,
+                                itemData,
+                                element
+                            );
+                            break;
+                        case "card":
+                            showCardInformation(
+                                selectionContainer,
+                                itemData,
+                                element
+                            );
+                            break;
+                        default:
+                            break;
+                    }
+
                     console.log(
                         "Single click detected:",
                         element.getAttribute("item-id")
                     );
 
-                    const temp = document.createElement("div")
-                    const deckId = element.getAttribute("item-id");
-                    const deckInformation = await fetchWithAuth(`/api/decks/edit?deckId=${deckId}`)
-                    const deckData = await deckInformation.json();
-
-                    console.log(deckData);
-                    console.log(deckData.deckInformation[0].deck_contain_card);
-
-                    const dataContainer = await temp.querySelector("deck-data-container")
-
-                    const currentDeck = document.createElement("current-deck")
-                    if (deckData.deckInformation) {
-                        deckData.deckInformation.forEach((content) => {
-                            const data = content.deck_contain_card;
-                            currentDeck.textContent = (data);
-                        });
-                    }
-
                     clickTimer = null;
                 }, doubleClickThreshold);
             } else {
-                const itemType = element.getAttribute("item-type");
-
                 clearTimeout(clickTimer);
 
                 console.log(
@@ -187,8 +199,8 @@ export function insertEventActions(containerSelector = document, options = {}) {
                 if (itemType != "card") {
                     loadPage(
                         document.location.pathname +
-                        "/" +
-                        element.getAttribute("item-id")
+                            "/" +
+                            element.getAttribute("item-id")
                     );
                 } else if (deckId != null && levelId != null) {
                     const cardId = element.getAttribute("item-id");
@@ -216,20 +228,147 @@ export function insertEventActions(containerSelector = document, options = {}) {
     // Handle ripple effect
     Array.from(containerSelector.querySelectorAll(rippleSelector)).forEach(
         (element) => {
-            element.addEventListener("click", (event) => {
-                const ripple = document.createElement("span");
-                ripple.className = "ripple";
+            element.addEventListener(
+                "click",
+                /**
+                 *
+                 * @param {MouseEvent} event
+                 */
+                (event) => {
+                    const ripple = document.createElement("span");
+                    ripple.className = "ripple";
 
-                const rect = element.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                ripple.style.width = ripple.style.height = size + "px";
-                ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
-                ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+                    const rect = element.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + "px";
+                    ripple.style.left = `${
+                        event.clientX - rect.left - size / 2
+                    }px`;
+                    ripple.style.top = `${
+                        event.clientY - rect.top - size / 2
+                    }px`;
 
-                element.appendChild(ripple);
+                    element.appendChild(ripple);
 
-                ripple.addEventListener("animationend", () => ripple.remove());
-            });
+                    ripple.addEventListener("animationend", () =>
+                        ripple.remove()
+                    );
+                }
+            );
         }
     );
+}
+
+function toDate(arr) {
+    // @ts-ignore
+    return Array.isArray(arr) ? new Date(...arr) : null;
+}
+
+// Create element to display datas
+function formatDate(date) {
+    // @ts-ignore
+    if (!(date instanceof Date) || isNaN(date)) return "";
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+}
+
+/**
+ * @param {HTMLElement} container
+ * @param {Object} deckData
+ */
+async function showDeckInformation(container, deckData, target) {
+    const dataContainer = container.querySelector("deck-data-container");
+
+    const sel = container.querySelector("selection");
+
+    if (sel != null) sel.remove();
+
+    const cardContainer = container.querySelector(".card-item-container");
+    cardContainer.innerHTML = "";
+    cardContainer.appendChild(target.cloneNode(true));
+
+    cardContainer.querySelector(".ripple").remove();
+
+    const dataToStore = {
+        "Deck Name": deckData.deck_name,
+        "Contained Cards": deckData.deck_contain_card,
+        "Deck Description": deckData.deck_description,
+        "Created Date": formatDate(toDate(deckData.deck_created_date)),
+        "Last Update": formatDate(toDate(deckData.deck_lastest_updated)),
+        "Is Public": deckData.deck_is_public,
+        "Allow Cloning": deckData.deck_clone_perm,
+    };
+
+    dataContainer.innerHTML = "";
+
+    Object.entries(dataToStore).forEach(([key, value]) => {
+        const p = document.createElement("p");
+        const formattedString = key + " : " + value;
+        p.textContent = formattedString;
+        dataContainer.append(p);
+    });
+}
+
+/**
+ * @param {HTMLElement} container
+ * @param {Object} levelData
+ */
+function showLevelInformation(container, levelData, target) {
+    const dataContainer = container.querySelector("deck-data-container");
+
+    const sel = container.querySelector("selection");
+
+    if (sel != null) sel.remove();
+
+    const cardContainer = container.querySelector(".card-item-container");
+    cardContainer.innerHTML = "";
+    cardContainer.appendChild(target.cloneNode(true));
+
+    cardContainer.querySelector(".ripple").remove();
+
+    const dataToStore = {
+        "Level Value": levelData.level_name,
+        "Level Weight": levelData.level_weight,
+        "Created Date": formatDate(toDate(levelData.level_created_date)),
+        "Contained Cards": levelData.level_contain_card,
+    };
+
+    dataContainer.innerHTML = "";
+
+    Object.entries(dataToStore).forEach(([key, value]) => {
+        const p = document.createElement("p");
+        const formattedString = key + " : " + value;
+        p.textContent = formattedString;
+        dataContainer.append(p);
+    });
+}
+
+function showCardInformation(container, cardData, target) {
+    const dataContainer = container.querySelector("deck-data-container");
+
+    const sel = container.querySelector("selection");
+
+    if (sel != null) sel.remove();
+
+    const cardContainer = container.querySelector(".card-item-container");
+    cardContainer.innerHTML = "";
+    cardContainer.appendChild(target.cloneNode(true));
+
+    cardContainer.querySelector(".ripple").remove();
+
+    const dataToStore = {
+        "Card Word": cardData.card_word,
+        "Created Date": formatDate(toDate(cardData.card_created_date)),
+    };
+
+    dataContainer.innerHTML = "";
+
+    Object.entries(dataToStore).forEach(([key, value]) => {
+        const p = document.createElement("p");
+        const formattedString = key + " : " + value;
+        p.textContent = formattedString;
+        dataContainer.append(p);
+    });
 }

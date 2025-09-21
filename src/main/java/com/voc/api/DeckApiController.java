@@ -15,31 +15,38 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
 import com.voc.utils.Row;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/decks")
 public class DeckApiController {
+
+    private Optional<Long> getUserIdFromJWT(String authToken) {
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+            String token = authToken.substring(7);
+            return JwtManager.validateJwt(token);
+        }
+        return Optional.empty();
+    }
+
     @GetMapping("/getDecks")
     public ResponseEntity<Map<String, Object>> deckLoader(
             @RequestHeader(value = "Authorization", required = false) String authToken) {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
+        Optional<Long> userId = getUserIdFromJWT(authToken);
 
-            String token = authToken.substring(7);
-            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
-
-            if (optionalUserId.isPresent()) {
-                List<Row> ownedDecks = DeckManager.getOwnedDecks(optionalUserId.get());
-                List<Row> forkedDecks = DeckManager.getForkedDecks(optionalUserId.get());
-                response.put("ownedDecks", ownedDecks);
-                response.put("forkedDecks", forkedDecks);
-            }
+        if (userId.isPresent()) {
+            List<Row> ownedDecks = DeckManager.getOwnedDecks(userId.get());
+            List<Row> forkedDecks = DeckManager.getForkedDecks(userId.get());
+            response.put("ownedDecks", ownedDecks);
+            response.put("forkedDecks", forkedDecks);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
         }
-        response.put("status", "session is valid");
-        return ResponseEntity.ok(response);
+
     }
 
     @GetMapping("/{deckId}")
@@ -49,28 +56,24 @@ public class DeckApiController {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
 
-            String token = authToken.substring(7);
-            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
-
-            // Validate Ownership
-            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if (ownershipType.isEmpty()) {
-                response.put("status", "error");
-                return ResponseEntity.ok(response);
-            }
-
-            response.put("ownership_type", ownershipType.get());
-
-            if (optionalUserId.isPresent()) {
-                List<Row> deckLevels = DeckManager.getDeckLevel(deckId);
-                response.put("deckLevels", deckLevels);
-            }
+        if (ownershipType.isEmpty()) {
+            response.put("message", "You do not owned this deck.");
+            return ResponseEntity.badRequest().body(response);
         }
 
-        response.put("status", "pass");
-        return ResponseEntity.ok(response);
+        response.put("ownership_type", ownershipType.get());
+
+        if (userId.isPresent()) {
+            List<Row> deckLevels = DeckManager.getDeckLevel(deckId);
+            response.put("deckLevels", deckLevels);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
     }
 
     @GetMapping("/{deckId}/{levelId}")
@@ -80,27 +83,25 @@ public class DeckApiController {
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
+        Optional<Long> userId = getUserIdFromJWT(authToken);
 
-            String token = authToken.substring(7);
-            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
-
-            // Validate Ownership
-            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if (ownershipType.isEmpty()) {
-                response.put("status", "error");
-                return ResponseEntity.ok(response);
-            }
-
-            response.put("ownership_type", ownershipType.get());
-
-            if (optionalUserId.isPresent()) {
-                List<Row> deckLevels = DeckManager.getCardsOfLevel(deckId, levelId);
-                response.put("cards", deckLevels);
-            }
+        // Validate Ownership
+        Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
+        if (ownershipType.isEmpty()) {
+            response.put("message", "You do not owned this deck.");
+            return ResponseEntity.badRequest().body(response);
         }
-        response.put("status", "session is valid");
-        return ResponseEntity.ok(response);
+
+        response.put("ownership_type", ownershipType.get());
+
+        if (userId.isPresent()) {
+            List<Row> deckLevels = DeckManager.getCardsOfLevel(deckId, levelId);
+            response.put("cards", deckLevels);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
     }
 
     @GetMapping("/{deckId}/{levelId}/{cardId}")
@@ -111,48 +112,24 @@ public class DeckApiController {
             @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
+        Optional<Long> userId = getUserIdFromJWT(authToken);
 
-            String token = authToken.substring(7);
-            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
-
-            // Validate Ownership
-            Optional<String> ownershipType = DeckManager.getOwnershipType(optionalUserId.get(), deckId);
-            if (ownershipType.isEmpty()) {
-                response.put("status", "error");
-                return ResponseEntity.ok(response);
-            }
-
-            response.put("ownership_type", ownershipType.get());
-
-            if (optionalUserId.isPresent()) {
-                Row cardData = DeckManager.getCardInfo(deckId, levelId, cardId);
-                response.put("card_data", cardData);
-            }
+        // Validate Ownership
+        Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
+        if (ownershipType.isEmpty()) {
+            response.put("message", "You do not owned this deck.");
+            return ResponseEntity.badRequest().body(response);
         }
-        response.put("status", "session is valid");
-        return ResponseEntity.ok(response);
-    }
 
-    // TODO: create deck info API js later
-    @GetMapping("/edit")
-    public ResponseEntity<Map<String, Object>> getDeckInformation(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestParam Long deckId) {
-        Map<String, Object> response = new HashMap<>();
+        response.put("ownership_type", ownershipType.get());
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
-
-            String token = authToken.substring(7);
-            Optional<Long> optionalUserId = JwtManager.validateJwt(token);
-
-            if (optionalUserId.isPresent()) {
-                List<Row> deckInformation = DeckManager.getDeckInformation(deckId);
-                response.put("deckInformation", deckInformation);
-                System.out.println(deckInformation);
-            }
+        if (userId.isPresent()) {
+            Row cardData = DeckManager.getCardInfo(deckId, levelId, cardId);
+            response.put("card_data", cardData);
             return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
         }
-        return null;
     }
 }
