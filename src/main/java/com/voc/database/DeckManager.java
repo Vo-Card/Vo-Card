@@ -314,6 +314,7 @@ public class DeckManager {
         Row cardInfo = new Row();
         cardInfo.put("card_id_PK", rows.get(0).get("card_id_PK").toString());
         cardInfo.put("card_word", rows.get(0).get("card_word"));
+        cardInfo.put("level_name", rows.get(0).get("level_name"));
 
         Map<String, Row> posMap = new LinkedHashMap<>();
         for (Row row : rows) {
