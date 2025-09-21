@@ -1,4 +1,4 @@
--- vo_card_test.blogtb definition
+-- vo_card.blogtb definition
 
 CREATE TABLE `blogtb` (
   `post_id_PK` bigint(20) unsigned NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `blogtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.jwt_keys definition
+-- vo_card.jwt_keys definition
 
 CREATE TABLE `jwt_keys` (
   `kid` char(36) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `jwt_keys` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.permissiontb definition
+-- vo_card.permissiontb definition
 
 CREATE TABLE `permissiontb` (
   `permission_id_PK` bigint(20) unsigned NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `permissiontb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.theme_modifiertb definition
+-- vo_card.theme_modifiertb definition
 
 CREATE TABLE `theme_modifiertb` (
   `modifier_id_PK` bigint(20) unsigned NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE `theme_modifiertb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- vo_card_test.themetb definition
+-- vo_card.themetb definition
 
 CREATE TABLE `themetb` (
   `theme_id_PK` bigint(20) unsigned NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE `themetb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- vo_card_test.workertb definition
+-- vo_card.workertb definition
 
 CREATE TABLE `workertb` (
   `worker_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -73,10 +73,10 @@ CREATE TABLE `workertb` (
   PRIMARY KEY (`worker_id`),
   UNIQUE KEY `workertb_unique` (`uuid`),
   KEY `workertb_expires_at_IDX` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.usertb definition
+-- vo_card.usertb definition
 
 CREATE TABLE `usertb` (
   `user_id_PK` bigint(20) unsigned NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE `usertb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.decktb definition
+-- vo_card.decktb definition
 
 CREATE TABLE `decktb` (
   `deck_id_PK` bigint(20) unsigned NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE `decktb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.forktb definition
+-- vo_card.forktb definition
 
 CREATE TABLE `forktb` (
   `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE `forktb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- vo_card_test.inboxtb definition
+-- vo_card.inboxtb definition
 
 CREATE TABLE `inboxtb` (
   `inbox_id_PK` bigint(20) unsigned NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE `inboxtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.message_boxtb definition
+-- vo_card.message_boxtb definition
 
 CREATE TABLE `message_boxtb` (
   `message_id_PK` bigint(20) unsigned NOT NULL,
@@ -163,7 +163,7 @@ CREATE TABLE `message_boxtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.moderation_action definition
+-- vo_card.moderation_action definition
 
 CREATE TABLE `moderation_action` (
   `action_id_PK` bigint(20) unsigned NOT NULL,
@@ -177,7 +177,7 @@ CREATE TABLE `moderation_action` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.notificationtb definition
+-- vo_card.notificationtb definition
 
 CREATE TABLE `notificationtb` (
   `notification_id_PK` bigint(20) unsigned NOT NULL,
@@ -194,7 +194,7 @@ CREATE TABLE `notificationtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.reviewtb definition
+-- vo_card.reviewtb definition
 
 CREATE TABLE `reviewtb` (
   `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
@@ -208,7 +208,7 @@ CREATE TABLE `reviewtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.sessiontb definition
+-- vo_card.sessiontb definition
 
 CREATE TABLE `sessiontb` (
   `session_id_PK` varchar(64) NOT NULL,
@@ -225,7 +225,7 @@ CREATE TABLE `sessiontb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.stattb definition
+-- vo_card.stattb definition
 
 CREATE TABLE `stattb` (
   `stat_id_PK` bigint(20) unsigned NOT NULL,
@@ -239,7 +239,7 @@ CREATE TABLE `stattb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.card_leveltb definition
+-- vo_card.card_leveltb definition
 
 CREATE TABLE `card_leveltb` (
   `level_id_PK` bigint(20) unsigned NOT NULL,
@@ -248,6 +248,8 @@ CREATE TABLE `card_leveltb` (
   `deck_id_FK` bigint(20) unsigned NOT NULL,
   `theme_id_FK` bigint(20) unsigned DEFAULT NULL,
   `modifier_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `level_created_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `level_contain_card` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`level_id_PK`),
   KEY `card_leveltb_decktb_FK_IDX` (`deck_id_FK`),
   KEY `card_leveltb_themetb_FK` (`theme_id_FK`),
@@ -258,19 +260,20 @@ CREATE TABLE `card_leveltb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.cardtb definition
+-- vo_card.cardtb definition
 
 CREATE TABLE `cardtb` (
   `card_id_PK` bigint(20) unsigned NOT NULL,
   `level_id_FK` bigint(20) unsigned NOT NULL,
   `card_word` varchar(255) NOT NULL DEFAULT 'New Card',
+  `card_created_date` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`card_id_PK`),
   KEY `cardtb_card_leveltb_FK_IDX` (`level_id_FK`),
   CONSTRAINT `cardtb_card_leveltb_FK` FOREIGN KEY (`level_id_FK`) REFERENCES `card_leveltb` (`level_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.learned_cardtb definition
+-- vo_card.learned_cardtb definition
 
 CREATE TABLE `learned_cardtb` (
   `learn_card_ease_factor` float NOT NULL DEFAULT 2.5,
@@ -285,7 +288,7 @@ CREATE TABLE `learned_cardtb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.postb definition
+-- vo_card.postb definition
 
 CREATE TABLE `postb` (
   `pos_id_PK` bigint(20) unsigned NOT NULL,
@@ -297,7 +300,7 @@ CREATE TABLE `postb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card_test.definitiontb definition
+-- vo_card.definitiontb definition
 
 CREATE TABLE `definitiontb` (
   `definition_id_PK` bigint(20) unsigned NOT NULL,
