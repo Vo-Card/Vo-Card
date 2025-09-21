@@ -36,6 +36,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         };
         for (String page : excludedPages) {
             if (currentPage.matches(page.replace("**", ".*"))) {
+                request.setAttribute("hasSession", true);
                 return true;
             }
         }
