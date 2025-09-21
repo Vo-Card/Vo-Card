@@ -22,9 +22,9 @@ async function viewerLoader(path, data) {
 
     // Fill top-level fields
     temp.querySelector("[card-word]").textContent = cardData.card_word ?? "";
+    temp.querySelector("[card-level]").textContent = cardData.level_name ?? "";
     temp.querySelector("[is-owned]").textContent =
         data.ownership_type ?? "Unknown";
-    temp.querySelector("[card-level]").textContent = cardData.level_name ?? "";
 
     // Definitions
     const defContainer = temp.querySelector("[definition-container]");
@@ -141,7 +141,7 @@ export function insertEventActions(containerSelector = document, options = {}) {
     const levelId = options.levelId;
 
     let clickTimer = null;
-
+    let clickedElement = null;
     // Handle single / double click
     Array.from(
         containerSelector.querySelectorAll(interactableSelector)
@@ -153,48 +153,36 @@ export function insertEventActions(containerSelector = document, options = {}) {
                 "card-selection-container"
             );
 
-            if (clickTimer === null) {
-                clickTimer = setTimeout(async () => {
-                    switch (itemType) {
-                        case "deck":
-                            showDeckInformation(
-                                selectionContainer,
-                                itemData,
-                                element
-                            );
-                            break;
-                        case "level":
-                            showLevelInformation(
-                                selectionContainer,
-                                itemData,
-                                element
-                            );
-                            break;
-                        case "card":
-                            showCardInformation(
-                                selectionContainer,
-                                itemData,
-                                element
-                            );
-                            break;
-                        default:
-                            break;
-                    }
-
-                    console.log(
-                        "Single click detected:",
-                        element.getAttribute("item-id")
+            switch (itemType) {
+                case "deck":
+                    showDeckInformation(selectionContainer, itemData, element);
+                    break;
+                case "level":
+                    showLevelInformation(selectionContainer, itemData, element);
+                    break;
+                case "card":
+                    showCardInformation(selectionContainer, itemData, element);
+                    break;
+                default:
+                    console.error(
+                        "Failed to load the metadata type of : " + itemType
                     );
+                    break;
+            }
 
+            if (clickTimer === null) {
+                clickedElement = element;
+                clickTimer = setTimeout(async () => {
                     clickTimer = null;
                 }, doubleClickThreshold);
             } else {
-                clearTimeout(clickTimer);
+                if (clickedElement != element) {
+                    clearTimeout(clickTimer);
+                    clickTimer = null;
+                    return;
+                }
 
-                console.log(
-                    "Double click detected:",
-                    element.getAttribute("item-id")
-                );
+                clearTimeout(clickTimer);
 
                 if (itemType != "card") {
                     loadPage(
@@ -209,7 +197,7 @@ export function insertEventActions(containerSelector = document, options = {}) {
                     );
 
                     const data = await dataResponse.json();
-
+                    console.log(data);
                     createPopupBox(
                         "60vw",
                         "60vh",
@@ -289,7 +277,9 @@ async function showDeckInformation(container, deckData, target) {
     cardContainer.innerHTML = "";
     cardContainer.appendChild(target.cloneNode(true));
 
-    cardContainer.querySelector(".ripple").remove();
+    const rip = cardContainer.querySelector(".ripple");
+
+    if (rip != null) rip.remove();
 
     const dataToStore = {
         "Deck Name": deckData.deck_name,
@@ -326,7 +316,9 @@ function showLevelInformation(container, levelData, target) {
     cardContainer.innerHTML = "";
     cardContainer.appendChild(target.cloneNode(true));
 
-    cardContainer.querySelector(".ripple").remove();
+    const rip = cardContainer.querySelector(".ripple");
+
+    if (rip != null) rip.remove();
 
     const dataToStore = {
         "Level Value": levelData.level_name,
@@ -356,7 +348,9 @@ function showCardInformation(container, cardData, target) {
     cardContainer.innerHTML = "";
     cardContainer.appendChild(target.cloneNode(true));
 
-    cardContainer.querySelector(".ripple").remove();
+    const rip = cardContainer.querySelector(".ripple");
+
+    if (rip != null) rip.remove();
 
     const dataToStore = {
         "Card Word": cardData.card_word,
