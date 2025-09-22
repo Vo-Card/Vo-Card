@@ -1,9 +1,22 @@
-import { createPopupBox, updatePopup } from "../handler/popup-handler.js";
+import {
+    closePopup,
+    createPopupBox,
+    updatePopup,
+} from "../handler/popup-handler.js";
 import { loadPage } from "../module/page-manager.js";
 import { fetchWithAuth } from "../../auth/auth.js";
+
+// Meta data handler
+import {
+    showCardInformation,
+    showDeckInformation,
+    showLevelInformation,
+} from "/js/workspace/handler/deck-metadata-handler.js";
 import { loadTemplate } from "../content/deck-loader.js";
 
 // Cache until update
+// @ts-ignore
+// @ts-ignore
 const contentCatch = new Map();
 
 /**
@@ -13,8 +26,6 @@ const contentCatch = new Map();
  * @returns {Promise<HTMLElement>}
  */
 async function viewerLoader(path, data) {
-    console.log(data);
-
     const cardData = data.card_data;
     const temp = document.createElement("div");
     const template = await (await fetch(path)).text();
@@ -79,8 +90,6 @@ async function viewerLoader(path, data) {
  * @returns {Promise<HTMLElement>}
  */
 async function editLoader(path, data) {
-    console.log(data);
-
     const cardData = data.card_data;
     const temp = document.createElement("div");
     const template = await (await fetch(path)).text();
@@ -126,12 +135,292 @@ async function editLoader(path, data) {
     return temp;
 }
 
+function createForm(
+    inputOverride = "input",
+    formElement,
+    labelValue,
+    inputType = "text",
+    inputValue = "",
+    inputname,
+    attributes = {},
+    updateFunction = () => {}
+) {
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+
+    if (labelValue != null) {
+        label.textContent = labelValue;
+        label.setAttribute("for", inputname);
+        div.appendChild(label);
+    }
+
+    const input = document.createElement(inputOverride);
+
+    if (inputOverride !== "textarea") {
+        // @ts-ignore
+        input.type = inputType;
+    }
+
+    // @ts-ignore
+    input.value = inputValue;
+    input.oninput = updateFunction;
+    // @ts-ignore
+    input.name = inputname;
+    input.id = inputname;
+
+    Object.entries(attributes).forEach(([key, value]) => {
+        input.setAttribute(key, value);
+    });
+
+    div.appendChild(document.createElement("br"));
+    div.appendChild(input);
+    formElement.appendChild(div);
+    return input;
+}
+
+async function createLoader(path, itemType) {
+    const temp = document.createElement("div");
+    const popupTemplate = await (await fetch(path)).text();
+
+    temp.style.height = "100%";
+    temp.innerHTML = popupTemplate;
+
+    const inpArea = temp.querySelector("create-input-area");
+    const cardDisplay = temp.querySelector(".card-item-container");
+    const form = /**@type {HTMLFormElement} */ document.createElement("form");
+
+    const winPath = document.location.pathname;
+
+    const callCreate = (apiEndpoint) => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            // @ts-ignore
+            const data = Object.fromEntries(Array.from(formData.entries()));
+            try {
+                const response = await fetchWithAuth(apiEndpoint, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+                if (response.ok) {
+                    const message = await response.json();
+                    closePopup();
+                    console.log(message);
+                } else {
+                    alert("Failed to update deck.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error updating deck.");
+            }
+        });
+    };
+
+    switch (itemType) {
+        case "Deck":
+            const theme = await loadTemplate(
+                "/components/template/deck_template.svg"
+            );
+
+            // Insert SVG into display
+            cardDisplay.innerHTML = theme.replace(/{ii}/g, "");
+
+            // Get all linearGradient elements inside this SVG
+            const gradients = cardDisplay.querySelectorAll("linearGradient");
+
+            const svgTitle = cardDisplay.querySelector("#fit-text");
+            svgTitle.textContent = "New Deck";
+            createForm(
+                "input",
+                form,
+                "Deck Name :",
+                "text",
+                "New Deck",
+                "deckName",
+                {},
+                (e) => {
+                    if (svgTitle) svgTitle.textContent = e.target.value;
+                }
+            );
+
+            createForm(
+                "textarea",
+                form,
+                "Description Color :",
+                "textarea",
+                "Description",
+                "deckDescription"
+            );
+
+            const priColor = createForm(
+                "input",
+                form,
+                "Primary Color :",
+                "text",
+                "#000000",
+                "primaryColor",
+                { "data-coloris": "" },
+                // @ts-ignore
+                // @ts-ignore
+                (e) => {
+                    gradients.forEach((gradient) => {
+                        const stops = gradient.querySelectorAll("stop");
+                        stops.forEach((stop, index) => {
+                            if (index === 0)
+                                // @ts-ignore
+                                stop.setAttribute("stop-color", priColor.value);
+                        });
+                    });
+                }
+            );
+
+            const secColor = createForm(
+                "input",
+                form,
+                "Secondary Color :",
+                "text",
+                "#000000",
+                "secondaryColor",
+                { "data-coloris": "" },
+                // @ts-ignore
+                // @ts-ignore
+                (e) => {
+                    gradients.forEach((gradient) => {
+                        const stops = gradient.querySelectorAll("stop");
+                        stops.forEach((stop, index) => {
+                            if (index === 1)
+                                // @ts-ignore
+                                stop.setAttribute("stop-color", secColor.value);
+                        });
+                    });
+                }
+            );
+
+            createForm("input", form, null, "submit", "Create Deck");
+
+            callCreate("/api/decks/create");
+
+            break;
+
+        case "Level":
+            const cardId = "level_" + Date.now(); // or UUID
+            const levelTheme = (
+                await loadTemplate("/components/template/card_template.svg")
+            )
+                .replace(/{card_id}/g, cardId)
+                .replace(/{top_indicator}/g, "Deck's Name")
+                .replace(/{ii}/g, "");
+
+            const match = winPath.match(/^\/workspace\/decks\/([^/]+)/);
+            if (!match) return temp;
+
+            const deckId = match[1];
+
+            // Insert SVG into display
+            cardDisplay.innerHTML = levelTheme;
+
+            // Get all linearGradient elements inside this SVG
+            const lev_radgradient = cardDisplay.querySelector("radialGradient");
+            const lev_svgPriColor = cardDisplay.querySelector(
+                `#primary_indicator_${cardId}`
+            );
+
+            const levSvgTitle = cardDisplay.querySelector("#fit-text");
+            levSvgTitle.textContent = "New Level";
+            createForm(
+                "input",
+                form,
+                "Level Name :",
+                "text",
+                "New Level",
+                "levelValue",
+                {},
+                (e) => {
+                    if (levSvgTitle) levSvgTitle.textContent = e.target.value;
+                }
+            );
+
+            createForm(
+                "input",
+                form,
+                "Level Weight :",
+                "number",
+                "0",
+                "levelWeight"
+            );
+
+            // Primary color
+            const levPriColor = createForm(
+                "input",
+                form,
+                "Primary Color :",
+                "text",
+                "#000000",
+                "primaryColor",
+                { "data-coloris": "" },
+                // @ts-ignore
+                (e) => {
+                    // @ts-ignore
+                    lev_svgPriColor.setAttribute("fill", levPriColor.value);
+                }
+            );
+            // @ts-ignore
+            lev_svgPriColor.setAttribute("fill", levPriColor.value);
+
+            // Secondary color
+            const levSecColor = createForm(
+                "input",
+                form,
+                "Secondary Color :",
+                "text",
+                "#000000",
+                "secondaryColor",
+                { "data-coloris": "" },
+                // @ts-ignore
+                (e) => {
+                    const stops = lev_radgradient.querySelectorAll("stop");
+                    // @ts-ignore
+                    stops[1].setAttribute("stop-color", levSecColor.value);
+                }
+            );
+
+            const stops = lev_radgradient.querySelectorAll("stop");
+            // @ts-ignore
+            stops[1].setAttribute("stop-color", levSecColor.value);
+
+            createForm("input", form, null, "submit", "Create Level");
+            callCreate(`/api/decks/${deckId}/create`);
+
+            break;
+        default:
+            console.error("Incorrect type");
+            break;
+    }
+    inpArea.appendChild(form);
+    // @ts-ignore
+    Coloris.setInstance("[data-coloris]", {
+        theme: "polaroid",
+        themeMode: "dark",
+        alpha: false,
+        formatToggle: true,
+        swatches: ["#264653", "#2a9d8f", "#e9c46a"],
+    });
+
+    return temp;
+}
+
 /**
  *
  * @param {*} containerSelector
  * @param {*} options
  */
-export function insertEventActions(containerSelector = document, options = {}) {
+export function insertDataEventActions(
+    containerSelector = document,
+    options = {}
+) {
     const interactableSelector =
         options.interactableSelector || ".item-interactable";
     const rippleSelector = options.rippleSelector || ".deck-container";
@@ -247,122 +536,28 @@ export function insertEventActions(containerSelector = document, options = {}) {
     );
 }
 
-function toDate(arr) {
-    // @ts-ignore
-    return Array.isArray(arr) ? new Date(...arr) : null;
-}
-
-// Create element to display datas
-function formatDate(date) {
-    // @ts-ignore
-    if (!(date instanceof Date) || isNaN(date)) return "";
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
-    const dd = String(date.getDate()).padStart(2, "0");
-    const yyyy = date.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
-}
-
 /**
- * @param {HTMLElement} container
- * @param {Object} deckData
+ *
+ * @param {Document|Element} containerSelector
+ * @param {String} interactableSelector
+ * @param {String} createType
  */
-async function showDeckInformation(container, deckData, target) {
-    const dataContainer = container.querySelector("deck-data-container");
+export function insertCreateEventActions(
+    containerSelector = document,
+    interactableSelector,
+    createType
+) {
+    const createElem = containerSelector.querySelector(interactableSelector);
 
-    const sel = container.querySelector("selection");
-
-    if (sel != null) sel.remove();
-
-    const cardContainer = container.querySelector(".card-item-container");
-    cardContainer.innerHTML = "";
-    cardContainer.appendChild(target.cloneNode(true));
-
-    const rip = cardContainer.querySelector(".ripple");
-
-    if (rip != null) rip.remove();
-
-    const dataToStore = {
-        "Deck Name": deckData.deck_name,
-        "Contained Cards": deckData.deck_contain_card,
-        "Deck Description": deckData.deck_description,
-        "Created Date": formatDate(toDate(deckData.deck_created_date)),
-        "Last Update": formatDate(toDate(deckData.deck_lastest_updated)),
-        "Is Public": deckData.deck_is_public,
-        "Allow Cloning": deckData.deck_clone_perm,
-    };
-
-    dataContainer.innerHTML = "";
-
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
-    });
-}
-
-/**
- * @param {HTMLElement} container
- * @param {Object} levelData
- */
-function showLevelInformation(container, levelData, target) {
-    const dataContainer = container.querySelector("deck-data-container");
-
-    const sel = container.querySelector("selection");
-
-    if (sel != null) sel.remove();
-
-    const cardContainer = container.querySelector(".card-item-container");
-    cardContainer.innerHTML = "";
-    cardContainer.appendChild(target.cloneNode(true));
-
-    const rip = cardContainer.querySelector(".ripple");
-
-    if (rip != null) rip.remove();
-
-    const dataToStore = {
-        "Level Value": levelData.level_name,
-        "Level Weight": levelData.level_weight,
-        "Created Date": formatDate(toDate(levelData.level_created_date)),
-        "Contained Cards": levelData.level_contain_card,
-    };
-
-    dataContainer.innerHTML = "";
-
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
-    });
-}
-
-function showCardInformation(container, cardData, target) {
-    const dataContainer = container.querySelector("deck-data-container");
-
-    const sel = container.querySelector("selection");
-
-    if (sel != null) sel.remove();
-
-    const cardContainer = container.querySelector(".card-item-container");
-    cardContainer.innerHTML = "";
-    cardContainer.appendChild(target.cloneNode(true));
-
-    const rip = cardContainer.querySelector(".ripple");
-
-    if (rip != null) rip.remove();
-
-    const dataToStore = {
-        "Card Word": cardData.card_word,
-        "Created Date": formatDate(toDate(cardData.card_created_date)),
-    };
-
-    dataContainer.innerHTML = "";
-
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
+    createElem.addEventListener("click", async () => {
+        createPopupBox(
+            "50vw",
+            "50vh",
+            "Create " + createType,
+            await createLoader(
+                "/components/content/popup/create-item.jsp",
+                createType
+            )
+        );
     });
 }

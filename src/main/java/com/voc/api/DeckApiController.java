@@ -5,16 +5,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
+import com.voc.server.Snowflake;
 import com.voc.utils.Row;
+import com.voc.utils.ThemeTypes;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -28,7 +33,81 @@ public class DeckApiController {
         return Optional.empty();
     }
 
-    @GetMapping("/getDecks")
+    private static class DeckCreateRequest {
+        public String deckName;
+        public String deckDescription;
+        public String primaryColor;
+        public String secondaryColor;
+    }
+
+    private static class LevelCreateRequest {
+        public String levelValue;
+        public int levelWeight;
+        public String primaryColor;
+        public String secondaryColor;
+    }
+
+    /* --- */
+    /* PUT */
+    /* --- */
+
+    @PutMapping("/create")
+    public ResponseEntity<Map<String, Object>> createDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody DeckCreateRequest deckData) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            Long deckId = Snowflake.nextId();
+            Long themeId = DeckManager.createNewTheme("Custom_" + deckId,
+                    ThemeTypes.Deck,
+                    "/components/template/deck_template.svg");
+            Long modifierId = DeckManager.createNewModifier(deckData.primaryColor,
+                    deckData.secondaryColor, "dots",
+                    ThemeTypes.Deck);
+
+            DeckManager.createNewDeck(deckId, deckData.deckName,
+                    deckData.deckDescription, false, themeId,
+                    modifierId, userId.get());
+
+            response.put("message", "Successfully created Deck");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @PutMapping("/{deckId}/create")
+    public ResponseEntity<Map<String, Object>> createLevel(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody LevelCreateRequest levelData,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            Long levelId = Snowflake.nextId();
+            Long themeId = DeckManager.createNewTheme("Custom_" + levelId, ThemeTypes.Deck,
+                    "/components/template/card_template.svg");
+            Long modifierId = DeckManager.createNewModifier(levelData.primaryColor, levelData.secondaryColor, "dots",
+                    ThemeTypes.Deck);
+
+            DeckManager.createNewLevel(levelId, levelData.levelValue, levelData.levelWeight, themeId,
+                    modifierId, deckId);
+
+            response.put("message", "Successfully created Level");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    @GetMapping({ "", "/" })
     public ResponseEntity<Map<String, Object>> deckLoader(
             @RequestHeader(value = "Authorization", required = false) String authToken) {
 
@@ -46,7 +125,6 @@ public class DeckApiController {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(401).body(response);
         }
-
     }
 
     @GetMapping("/{deckId}")

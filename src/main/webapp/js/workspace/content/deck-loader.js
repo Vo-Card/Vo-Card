@@ -1,9 +1,16 @@
 // @ts-check
 
 import { fetchWithAuth } from "/js/auth/auth.js";
-import { insertEventActions } from "../event/card-event-handler.js";
+import {
+    insertCreateEventActions,
+    insertDataEventActions,
+} from "../event/card-event-handler.js";
 
 const templateCache = new Map();
+
+/* ------------- */
+/*   Utilities   */
+/* ------------- */
 
 /**
  * Load the template from the given URL
@@ -30,20 +37,59 @@ export async function loadTemplate(themeUrl) {
 
 /**
  *
- *
+ * @param {String} elementType
  * @param {String} html
  * @param {Array} classes
  * @param {Object} attributes
- * @return {HTMLDivElement} the element that have been created
+ * @return {HTMLElement} the element that have been created
  */
-function createElementFromHTML(html, classes = [], attributes = {}) {
-    const el = document.createElement("div");
+function createElementFromHTML(
+    elementType,
+    html,
+    classes = [],
+    attributes = {}
+) {
+    const el = document.createElement(elementType);
     el.innerHTML = html;
     classes.filter((cls) => cls).forEach((cls) => el.classList.add(cls));
     Object.entries(attributes).forEach(([key, value]) =>
         el.setAttribute(key, value)
     );
     return el;
+}
+
+/**
+ * Fetch the API using auth with error handling
+ *
+ * @param {String} url
+ * @returns {Promise<Object>}
+ */
+async function safeFetch(url) {
+    try {
+        const res = await fetchWithAuth(url);
+        if (!res.ok) throw new Error("Unauthorized");
+        return await res.json();
+    } catch {
+        // Currently debug
+        console.error("Error Fetching Page");
+    }
+}
+
+/**
+ * Append the HTML template using link
+ *
+ * @param {HTMLElement} target
+ * @param {String} url
+ * @param {String} id A string of ID (String because javascript sucks)
+ * @param {String} additionalClass
+ */
+async function appendTemplate(target, url, id, additionalClass = "") {
+    const html = await loadTemplate(url);
+    const el = createElementFromHTML("div", html, [additionalClass], { id });
+    const overlay = document.createElement("div");
+    overlay.className = "hoverOverlay";
+    el.appendChild(overlay);
+    target.appendChild(el);
 }
 
 /**
@@ -64,19 +110,14 @@ export async function populateContainer(
 
         let cardHTML = template
             .replace(/{primary_color}/g, item.primary_color)
-            .replace(/{secondary_color}/g, item.secondary_color);
-
+            .replace(/{secondary_color}/g, item.secondary_color)
+            .replace(
+                /{ii}/g,
+                ownership === "forked" ? "" : ownership === "owned" ? "" : ""
+            );
         switch (type) {
             case "deck":
                 cardHTML = cardHTML
-                    .replace(
-                        /{ii}/g,
-                        ownership === "forked"
-                            ? ""
-                            : ownership === "owned"
-                            ? ""
-                            : ""
-                    )
                     .replace(/{deck_id}/g, item.deck_id_PK)
                     .replace(/{deck_name}/g, item.deck_name);
                 break;
@@ -84,28 +125,12 @@ export async function populateContainer(
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.level_id_PK)
                     .replace(/{top_indicator}/g, item.deck_name)
-                    .replace(
-                        /{ii}/g,
-                        ownership === "forked"
-                            ? ""
-                            : ownership === "owned"
-                            ? ""
-                            : ""
-                    )
                     .replace(/{word_content}/g, item.level_name);
                 break;
             case "card":
                 cardHTML = cardHTML
                     .replace(/{card_id}/g, item.card_id_PK)
                     .replace(/{top_indicator}/g, item.level_name)
-                    .replace(
-                        /{ii}/g,
-                        ownership === "forked"
-                            ? ""
-                            : ownership === "owned"
-                            ? ""
-                            : ""
-                    )
                     .replace(/{word_content}/g, item.card_word);
                 break;
             default:
@@ -114,12 +139,9 @@ export async function populateContainer(
         }
 
         const container = createElementFromHTML(
+            "div",
             cardHTML,
-            [
-                "card-item-container",
-                `${type}-container-indicator`,
-                "item-interactable",
-            ],
+            ["card-item-container", "item-interactable"],
             {
                 "item-id":
                     type === "deck"
@@ -129,6 +151,7 @@ export async function populateContainer(
                         : item.card_id_PK,
                 "item-type": type,
                 "item-data": JSON.stringify(item),
+                "owner-type": ownership != null ? ownership : "Unknown",
             }
         );
 
@@ -137,39 +160,7 @@ export async function populateContainer(
         container.appendChild(hoverOverlay);
 
         target.appendChild(container);
-        console.log(item);
     }
-}
-
-/**
- *
- * @param {String} url
- * @returns {Promise<Object>}
- */
-async function safeFetch(url) {
-    try {
-        const res = await fetchWithAuth(url);
-        if (!res.ok) throw new Error("Unauthorized");
-        return await res.json();
-    } catch {
-        console.log("Error Fetching Page");
-    }
-}
-
-/**
- *
- * @param {HTMLElement} target
- * @param {String} url
- * @param {String} id A string of ID (String because javascript sucks)
- * @param {String} additionalClass
- */
-async function appendTemplate(target, url, id, additionalClass = "") {
-    const html = await loadTemplate(url);
-    const el = createElementFromHTML(html, [additionalClass], { id });
-    const overlay = document.createElement("div");
-    overlay.className = "hoverOverlay";
-    el.appendChild(overlay);
-    target.appendChild(el);
 }
 
 export async function deckLoader() {
@@ -178,8 +169,7 @@ export async function deckLoader() {
     );
     const ownedDeckContainer = document.getElementById("owned-decks-container");
 
-    const data = await safeFetch("/api/decks/getDecks");
-    console.log(data);
+    const data = await safeFetch("/api/decks");
     if (!data) return;
 
     await populateContainer(
@@ -209,10 +199,16 @@ export async function deckLoader() {
         "card-item-container"
     );
 
-    insertEventActions(document, {
-        interactableSelector: ".item-interactable, .level-container-indicator",
+    insertDataEventActions(document.getElementById("loadDecks"), {
+        interactableSelector: ".item-interactable",
         rippleSelector: ".card-item-container",
     });
+
+    insertCreateEventActions(
+        document.getElementById("loadDecks"),
+        "#createDeckButton",
+        "Deck"
+    );
 }
 
 /**
@@ -237,15 +233,19 @@ export async function deckDetailLoader(path) {
             data.ownership_type
         );
 
-    await appendTemplate(
-        levelContainer,
-        "/components/template/new_card.svg",
-        null,
-        "card-item-container"
-    );
+    if (data.ownership_type === "owned") {
+        await appendTemplate(
+            levelContainer,
+            "/components/template/new_card.svg",
+            "create-level-card",
+            "card-item-container"
+        );
 
-    insertEventActions(document, {
-        interactableSelector: ".item-interactable, .level-container-indicator",
+        insertCreateEventActions(levelContainer, "#create-level-card", "Level");
+    }
+
+    insertDataEventActions(levelContainer, {
+        interactableSelector: ".item-interactable",
         rippleSelector: ".card-item-container",
     });
 }
@@ -272,15 +272,17 @@ export async function levelDetailLoader(path) {
             data.ownership_type
         );
 
-    await appendTemplate(
-        cardContainer,
-        "/components/template/new_card.svg",
-        null,
-        "card-item-container"
-    );
+    if (data.ownership_type === "owned") {
+        await appendTemplate(
+            cardContainer,
+            "/components/template/new_card.svg",
+            null,
+            "card-item-container"
+        );
+    }
 
-    insertEventActions(document, {
-        interactableSelector: ".item-interactable, .level-container-indicator",
+    insertDataEventActions(cardContainer, {
+        interactableSelector: ".item-interactable",
         rippleSelector: ".card-item-container",
         deckId: match[1],
         levelId: match[2],
@@ -313,15 +315,19 @@ export async function loadVoteCards() {
         const svgs = await Promise.all(responses.map((res) => res.text()));
 
         svgs.forEach((svgText, i) => {
-            const el = createElementFromHTML(svgText, ["card-item-container"], {
-                "item-id": cards[i].id,
-            });
+            const el = createElementFromHTML(
+                "div",
+                svgText,
+                ["card-item-container"],
+                {
+                    "item-id": cards[i].id,
+                }
+            );
             const overlay = document.createElement("div");
             overlay.className = "hoverOverlay";
             el.appendChild(overlay);
             voteCardContainer.appendChild(el);
         });
-        console.log("All cards loaded");
     } catch (err) {
         console.error("Error loading cards:", err);
     }

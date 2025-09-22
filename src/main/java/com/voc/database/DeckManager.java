@@ -51,7 +51,8 @@ public class DeckManager {
 
         Long themeModifierId = createNewModifier("#0f1114", "#C38A39", null, ThemeTypes.Deck);
 
-        Long deckId = createNewDeck("Default", "This is the VoCard official default deck.", true, themeId,
+        Long deckId = createNewDeck(Snowflake.nextId(), "Default", "This is the VoCard official default deck.", true,
+                themeId,
                 themeModifierId, rootUserID);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -164,7 +165,7 @@ public class DeckManager {
 
         if (!isRoot) {
             SQLResult rootDecks = DatabaseUtils.sqlPrepareStatement(
-                    "SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
+                    "SELECT deck_id_PK FROM decktb WHERE user_id_FK = ? AND deck_is_public = 1",
                     rootUserID);
             if (rootDecks.isSuccess()) {
                 for (Row deck : rootDecks.getData()) {
@@ -176,7 +177,6 @@ public class DeckManager {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -362,6 +362,7 @@ public class DeckManager {
                     LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
                     LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
                     WHERE cl.deck_id_FK = ?
+                    ORDER BY cl.level_weight
                 """;
 
         SQLResult deckLevelList = DatabaseUtils.sqlPrepareStatement(sql, deckId);
@@ -453,12 +454,11 @@ public class DeckManager {
      * @param userId
      */
     public static Long createNewDeck(
+            Long deckId,
             String name,
             String description, Boolean isPublic,
             Long themeId, Long modifierId,
             Long userId) {
-
-        Long deckId = Snowflake.nextId();
 
         String sql = "INSERT INTO decktb " +
                 "(deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK) " +
