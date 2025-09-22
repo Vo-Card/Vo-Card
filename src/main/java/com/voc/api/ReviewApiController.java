@@ -61,7 +61,7 @@ public class ReviewApiController {
         Long covertedLevelId = Long.parseLong(levelId);
 
         if (covertedCardId != null && covertedDeckId != null && covertedLevelId != null) {
-            Object cardInfo = DeckManager.getCardInfo(covertedDeckId, covertedLevelId, covertedCardId);
+            Object cardInfo = DeckManager.getCardInfo(covertedCardId);
             response.put("Definition", cardInfo);
             return ResponseEntity.ok(response);
         }

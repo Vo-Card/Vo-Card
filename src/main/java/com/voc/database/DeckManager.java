@@ -144,7 +144,8 @@ public class DeckManager {
                     "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
             DatabaseUtils.sqlExecuteBatch(
                     "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
-            updateContainCard(deckId);
+            updateAllLevelContainCards(deckId);
+            updateDeckContainCard(deckId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -209,6 +210,49 @@ public class DeckManager {
     }
 
     /**
+     * Validate ownership for deck/level/card/pos in a single query.
+     *
+     * @param userId
+     * @param deckId  required
+     * @param levelId optional
+     * @param cardId  optional
+     * @param posId   optional
+     * @return true if the user owns (or forked) the deck/item, false otherwise
+     */
+    public static boolean validateOwnership(Long userId, Long deckId, Long levelId, Long cardId, Long posId,
+            Long definitionId) {
+
+        String sql = """
+                    SELECT 1
+                    FROM decktb d
+                    LEFT JOIN card_leveltb cl ON cl.deck_id_FK = d.deck_id_PK
+                    LEFT JOIN cardtb c ON c.level_id_FK = cl.level_id_PK
+                    LEFT JOIN postb p ON p.card_id_FK = c.card_id_PK
+                    LEFT JOIN definitiontb def ON def.pos_id_FK = p.pos_id_PK
+                    LEFT JOIN forktb f ON f.deck_id_FK = d.deck_id_PK AND f.user_id_FK = ?
+                    WHERE (d.user_id_FK = ? OR f.user_id_FK IS NOT NULL)
+                      AND d.deck_id_PK = ?
+                      AND (? IS NULL OR cl.level_id_PK = ?)
+                      AND (? IS NULL OR c.card_id_PK = ?)
+                      AND (? IS NULL OR p.pos_id_PK = ?)
+                      AND (? IS NULL OR def.definition_id_PK = ?)
+                    LIMIT 1
+                """;
+
+        Row row = DatabaseUtils.sqlSingleRowStatement(
+                sql,
+                userId, // for forktb join
+                userId, // for owned deck
+                deckId,
+                levelId, levelId,
+                cardId, cardId,
+                posId, posId,
+                definitionId, definitionId);
+
+        return row != null;
+    }
+
+    /**
      * 
      * @param userid
      * @return
@@ -258,95 +302,6 @@ public class DeckManager {
     }
 
     /**
-     * Get all cards for a specific deck level
-     *
-     * @param deckId
-     * @param levelId
-     * @return List of cards (joined with themes & modifiers from their level)
-     */
-    public static List<Row> getCardsOfLevel(Long deckId, Long levelId) {
-        String sql = """
-                    SELECT c.*,
-                        cl.level_name, cl.level_weight,
-                        t.theme_name, t.theme_type, t.theme_url,
-                        m.primary_color, m.secondary_color, m.card_pattern
-                    FROM cardtb c
-                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-                    LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
-                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
-                    WHERE cl.deck_id_FK = ? AND cl.level_id_PK = ?
-                """;
-
-        SQLResult cardList = DatabaseUtils.sqlPrepareStatement(sql, deckId, levelId);
-        List<Row> rows = cardList.getData();
-
-        Convertors.convertIdsToString(
-                rows,
-                "card_id_PK", "level_id_FK", "level_id_PK", "deck_id_FK",
-                "theme_id_FK", "modifier_id_FK");
-
-        return rows;
-    }
-
-    public static Row getCardInfo(Long deckId, Long levelId, Long cardId) {
-        String sql = """
-                    SELECT c.card_id_PK, c.card_word,
-                        cl.level_name,
-                        p.pos_id_PK, p.part_of_speech,
-                        d.definition_id_PK, d.definition
-                    FROM cardtb c
-                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-                    INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
-                    LEFT JOIN postb p ON c.card_id_PK = p.card_id_FK
-                    LEFT JOIN definitiontb d ON p.pos_id_PK = d.pos_id_FK
-                    WHERE c.card_id_PK = ?
-                    AND cl.level_id_PK = ?
-                    AND dck.deck_id_PK = ?
-                    ORDER BY p.pos_id_PK, d.definition_id_PK
-                """;
-
-        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, cardId, levelId, deckId);
-        List<Row> rows = result.getData();
-
-        if (rows.isEmpty())
-            return null;
-
-        Row cardInfo = new Row();
-        cardInfo.put("card_id_PK", rows.get(0).get("card_id_PK").toString());
-        cardInfo.put("card_word", rows.get(0).get("card_word"));
-        cardInfo.put("level_name", rows.get(0).get("level_name"));
-
-        Map<String, Row> posMap = new LinkedHashMap<>();
-        for (Row row : rows) {
-            if (row.get("pos_id_PK") == null)
-                continue;
-
-            String posId = row.get("pos_id_PK").toString();
-            Row posRow = posMap.computeIfAbsent(posId, id -> {
-                Row newPos = new Row();
-                newPos.put("pos_id_PK", id);
-                newPos.put("part_of_speech", row.get("part_of_speech"));
-                newPos.put("definitions", new ArrayList<Row>()); // <-- now list of Rows
-                return newPos;
-            });
-
-            if (row.get("definition_id_PK") != null && row.get("definition") != null) {
-                @SuppressWarnings("unchecked")
-                List<Row> definitions = (List<Row>) posRow.get("definitions");
-
-                Row defRow = new Row();
-                defRow.put("definition_id_PK", row.get("definition_id_PK").toString());
-                defRow.put("definition", row.get("definition"));
-
-                definitions.add(defRow);
-            }
-        }
-
-        cardInfo.put("pos", new ArrayList<>(posMap.values()));
-        return cardInfo;
-    }
-
-    /**
      * 
      * @param deckId
      * @return
@@ -373,6 +328,98 @@ public class DeckManager {
         return rows;
     }
 
+    /**
+     * Get all cards for a specific deck level
+     *
+     * @param deckId
+     * @param levelId
+     * @return List of cards (joined with themes & modifiers from their level)
+     */
+    public static List<Row> getCardsOfLevel(Long levelId) {
+        String sql = """
+                    SELECT c.*,
+                        cl.level_name, cl.level_weight,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    LEFT JOIN themetb t ON cl.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+                    WHERE cl.level_id_PK = ?
+                """;
+
+        SQLResult cardList = DatabaseUtils.sqlPrepareStatement(sql, levelId);
+        List<Row> rows = cardList.getData();
+
+        Convertors.convertIdsToString(
+                rows,
+                "card_id_PK", "level_id_FK", "level_id_PK",
+                "theme_id_FK", "modifier_id_FK");
+
+        return rows;
+    }
+
+    public static Row getCardInfo(Long cardId) {
+        String sql = """
+                    SELECT c.card_id_PK, c.card_word,
+                        cl.level_name,
+                        p.pos_id_PK, p.part_of_speech,
+                        d.definition_id_PK, d.definition
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
+                    LEFT JOIN postb p ON c.card_id_PK = p.card_id_FK
+                    LEFT JOIN definitiontb d ON p.pos_id_PK = d.pos_id_FK
+                    WHERE c.card_id_PK = ?
+                    ORDER BY p.pos_id_PK, d.definition_id_PK
+                """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, cardId);
+        List<Row> rows = result.getData();
+
+        if (rows.isEmpty())
+            return null;
+
+        Row cardInfo = new Row();
+        cardInfo.put("card_id_PK", rows.get(0).get("card_id_PK").toString());
+        cardInfo.put("card_word", rows.get(0).get("card_word"));
+        cardInfo.put("level_name", rows.get(0).get("level_name"));
+
+        Map<String, Row> posMap = new LinkedHashMap<>();
+        for (Row row : rows) {
+            if (row.get("pos_id_PK") == null)
+                continue;
+
+            String posId = row.get("pos_id_PK").toString();
+            Row posRow = posMap.computeIfAbsent(posId, id -> {
+                Row newPos = new Row();
+                newPos.put("pos_id_PK", id);
+                newPos.put("part_of_speech", row.get("part_of_speech"));
+                newPos.put("definitions", new ArrayList<Row>());
+                return newPos;
+            });
+
+            if (row.get("definition_id_PK") != null && row.get("definition") != null) {
+                @SuppressWarnings("unchecked")
+                List<Row> definitions = (List<Row>) posRow.get("definitions");
+
+                Row defRow = new Row();
+                defRow.put("definition_id_PK", row.get("definition_id_PK").toString());
+                defRow.put("definition", row.get("definition"));
+
+                definitions.add(defRow);
+            }
+        }
+
+        cardInfo.put("pos", new ArrayList<>(posMap.values()));
+        return cardInfo;
+    }
+
+    /**
+     * 
+     * @param deckId
+     * @return All card data inside the deck
+     */
     public static List<Row> getAllCardFromDeck(Long deckId) {
         String sql = """
                     SELECT
@@ -408,7 +455,6 @@ public class DeckManager {
      * @param themeURL
      */
     public static Long createNewTheme(String themeName, ThemeTypes themeType, String themeURL) {
-
         Long themeId = Snowflake.nextId();
 
         DatabaseUtils.sqlPrepareStatement(
@@ -460,9 +506,11 @@ public class DeckManager {
             Long themeId, Long modifierId,
             Long userId) {
 
-        String sql = "INSERT INTO decktb " +
-                "(deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+                INSERT INTO decktb
+                (deck_id_PK, deck_name, deck_description, deck_is_public, theme_id_FK, modifier_id_FK, user_id_FK)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """;
 
         DatabaseUtils.sqlSingleRowStatement(
                 sql,
@@ -500,6 +548,7 @@ public class DeckManager {
         DatabaseUtils.sqlPrepareStatement(
                 "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)",
                 cardId != null ? cardId : Snowflake.nextId(), levelId, cardName);
+        updateLevelContainCard(levelId);
     }
 
     /**
@@ -656,23 +705,54 @@ public class DeckManager {
      * @param deck_id
      * @return number in deck_contain_card from decktb
      */
-    private static String updateContainCard(Long deck_id) {
+    public static void updateDeckContainCard(Long deckId) {
         String sql = """
-                UPDATE decktb d
-                SET deck_contain_card = (
-                    SELECT COUNT(c.level_id_FK)
-                    FROM cardtb c
-                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
-                    WHERE cl.deck_id_FK = d.deck_id_PK
-                )
-                WHERE d.deck_id_PK = ?
+                    UPDATE decktb d
+                    SET deck_contain_card = (
+                        SELECT SUM(cl.level_contain_card)
+                        FROM card_leveltb cl
+                        WHERE cl.deck_id_FK = d.deck_id_PK
+                    )
+                    WHERE d.deck_id_PK = ?
                 """;
 
-        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, deck_id);
-        if (result.isSuccess()) {
-            return "deck_contain_card has been updated";
+        DatabaseUtils.sqlPrepareStatement(sql, deckId);
+    }
+
+    public static void updateLevelContainCard(Long levelId) {
+        String sql = """
+                    UPDATE card_leveltb cl
+                    SET level_contain_card = (
+                        SELECT COUNT(*)
+                        FROM cardtb c
+                        WHERE c.level_id_FK = cl.level_id_PK
+                    )
+                    WHERE cl.level_id_PK = ?
+                """;
+
+        DatabaseUtils.sqlPrepareStatement(sql, levelId);
+
+        Row row = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT deck_id_FK FROM card_leveltb WHERE level_id_PK = ?", levelId);
+        if (row != null && row.get("deck_id_FK") != null) {
+            Long deckId = ((Number) row.get("deck_id_FK")).longValue();
+
+            updateDeckContainCard(deckId);
         }
-        return "Cannot find current deck";
+    }
+
+    private static void updateAllLevelContainCards(Long deckId) {
+        String sql = """
+                    UPDATE card_leveltb cl
+                    SET level_contain_card = (
+                        SELECT COUNT(*)
+                        FROM cardtb c
+                        WHERE c.level_id_FK = cl.level_id_PK
+                    )
+                    WHERE cl.deck_id_FK = ?
+                """;
+
+        DatabaseUtils.sqlPrepareStatement(sql, deckId);
     }
 
 }
