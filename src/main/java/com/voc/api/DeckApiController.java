@@ -47,9 +47,13 @@ public class DeckApiController {
         public String secondaryColor;
     }
 
-    /* --- */
-    /* PUT */
-    /* --- */
+    private static class CardCreateRequest {
+        public String cardWord;
+    }
+
+    /* ----------- */
+    /* PUT MAPPING */
+    /* ----------- */
 
     @PutMapping("/create")
     public ResponseEntity<Map<String, Object>> createDeck(
@@ -89,6 +93,12 @@ public class DeckApiController {
 
         Optional<Long> userId = getUserIdFromJWT(authToken);
 
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+        if (!validateOwner) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+        }
+
         if (userId.isPresent()) {
             Long levelId = Snowflake.nextId();
             Long themeId = DeckManager.createNewTheme("Custom_" + levelId, ThemeTypes.Deck,
@@ -106,6 +116,39 @@ public class DeckApiController {
             return ResponseEntity.status(401).body(response);
         }
     }
+
+    @PutMapping("/{deckId}/{levelId}/create")
+    public ResponseEntity<Map<String, Object>> createCard(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody CardCreateRequest cardData,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
+        if (!validateOwner) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+        }
+
+        if (userId.isPresent()) {
+            Long cardId = Snowflake.nextId();
+
+            DeckManager.createNewCard(cardId, levelId, cardData.cardWord);
+
+            response.put("message", "Successfully created Level");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    /* ----------- */
+    /* GET MAPPING */
+    /* ----------- */
 
     @GetMapping({ "", "/" })
     public ResponseEntity<Map<String, Object>> deckLoader(
@@ -135,11 +178,13 @@ public class DeckApiController {
         Map<String, Object> response = new HashMap<>();
 
         Optional<Long> userId = getUserIdFromJWT(authToken);
-        Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
 
-        if (ownershipType.isEmpty()) {
-            response.put("message", "You do not owned this deck.");
-            return ResponseEntity.badRequest().body(response);
+        // Permission check
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+        Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
+        if (!validateOwner || ownershipType.isEmpty()) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
         }
 
         response.put("ownership_type", ownershipType.get());
@@ -163,17 +208,20 @@ public class DeckApiController {
 
         Optional<Long> userId = getUserIdFromJWT(authToken);
 
-        // Validate Ownership
+        // Permission check
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
         Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
-        if (ownershipType.isEmpty()) {
-            response.put("message", "You do not owned this deck.");
-            return ResponseEntity.badRequest().body(response);
+        if (!validateOwner || ownershipType.isEmpty()) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
         }
 
         response.put("ownership_type", ownershipType.get());
 
+        response.put("ownership_type", ownershipType.get());
+
         if (userId.isPresent()) {
-            List<Row> deckLevels = DeckManager.getCardsOfLevel(deckId, levelId);
+            List<Row> deckLevels = DeckManager.getCardsOfLevel(levelId);
             response.put("cards", deckLevels);
             return ResponseEntity.ok(response);
         } else {
@@ -192,17 +240,18 @@ public class DeckApiController {
 
         Optional<Long> userId = getUserIdFromJWT(authToken);
 
-        // Validate Ownership
+        // Permission check
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
         Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
-        if (ownershipType.isEmpty()) {
-            response.put("message", "You do not owned this deck.");
-            return ResponseEntity.badRequest().body(response);
+        if (!validateOwner || ownershipType.isEmpty()) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
         }
 
         response.put("ownership_type", ownershipType.get());
 
         if (userId.isPresent()) {
-            Row cardData = DeckManager.getCardInfo(deckId, levelId, cardId);
+            Row cardData = DeckManager.getCardInfo(cardId);
             response.put("card_data", cardData);
             return ResponseEntity.ok(response);
         } else {
