@@ -340,16 +340,16 @@
     padding: 10px;
 }
 
-#popup-content-container::-webkit-scrollbar {
+#popup-content-container::-webkit-scrollbar, create-input-area::-webkit-scrollbar {
     width: 8px;
 }
 
-#popup-content-container::-webkit-scrollbar-thumb {
+#popup-content-container::-webkit-scrollbar-thumb, create-input-area::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
-#popup-content-container::-webkit-scrollbar-thumb:hover {
+#popup-content-container::-webkit-scrollbar-thumb:hover, create-input-area::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
