@@ -64,6 +64,8 @@ export async function cardSessionPlay(sessionPlay) {
     const usrCards = await sendPackDeckId(["757573526466093056"]);
     const voteCover = document.getElementById("vote-cover")
     const cardStage = document.getElementById("card-placeholder");
+    const voteCards = document.getElementById("vote-cards")
+
 
     for (let i = 0; i < sessionPlay; i++) {
 
@@ -85,18 +87,24 @@ export async function cardSessionPlay(sessionPlay) {
             console.error(err);
         }
 
-
         voteCover.style.display = "block";
 
-        await new Promise((resolve) => {
-            const onClick = () => {
-                voteCover.style.display = "none";
-                voteCover.removeEventListener("click", onClick);
-                resolve();
-            };
-            voteCover.addEventListener("click", onClick);
+        voteCover.addEventListener('click', () => {
+            voteCover.style.display = "none";
+            voteCover.removeEventListener
         });
 
-        
+        const voteButtons = voteCards.querySelectorAll(".card-item-container");
+
+        voteButtons.forEach(vote => {
+            vote.addEventListener('click', () => {
+                console.log("Choice " + vote.getAttribute('item-id'));
+
+                voteButtons.forEach(b => {
+                    b.style.display = "none";
+                });
+            });
+
+        });
     }
 }
