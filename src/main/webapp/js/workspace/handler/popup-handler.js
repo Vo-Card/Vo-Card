@@ -59,3 +59,11 @@ backdrop.addEventListener("mouseup", (e) => {
     popupOrder.pop();
     mouseDownOnBackdrop = false;
 });
+
+export function closePopup() {
+    backdrop.classList.remove("active");
+    popupBox.removeAttribute("style");
+    contentContainer.innerHTML = "";
+    popupOrder.length = 0;
+    mouseDownOnBackdrop = false;
+}

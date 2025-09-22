@@ -55,17 +55,17 @@ function displayRightSidebar(path) {
     const sidebarId = document.getElementById("information-container");
 
     Object.keys(informationPages).forEach(async (pageKey) => {
-        console.log("Sidebar page : ", path, pageKey, path.startsWith(pageKey));
-
         if (path.startsWith(pageKey) && !match) {
             sidebarId.setAttribute("active", "");
             match = true;
 
             // Get the template for this key
             const template = informationPages[pageKey].template;
-            if (template && !cache.has(template)) await fetchPage(template);
-            sidebarId.innerHTML = cache.get(template);
-            console.log("Matched template:", template);
+            const fragment = await fetchPage(template);
+
+            while (sidebarId.firstChild)
+                sidebarId.removeChild(sidebarId.firstChild);
+            sidebarId.appendChild(fragment);
 
             sidebarId.style.visibility = "visible";
         } else if (!match) {
@@ -114,27 +114,29 @@ function changePageHeader(headerName) {
 }
 
 /**
- * Fetch page content (AJAX)
+ * Fetch page content (AJAX) and cache as DocumentFragment
  * @param {String} path
- * @param {AbortController} signal
- * @returns {Promise<string|null>}
+ * @param {AbortController} controller
+ * @returns {Promise<DocumentFragment|Node|null>}
  */
-async function fetchPage(path, signal = null) {
-    if (cache.has(path)) return cache.get(path);
+async function fetchPage(path, controller = null) {
+    if (cache.has(path)) return cache.get(path).cloneNode(true);
 
     try {
         const res = await fetch(path, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
-            signal: signal?.signal,
+            signal: controller?.signal,
         });
-
-        console.log(res);
 
         if (!res.ok) throw new Error("404");
 
         const html = await res.text();
-        cache.set(path, html);
-        return html;
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        const fragment = template.content;
+
+        cache.set(path, fragment);
+        return fragment.cloneNode(true);
     } catch (err) {
         if (err.name === "AbortError") return null;
         console.error(err);
@@ -143,7 +145,7 @@ async function fetchPage(path, signal = null) {
 }
 
 /**
- * Load a page with AJAX, inject CSS before showing content
+ * Load a page with AJAX, inject CSS + JS, prevent race conditions
  * @param {String} path
  * @param {Boolean} addHistory
  */
@@ -151,36 +153,31 @@ export async function loadPage(path, addHistory = true) {
     // Cancel previous request
     if (currentController) currentController.abort();
     currentController = new AbortController();
+    const thisController = currentController;
 
-    const html = await fetchPage(path, currentController);
-    if (!html) {
-        // window.location.href = "/error/404";
-        console.log("Failed to load page");
-        return;
-    }
+    const fragment = await fetchPage(path, thisController);
+    if (!fragment || thisController !== currentController) return;
 
     const contentEl = document.getElementById("content");
     if (!contentEl) return;
 
-    // Initialize JS + CSS based on mapping
-    const component = Object.keys(pageComponents).find((p) =>
-        path.startsWith(p)
-    );
+    // Find matching component for CSS + JS
+    const compKey = Object.keys(pageComponents).find((p) => path.startsWith(p));
     let cssPromise = Promise.resolve();
-    let jsFn = null;
+    let jsPromise = Promise.resolve();
 
-    if (component) {
-        const { js, css } = pageComponents[component];
+    if (compKey) {
+        const { js, css } = pageComponents[compKey];
         if (css) cssPromise = loadCSS(css);
-        if (js) jsFn = js;
+        if (js) jsPromise = Promise.resolve().then(() => js(path));
     }
 
-    // wait for CSS load (or cached)
-    await cssPromise;
+    // Inject content immediately (don’t wait for CSS)
+    while (contentEl.firstChild) contentEl.removeChild(contentEl.firstChild);
+    contentEl.appendChild(fragment);
 
-    contentEl.innerHTML = html;
-
-    if (jsFn) jsFn(path);
+    // Run CSS + JS in parallel
+    Promise.allSettled([cssPromise, jsPromise]);
 
     // Deck-specific AJAX loader
     if (path.startsWith("/workspace/decks")) {
@@ -190,27 +187,46 @@ export async function loadPage(path, addHistory = true) {
         else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path))
             levelDetailLoader(path);
     }
-    const match = path.match(/^\/workspace\/([^\/]+)/);
 
+    const match = path.match(/^\/workspace\/([^\/]+)/);
     changePageHeader(match ? match[1] + " Page" : "unknown Page");
 
     if (addHistory) window.history.pushState({ path }, "", path);
 
     displayRightSidebar(path);
-
-    console.log("Loaded via AJAX:", path);
 }
 
 // Preload pages on hover
-document.addEventListener("mouseover", (event) => {
-    const target = event.target;
-    if (target instanceof Element) {
-        const link = target.closest("a[data-workspace]");
-        if (link) {
-            const href = link.getAttribute("href");
-            if (href && !cache.has(href)) fetchPage(href);
+let hoverTimeout;
+
+const navbar = document.getElementById("workspace-sidebar");
+
+navbar.addEventListener("mouseover", (event) => {
+    clearTimeout(hoverTimeout);
+    hoverTimeout = setTimeout(() => {
+        // @ts-ignore
+        const target = event.target.closest("a[data-workspace]");
+        if (target) {
+            const href = target.getAttribute("href");
+            if (href && !cache.has(href)) {
+                fetchPage(href);
+                const comp = Object.keys(pageComponents).find((p) =>
+                    href.startsWith(p)
+                );
+                if (
+                    comp &&
+                    pageComponents[comp].css &&
+                    !cssCache.has(pageComponents[comp].css)
+                ) {
+                    const preload = document.createElement("link");
+                    preload.rel = "preload";
+                    preload.as = "style";
+                    preload.href = pageComponents[comp].css;
+                    document.head.appendChild(preload);
+                }
+            }
         }
-    }
+    }, 120); // only trigger if hovered ~0.1s+
 });
 
 document.addEventListener("click", async (event) => {
@@ -238,8 +254,7 @@ document.addEventListener("click", async (event) => {
                     break;
             }
         }
-
-        const startReview = target.closest('a#start-review')
+        const startReview = target.closest("a#start-review");
         if (startReview) {
             await loadPage('/workspace/playground');
             cardSessionPlay(3);

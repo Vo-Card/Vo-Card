@@ -67,7 +67,7 @@
     --alert: #ff8989;
 }
 
-* {
+*:not(#clr-picker *) {
     font-family: var(--primary-font);
     color: var(--primary-font-color);
 }

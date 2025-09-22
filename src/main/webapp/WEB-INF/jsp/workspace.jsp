@@ -11,6 +11,7 @@
             <link rel="stylesheet" type="text/css" href="/css/global.css">
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             <link rel="stylesheet" type="text/css" href="/css/workspace.css">
+            <link rel="stylesheet" type="text/css" href="/css/library/coloris.min.css">
 
             <!-- Imported modules -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -21,6 +22,7 @@
                 crossorigin="anonymous"></script>
             <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 
+            <script src="/js/library/coloris.min.js"></script>
             <script type="module" src="/js/workspace/getPageInformation.js"></script>
 
             <!-- Override css -->
@@ -28,6 +30,47 @@
                 :root {
                     --theme-color: #1b1d24;
                     --alert: #ff8989;
+                }
+
+                div input,
+                textarea {
+                    background-color: rgb(62, 62, 62);
+                    border-style: none;
+                    border-radius: 5px;
+                    padding: 5px;
+                    cursor: pointer;
+                    color: white;
+                }
+
+
+                input::placeholder {
+                    color: white;
+                    opacity: 50%;
+                }
+
+                textarea {
+                    width: 100%;
+                }
+
+                input {
+                    transition: ease-in 0.35s;
+                    width: 100%;
+                }
+
+                input[type="submit"] {
+                    color: white;
+                    background-color: #3b3b79;
+                }
+
+                input[type="submit"]:hover {
+                    color: white;
+                    background-color: #5050a1;
+                }
+
+                p {
+                    margin-bottom: 0.5rem;
+                    color: white;
+                    user-select: none;
                 }
             </style>
         </head>
