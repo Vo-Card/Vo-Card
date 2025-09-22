@@ -9,7 +9,8 @@ import { populateContainer } from "/js/workspace/content/deck-loader.js";
 // 4. showing definition
 // 5. let user voting for their memory (No FSRS yet)
 // 6. back to step 1. until complete the session
-let tempData = null;
+
+const Cache = new Map();
 
 /**
  * Send array of deck_id for get all cards in decks
@@ -19,11 +20,17 @@ let tempData = null;
 export async function sendPackDeckId(ids) {
     const text = ids.map((id) => "arrayDeckId=" + id).join("&");
 
+    if (Cache.has(text)) {
+        console.log("----------------- From Cache ---------------");
+        return Cache.get(text);
+    }
+
     try {
         const res = await fetchWithAuth("/api/review/getCards?" + text);
         if (res.ok) {
             const data = await res.json();
-            return data.Cards;
+            Cache.set(text, data.Cards);
+            return Cache.get(text);
         }
     } catch (err) {
         console.log("Failed to send Deck ID: ", err);
@@ -39,18 +46,35 @@ async function randomizer(usrDecks) {
     // cardStage.textContent(packArray.Cards[whichDeck][whichCard]);
 }
 
-// TODO:<> Loop function for play
+export async function checkPlaySession() {
+    if (Cache.size === 0) {
+        console.log("No deck id had sent");
+        const cardStage = document.getElementById("card-placeholder");
+        if (cardStage) {
+            loadPage('/workspace/review')
+        }
+    }
+}
 /**
  *
  * @param {number} sessionPlay
  */
 export async function cardSessionPlay(sessionPlay) {
-    // start
-    const usrCards = await sendPackDeckId(["757225684526436352"]);
+
+    const usrCards = await sendPackDeckId(["757573526466093056"]);
+    const voteCover = document.getElementById("vote-cover")
+    const cardStage = document.getElementById("card-placeholder");
+    const voteCards = document.getElementById("vote-cards")
+
 
     for (let i = 0; i < sessionPlay; i++) {
+
+        // Checking if there any card on stage
+        while (cardStage.firstChild) {
+            cardStage.removeChild(cardStage.firstChild);
+        }
+
         let whatCard = await randomizer(usrCards);
-        const cardStage = document.getElementById("card-placeholder");
 
         try {
             const cardDefinition = await fetchWithAuth(
@@ -58,9 +82,29 @@ export async function cardSessionPlay(sessionPlay) {
             );
             const data = await cardDefinition.json();
 
-            populateContainer([whatCard], cardStage, "card", null);
+            await populateContainer([whatCard], cardStage, "card", null);
         } catch (err) {
             console.error(err);
         }
+
+        voteCover.style.display = "block";
+
+        voteCover.addEventListener('click', () => {
+            voteCover.style.display = "none";
+            voteCover.removeEventListener
+        });
+
+        const voteButtons = voteCards.querySelectorAll(".card-item-container");
+
+        voteButtons.forEach(vote => {
+            vote.addEventListener('click', () => {
+                console.log("Choice " + vote.getAttribute('item-id'));
+
+                voteButtons.forEach(b => {
+                    b.style.display = "none";
+                });
+            });
+
+        });
     }
 }

@@ -1,4 +1,4 @@
-import { sendPackDeckId, cardSessionPlay } from "/js/workspace/review.js";
+import { sendPackDeckId, cardSessionPlay, checkPlaySession } from "/js/workspace/review.js";
 import { snowfallEffect } from "/js/workspace/snowfall.js";
 import {
     homePageChart,
@@ -27,9 +27,9 @@ const pageComponents = {
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
     "/workspace/playground": {
         js: () => {
-            sendPackDeckId(["752111449966383104"]);
             loadVoteCards();
             snowfallEffect();
+            checkPlaySession();
         },
         css: "/css/workspace/playground.css",
     },
@@ -229,7 +229,7 @@ navbar.addEventListener("mouseover", (event) => {
     }, 120); // only trigger if hovered ~0.1s+
 });
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
     const target = event.target;
     if (target instanceof Element) {
         const link = target.closest("a[data-workspace]");
@@ -256,8 +256,8 @@ document.addEventListener("click", (event) => {
         }
         const startReview = target.closest("a#start-review");
         if (startReview) {
-            loadPage("/workspace/playground");
-            cardSessionPlay(1);
+            await loadPage('/workspace/playground');
+            cardSessionPlay(3);
         }
     }
 });
