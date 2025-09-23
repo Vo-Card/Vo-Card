@@ -40,6 +40,19 @@ public class Permission {
         return (res != null) ? ((Number) res.get("permission_level")).longValue() : null;
     }
 
+    private static Long getRootUserPermissionId(Long userId) {
+        String sql = """
+                SELECT p.permission_id_PK
+                FROM permissiontb p
+                JOIN usertb u ON u.permission_level_FK = p.permission_id_PK
+                WHERE u.user_id_PK = ? AND u.username = ?
+                                """;
+
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId, DatabaseUtils.getRootUsername());
+
+        return (res != null) ? ((Number) res.get("permission_id_PK")).longValue() : null;
+    }
+
     private static boolean isRootUserPresent() {
         String sql = """
                     SELECT p.permission_level
@@ -87,7 +100,7 @@ public class Permission {
         }
     }
 
-    public static void removeRole(Long userId, Long permissionBitmask, String roleName, String roleDesc) {
+    public static void removeRole(Long userId, Long selectedRole) {
         Long permissionLevel = getPermissionViaUserId(userId);
 
         if (permissionLevel == null) {
@@ -100,21 +113,96 @@ public class Permission {
             return;
         }
 
-        if ((permissionBitmask & Values.ROOT_USER) != 0 && isRootUserPresent()) {
-            System.err.println(TAG_ERROR + "You cannot have more than 1 ROOT USER");
-            return;
-        }
-
-        Long permId = Snowflake.nextId();
         String sql = """
-                INSERT INTO permissiontb (permission_id_PK, permission_name, permission_level, permission_description)
-                VALUES (?, ?, ?, ?)
+                DELETE FROM permissiontb
+                WHERE permission_id_PK = ?
                 """;
 
-        SQLResult res = DatabaseUtils.sqlPrepareStatement(sql, permId, roleName, permissionBitmask, roleDesc);
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(sql, selectedRole);
 
         if (!res.isSuccess()) {
             System.err.println(TAG_ERROR + res.getErrorMessage());
+        }
+    }
+
+    public static void updateRole(Long permissionId, String newName, Long newLevel, String newDescription,
+            Long userId) {
+        Long permissionLevel = getPermissionViaUserId(userId);
+
+        if (permissionLevel == null) {
+            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+            return;
+        }
+
+        if ((permissionLevel & Values.ROOT_USER) == 0) {
+            System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+            return;
+        }
+
+        String sql = """
+                UPDATE permissiontb
+                SET permission_name = COALESCE(?, permission_name),
+                    permission_level = COALESCE(?, permission_level),
+                    permission_description = COALESCE(?, permission_description)
+                WHERE permission_id_PK = ?
+                """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, newName, newLevel, newDescription, permissionId);
+
+        if (!result.isSuccess()) {
+            System.err.println(TAG_ERROR + result.getErrorMessage());
+        }
+    }
+
+    public static void updateUserRole(Long target, Long permissionId, Long userId) {
+        Long permissionLevel = getPermissionViaUserId(userId);
+
+        if (permissionLevel == null) {
+            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+            return;
+        }
+
+        if ((permissionLevel & Values.ROOT_USER) == 0) {
+            System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+            return;
+        }
+
+        String sql = """
+                UPDATE usertb
+                SET permission_level_FK = ?
+                WHERE user_id_PK = ?
+                """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, permissionId, target);
+
+        if (!result.isSuccess()) {
+            System.err.println(TAG_ERROR + result.getErrorMessage());
+        }
+    }
+
+    public static void removeUserRole(Long target, Long userId) {
+        Long permissionLevel = getPermissionViaUserId(userId);
+
+        if (permissionLevel == null) {
+            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+            return;
+        }
+
+        if ((permissionLevel & Values.ROOT_USER) == 0) {
+            System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+            return;
+        }
+
+        String sql = """
+                UPDATE usertb
+                SET permission_level_FK = ?
+                WHERE user_id_PK = ?
+                """;
+
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, null, target);
+
+        if (!result.isSuccess()) {
+            System.err.println(TAG_ERROR + result.getErrorMessage());
         }
     }
 
