@@ -29,7 +29,7 @@
 
     --menu-primary-color: #0f1114;
     --menu-button-hover: rgba(255, 255, 255, 0.1);
-    --menu-button-active: rgba(255, 255, 255, 0.5);
+    --menu-button-active: rgba(255, 255, 255, 0.3);
 
     --splitter-hover: rgb(210, 235, 255);
 
@@ -59,7 +59,7 @@
     --card-height: 238px;
 
     --header-height: 56px;
-    --menu-width: 250px;
+    --menu-width: 200px;
     --splitter-width: 5px;
     
     --information-container-width-close: 15px;

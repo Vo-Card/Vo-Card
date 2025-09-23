@@ -1,40 +1,38 @@
 <script src="/js/workspace/page-fixer.js"></script>
-<div style=" padding-left: 10px; padding-right: 10px; padding-bottom: 8px;">
-    <div style="font-size: 36px;">Review</div>
-    <p>Choose your review style</p>
+<div style=" padding : 0 10px;">
+    <h1>Review</h1>
+    <p>Choose your Deck(s) to start playing! </p>
 </div>
-<div style="width: 50%; padding-left: 10px; padding-bottom: 8px; height: 48px;"><input id='review-search-bar'
-        type="text" placeholder="Search bar">
-</div>
-<div class="review-header">
+<hr style="height: 4px; background-color: var(--primary-font-color);">
+<h3>Selected Decks</h3>
+<selected-card
+    style="border: var(--content-border); border-radius: 10px; display: flex; width: 100%; height: calc(var(--card-height) + 44px); background-color: var(--menu-primary-color); overflow-x: auto; overflow-y: hidden;">
+    <selected-card-container style="padding: 20px; display: flex; justify-content: center; gap: 10px;">
 
-    <!-- TODO:<make div select dropdown due to option cannot remove outline> -->
-    <!-- dropdown start -->
+    </selected-card-container>
+</selected-card>
+<br>
+<h3>All Decks</h3>
+<div class="review-header" style="display: flex;">
+
+    <div style="width: 50%;">
+        <input id='review-search-bar' type="text" placeholder="Search bar">
+    </div>
+
     <div class="review-left">
         <button onclick="openSortOption()" class="review-sort-selected" id="selected-value">
             <div>Select sort</div>
             <i class="nf nf-cod-arrow_down"></i>
         </button>
         <ul id="sort-options">
-            <!-- no 's' -->
             <li class="sort-option" data-value="name-asc">A-Z</li>
             <li class="sort-option" data-value="name-dsc">Z-A</li>
-            <li class="sort-option" data-value="fork-deck">Fork deck</li>
-            <li class="sort-option" data-value="own-deck">Owned deck</li>
+            <li class="sort-option" data-value="fork-deck">Forked Decks</li>
+            <li class="sort-option" data-value="own-deck">Owned Deck</li>
         </ul>
     </div>
-
-
-    <div class="review-right">
-        <!-- Create is first -->
-        <a href="#" class="review-create">
-            <div>Create Deck</div>
-        </a>
-        <a href="#">
-            <div>Fork Decks</div>
-        </a>
-    </div>
-
-    <!-- Showing Deck Session -->
 </div>
-<div id="forked-decks-container owned-decks-container"></div>
+<deck-wraper
+    style="border: var(--content-border); border-radius: 10px; display: flex; width: 100%; min-height: calc(var(--card-height) + 44px); background-color: var(--menu-primary-color);">
+    <div id="decks-container" style="justify-content: start;"></div>
+</deck-wraper>

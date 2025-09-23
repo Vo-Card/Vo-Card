@@ -6,10 +6,9 @@
 .review-header {
     display: flex;
     justify-content: space-between;
-    border-bottom: 2px solid #C38A39;
-    padding: 8px;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 8px 0  8px 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .review-header div {
@@ -49,8 +48,7 @@
 #review-search-bar {
     width: 100%;
     height: 100%;
-    padding: 5px;
-    border-radius: 18px;
+    border-radius: 10px;
     background-color: #131621;
     color: white;
 }
@@ -96,4 +94,26 @@
 .sort-option:hover {
     border-radius: 8px;
     background: #f0f0f0;
+}
+
+.crd-ss-group{
+    display: flex;
+    justify-content: space-between;
+}
+
+session-settings, .tt-decks{
+    display: block;
+    padding: 5px;
+    width: 100%;
+    border-bottom: #ffffff solid 1px;
+    margin-bottom: 10px;
+}
+
+.right-decks-style,
+#start-review {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    padding-top: 15px;
+    border-bottom: #ffffff solid 1px;
 }

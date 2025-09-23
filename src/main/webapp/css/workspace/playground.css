@@ -27,3 +27,12 @@
 #vote-card {
     display: none;
 }
+
+.card-item-container {
+    transition: all 0.3s ease-in;
+}
+
+.card-item-container.correct {
+    transition: all 0.3s ease-in;
+    margin-top: -50px;
+}

@@ -33,7 +33,7 @@
         <ul class="user menu">
             <li>
                 <a sidebar-popup popup-type="setting">
-                    <i class="nf nf-cod-settings_gear"></i>Settings
+                    <i class="nf nf-md-cog"></i>Settings
                 </a>
             </li>
 

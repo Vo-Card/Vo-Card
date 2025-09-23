@@ -1,59 +1,41 @@
-<div id="workspace-right-bar">
-    <h4 style="margin-right: 50px;">Configuration</h4>
-    <div class="right-decks-style">
-        <div>Decks</div>
+<form id="workspace-right-bar">
+    <h4>Configuration</h4>
+    <div class="tt-decks crd-ss-group" style="display: flex;">
+        <p>Decks</p>
         <div style="display: flex; gap: 5px;">
-            <!-- display none while user doesn't select deck yet -->
-            <div id="choose-deck">1</div>
-            <div id="choose-deck">/</div>
-
-            <div id="all-decks">1</div>
+            <selected-decks>0</selected-decks>
+            <p> / </p>
+            <maximum-decks>10</maximum-decks>
         </div>
     </div>
 
-    <div class="right-card-session">
-        <div>Card Per Session</div>
-        <input type="number" style="width: 50px; height: 25px;">
-    </div>
-
-    <!-- <div class="right-font-size">
-        <div>Font size</div>
-        <input type="number" style="width: 50px; height: 25px;">
-    </div> -->
-
-    <div class="right-auto-timer">
-        <div class="auto-timer">
-            <div>Auto-flip timer</div>
-            <div id="auto-time-changer">
-                <div>Off</div>
-                <div class="timer-unicode">&#129170;</div>
+    <session-settings>
+        <h5>Session Setting</h5>
+        <label class="crd-ss-group">
+            <div>
+                <p style="margin: 0;">Card Per Session</p>
+                <p>[Cards]</p>
             </div>
-        </div>
-
-        <div class="timer-options">
-            <div data-value="off">Off</div>
-            <div data-value="custom">Custom
-                <input type="number" min="1" class="custom-input" placeholder="sec"
-                    style="width: 50px; height: 25px; float: right;">
+            <input name="total-session" min="5" type="number" style="width: 50px; height: 25px;" value="10">
+        </label>
+        <label class="crd-ss-group">
+            <div>
+                <p style="margin: 0;">Set Time Limit</p>
+                <p>[Mins]</p>
             </div>
-        </div>
-    </div>
+            <input name="timelimit" placeholder="mins" min="1" type="number" style="width: 50px; height: 25px;"
+                value="15">
+        </label>
+    </session-settings>
 
-    <div class="review-mode">
-        <div class="review-selection">
-            <div class="">Review Mode</div>
-            <div id="review-changer">
-                <div>Randomize</div>
-                <div class="review-unicode">&#129170;</div>
-            </div>
-        </div>
+    <session-mode-selection>
+        <h5>Learning Mode</h5>
+        <p style="color: rgb(103, 110, 120);">Unavailable</p>
+        <p style="padding: 5px; border-radius: 5px; background-color: var(--menu-button-active);"><span
+                style="margin-right: 10px;"> </span>Random Mode</p>
+        <p style="padding: 5px; border-radius: 5px; background-color: var(--menu-button-hover);"><span
+                style="margin-right: 10px;"> </span>Difficulty Mode</p>
+    </session-mode-selection>
 
-        <div class="review-options">
-            <div data-value="FSRS">FSRS</div>
-            <div data-value="Randomize">Randomize</div>
-        </div>
-    </div>
-
-    <a style="cursor: pointer; user-select: none;" id="start-review">
-        Review Deck(s)</a>
-</div>
+    <input id="start-review-button" type="submit" value="Start Learning!">
+</form>
