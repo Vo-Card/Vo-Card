@@ -5,6 +5,7 @@ import {
     insertCreateEventActions,
     insertDataEventActions,
 } from "../event/card-event-handler.js";
+import { cardSessionPlay } from "../review.js";
 
 const templateCache = new Map();
 
@@ -289,50 +290,51 @@ export async function levelDetailLoader(path) {
     });
 }
 
-/**
- *
- */
-export async function loadVoteCards() {
-    const voteCardContainer = document.getElementById("vote-cards");
+export async function loadAllDecksToReview() {
+    const deckContainer = document.getElementById("decks-container");
+    const selectedContainer = document.querySelector("selected-card-container");
+    const data = await safeFetch("/api/decks");
+    if (!data) return;
 
-    const cards = [
-        { id: "vote-fail", url: "/components/template/vote-fail.svg" },
-        { id: "vote-hard", url: "/components/template/vote-hard.svg" },
-        { id: "vote-good", url: "/components/template/vote-good.svg" },
-        { id: "vote-easy", url: "/components/template/vote-easy.svg" },
-    ];
+    await populateContainer(data.forkedDecks, deckContainer, "deck", "forked");
+    await populateContainer(data.ownedDecks, deckContainer, "deck", "owned");
 
-    try {
-        const responses = await Promise.all(cards.map((c) => fetch(c.url)));
+    const selectedDecks = new Set();
+    const maxDecks = 10;
 
-        responses.forEach((res, i) => {
-            if (!res.ok)
-                throw new Error(
-                    `Failed to fetch ${cards[i].url} (${res.status})`
-                );
-        });
+    const selectedDeckDisplay = document.querySelector("selected-decks");
+    const configForm = /**@type {HTMLFormElement} */ document.getElementById(
+        "workspace-right-bar"
+    );
 
-        const svgs = await Promise.all(responses.map((res) => res.text()));
-
-        svgs.forEach((svgText, i) => {
-            const el = createElementFromHTML(
-                "div",
-                svgText,
-                ["card-item-container"],
-                {
-                    "item-id": cards[i].id,
-                }
+    configForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        // @ts-ignore
+        const formData = new FormData(configForm);
+        // @ts-ignore
+        const data = Object.fromEntries(Array.from(formData.entries()));
+        if (selectedDecks.size >= 1)
+            cardSessionPlay(
+                Array.from(selectedDecks),
+                data["total-session"],
+                data["timelimit"] * 60
             );
-            const overlay = document.createElement("div");
-            overlay.className = "hoverOverlay";
-            el.appendChild(overlay);
-            voteCardContainer.appendChild(el);
-        });
-    } catch (err) {
-        console.error("Error loading cards:", err);
-    }
-}
+    });
 
-async function showBasicDeckinfomation() {
-    const infomationContainer = document.querySelector("deck-data-container");
+    const handleClick = (event) => {
+        const element = event.target.closest(".card-item-container");
+        if (!element) return;
+
+        if (deckContainer.contains(element) && selectedDecks.size < maxDecks) {
+            selectedContainer.appendChild(element);
+            selectedDecks.add(element.getAttribute("item-id"));
+        } else if (selectedContainer.contains(element)) {
+            deckContainer.appendChild(element);
+            selectedDecks.delete(element.getAttribute("item-id"));
+        }
+        selectedDeckDisplay.textContent = selectedDecks.size.toString();
+    };
+
+    deckContainer.addEventListener("click", handleClick);
+    selectedContainer.addEventListener("click", handleClick);
 }

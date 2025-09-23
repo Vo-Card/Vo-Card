@@ -1,4 +1,3 @@
-import { sendPackDeckId, cardSessionPlay, checkPlaySession } from "/js/workspace/review.js";
 import { snowfallEffect } from "/js/workspace/snowfall.js";
 import {
     homePageChart,
@@ -8,7 +7,7 @@ import {
     deckLoader,
     deckDetailLoader,
     levelDetailLoader,
-    loadVoteCards,
+    loadAllDecksToReview,
 } from "../content/deck-loader.js";
 
 // Use to cache pages
@@ -27,13 +26,14 @@ const pageComponents = {
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
     "/workspace/playground": {
         js: () => {
-            loadVoteCards();
             snowfallEffect();
-            checkPlaySession();
         },
         css: "/css/workspace/playground.css",
     },
-    "/workspace/review": { js: null, css: "/css/workspace/review.css" },
+    "/workspace/review": {
+        js: loadAllDecksToReview,
+        css: "/css/workspace/review.css",
+    },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
 };
 
@@ -253,11 +253,6 @@ document.addEventListener("click", async (event) => {
                     console.error("Invalid popup type.");
                     break;
             }
-        }
-        const startReview = target.closest("a#start-review");
-        if (startReview) {
-            await loadPage('/workspace/playground');
-            cardSessionPlay(3);
         }
     }
 });

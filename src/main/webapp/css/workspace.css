@@ -7,7 +7,7 @@
     flex-direction: column;
     align-items: center;
     background-color: var(--menu-primary-color);
-    width: var(--menu-width);
+    flex: 0 0 var(--menu-width);
     height: calc(100vh - var(--header-height));
     padding: 8px;
     font-size: 20px;
@@ -132,7 +132,7 @@
 #splitter {
     display: flex;
     align-items: center;
-    width: var(--splitter-width);
+    flex: 0 0 var(--splitter-width);
     cursor: pointer;
     background-color: transparent;
     margin: 2px;
@@ -151,10 +151,6 @@
     background-color: var(--splitter-hover);
 }
 
-#splitter.dragging .splitter-move-bar {
-    background-color: var(--splitter-hover);
-}
-
 
 /* ----------------- */
 /* Right bar Styles  */
@@ -162,7 +158,6 @@
 
 #information-container {
     flex: 0 0 var(--information-container-width-close);
-    transition: flex-basis 0.5s ease-in;
     height: calc(100vh - var(--header-height));
     overflow: hidden;
 }
@@ -193,44 +188,6 @@
     min-width: 240px;
 }
 
-.right-decks-style,
-.right-card-session,
-.right-font-size,
-#start-review {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
-    padding-top: 15px;
-    border-bottom: #ffffff solid 1px;
-}
-
-.right-auto-timer,
-.review-mode {
-    display: block;
-    padding: 5px;
-    padding-top: 15px;
-    border-bottom: #ffffff solid 1px;
-
-}
-
-.review-options,
-.timer-options {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-.auto-timer,
-.review-selection {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-}
-
-#auto-time-changer,
-#review-changer {
-    display: flex;
-    gap: 5px;
-}
 
 /* ----------------- */
 /* Main Content Area */
@@ -340,16 +297,25 @@
     padding: 10px;
 }
 
-#popup-content-container::-webkit-scrollbar, create-input-area::-webkit-scrollbar {
+#popup-content-container::-webkit-scrollbar,
+create-input-area::-webkit-scrollbar,
+card-data::-webkit-scrollbar,
+selected-card::-webkit-scrollbar {
     width: 8px;
 }
 
-#popup-content-container::-webkit-scrollbar-thumb, create-input-area::-webkit-scrollbar-thumb {
+#popup-content-container::-webkit-scrollbar-thumb,
+create-input-area::-webkit-scrollbar-thumb,
+card-data::-webkit-scrollbar-thumb,
+selected-card::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
-#popup-content-container::-webkit-scrollbar-thumb:hover, create-input-area::-webkit-scrollbar-thumb:hover {
+#popup-content-container::-webkit-scrollbar-thumb:hover,
+create-input-area::-webkit-scrollbar-thumb:hover,
+card-data::-webkit-scrollbar-thumb:hover,
+selected-card::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -367,6 +333,7 @@
 #forked-decks-container,
 #owned-decks-container,
 #cards-container,
+#decks-container,
 #vote-cards {
     display: grid;
     width: 100%;
@@ -436,3 +403,41 @@
         background-position-y: calc(var(--card-height) + 100px - 150px);
     }
 }
+
+
+/* ------------------------- */
+/*  Definition Content Area  */
+/* ------------------------- */
+
+.part-of-speech {
+    background: #35383c;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 3px;
+    padding-left: 10px;
+}
+
+.definition {
+    background: #454a51;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 3px;
+    padding-left: 10px;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+

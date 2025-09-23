@@ -231,7 +231,7 @@ public class DeckApiController {
     }
 
     @GetMapping("/{deckId}/{levelId}/{cardId}")
-    public ResponseEntity<Map<String, Object>> getDeck(
+    public ResponseEntity<Map<String, Object>> getCardData(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId,
             @PathVariable Long levelId,
