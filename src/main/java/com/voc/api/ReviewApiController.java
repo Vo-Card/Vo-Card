@@ -44,28 +44,4 @@ public class ReviewApiController {
         System.out.println(arrayDeckId);
         return null;
     }
-
-    /**
-     * deckId levelId cardId for GET current word's definition
-     * 
-     * @param req
-     * @return current card_word definition
-     */
-    @GetMapping("/getDefinition")
-    public static ResponseEntity<Map<String, Object>> cardDefinition(@RequestParam String deckId,
-            @RequestParam String levelId, @RequestParam String cardId) {
-        Map<String, Object> response = new HashMap<>();
-
-        Long covertedDeckId = Long.parseLong(deckId);
-        Long covertedCardId = Long.parseLong(cardId);
-        Long covertedLevelId = Long.parseLong(levelId);
-
-        if (covertedCardId != null && covertedDeckId != null && covertedLevelId != null) {
-            Object cardInfo = DeckManager.getCardInfo(covertedCardId);
-            response.put("Definition", cardInfo);
-            return ResponseEntity.ok(response);
-        }
-        return null;
-    }
-
 }
