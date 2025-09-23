@@ -149,7 +149,9 @@ export async function cardSessionPlay(deckIds, sessionPlay, playTime) {
 
 async function nextCard() {
     document.querySelector("remainding-cards").textContent = (
-        sessionData.total_card - sessionData.remaining
+        sessionData.total_card -
+        sessionData.remaining +
+        1
     ).toString();
 
     if (sessionData.remaining <= 0 || CardPool.length < 4) {
@@ -243,16 +245,18 @@ async function renderCard(selectedCard) {
 
             let count = 5;
 
-            // @ts-ignore
-            nextDeckCountDown.style.display = "block";
             const countdownInterval = setInterval(() => {
+                sessionData.is_counting = false;
                 nextDeckCountDown.textContent = `Next Card in : ${count} secs`;
+                // @ts-ignore
+                nextDeckCountDown.style.display = "block";
                 count--;
 
                 if (count < 0) {
                     clearInterval(countdownInterval);
                     // @ts-ignore
                     nextDeckCountDown.style.display = "none";
+                    sessionData.is_counting = true;
                     sessionData.remaining--;
                     nextCard();
                 }
