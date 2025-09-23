@@ -25,6 +25,19 @@ CREATE TABLE `jwt_keys` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+-- vo_card.moderation_action definition
+
+CREATE TABLE `moderation_action` (
+  `action_id_PK` bigint(20) unsigned NOT NULL,
+  `action_type` varchar(255) DEFAULT NULL,
+  `action_message` text DEFAULT NULL,
+  `action_time_stamp` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`action_id_PK`),
+  KEY `moderation_action_usertb_FK_IDX` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- vo_card.permissiontb definition
 
 CREATE TABLE `permissiontb` (
@@ -73,7 +86,7 @@ CREATE TABLE `workertb` (
   PRIMARY KEY (`worker_id`),
   UNIQUE KEY `workertb_unique` (`uuid`),
   KEY `workertb_expires_at_IDX` (`expires_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- vo_card.usertb definition
@@ -89,6 +102,21 @@ CREATE TABLE `usertb` (
   UNIQUE KEY `usertb_unique` (`username`),
   KEY `usertb_permissiontb_FK_IDX` (`permission_level_FK`),
   CONSTRAINT `usertb_permissiontb_FK` FOREIGN KEY (`permission_level_FK`) REFERENCES `permissiontb` (`permission_id_PK`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- vo_card.learned_resulttb definition
+
+CREATE TABLE `learned_resulttb` (
+  `result_id_PK` bigint(20) unsigned NOT NULL,
+  `user_id_FK` bigint(20) unsigned NOT NULL,
+  `completed_date` datetime DEFAULT current_timestamp(),
+  `passed` int(10) unsigned NOT NULL,
+  `failed` int(10) unsigned NOT NULL,
+  `total_cards` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`result_id_PK`),
+  KEY `learned_resulttb_usertb_FK` (`user_id_FK`),
+  CONSTRAINT `learned_resulttb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -160,20 +188,6 @@ CREATE TABLE `message_boxtb` (
   KEY `message_boxtb_created_date_IDX` (`created_date`) USING BTREE,
   CONSTRAINT `message_boxtb_inboxtb_FK` FOREIGN KEY (`inbox_id_FK`) REFERENCES `inboxtb` (`inbox_id_PK`),
   CONSTRAINT `message_boxtb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
--- vo_card.moderation_action definition
-
-CREATE TABLE `moderation_action` (
-  `action_id_PK` bigint(20) unsigned NOT NULL,
-  `action_type` varchar(255) DEFAULT NULL,
-  `action_message` text DEFAULT NULL,
-  `action_time_stamp` datetime NOT NULL DEFAULT current_timestamp(),
-  `user_id_FK` bigint(20) unsigned DEFAULT 0,
-  PRIMARY KEY (`action_id_PK`),
-  KEY `moderation_action_usertb_FK_IDX` (`user_id_FK`),
-  CONSTRAINT `moderation_action_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -276,15 +290,16 @@ CREATE TABLE `cardtb` (
 -- vo_card.learned_cardtb definition
 
 CREATE TABLE `learned_cardtb` (
-  `learn_card_ease_factor` float NOT NULL DEFAULT 2.5,
-  `learn_card_interval` smallint(5) unsigned NOT NULL DEFAULT 1,
-  `learned_card_latest_review` datetime NOT NULL DEFAULT current_timestamp(),
-  `card_id_PK` bigint(20) unsigned DEFAULT NULL,
-  `user_id_PK` bigint(20) unsigned DEFAULT NULL,
-  KEY `learned_cardtb_cardtb_FK_IDX` (`card_id_PK`),
-  KEY `learned_cardtb_usertb_FK_IDX` (`user_id_PK`),
-  CONSTRAINT `learned_cardtb_cardtb_FK` FOREIGN KEY (`card_id_PK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE,
-  CONSTRAINT `learned_cardtb_usertb_FK` FOREIGN KEY (`user_id_PK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
+  `latest_review` datetime NOT NULL DEFAULT current_timestamp(),
+  `card_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `user_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
+  KEY `learned_cardtb_cardtb_FK_IDX` (`card_id_FK`),
+  KEY `learned_cardtb_usertb_FK_IDX` (`user_id_FK`),
+  KEY `learned_cardtb_decktb_FK` (`deck_id_FK`),
+  CONSTRAINT `learned_cardtb_cardtb_FK` FOREIGN KEY (`card_id_FK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `learned_cardtb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `learned_cardtb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
