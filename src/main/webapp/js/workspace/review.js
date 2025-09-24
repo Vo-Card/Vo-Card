@@ -180,8 +180,8 @@ async function nextCard() {
                     sessionData.total_pass + sessionData.total_failed
                 ),
                 deckIds: sessionData.deckIds,
-                totalCorrect: sessionData.total_pass,
-                totalFailed: sessionData.total_failed,
+                totalCorrect: sessionData.total_pass || 0,
+                totalFailed: sessionData.total_failed || 0,
             }),
         });
 

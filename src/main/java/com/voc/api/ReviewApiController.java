@@ -1,7 +1,5 @@
 package com.voc.api;
 
-import static com.voc.utils.AnsiColor.TAG_DEBUG;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,8 +72,6 @@ public class ReviewApiController {
         if (userId.isPresent()) {
 
             List<Row> stats = ReviewManager.getThisWeekStats(userId.get());
-
-            System.out.println(TAG_DEBUG + stats);
 
             response.put("stats", stats);
             response.put("message", "Successfully updated user cards.");
