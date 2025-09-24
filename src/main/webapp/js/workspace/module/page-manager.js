@@ -12,7 +12,6 @@ import {
 } from "../content/deck-loader.js";
 import { displayPublicDecks } from "../handler/explorer-handler.js";
 import { createPopupBox } from "../handler/popup-handler.js";
-import { createLoader } from "../event/card-event-handler.js"
 
 // Use to cache pages
 const cache = new Map();
@@ -248,7 +247,7 @@ async function userLoader(path) {
     const template = await (await fetch(path)).text();
     temp.innerHTML = template;
 
-    
+
     return temp;
 }
 document.addEventListener("click", async (event) => {
@@ -272,7 +271,7 @@ document.addEventListener("click", async (event) => {
                     // A fucking place holder
                     createPopupBox(
                         "60vw",
-                        "60vh",
+                        "fit-content",
                         "User Setting : ",
                         await userLoader(
                             "/components/content/popup/setting.jsp"
