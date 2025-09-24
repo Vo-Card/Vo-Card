@@ -54,6 +54,6 @@
             <p>Showing your stat recently 7 days</p>
         </div>
         <!-- TODO: <Create charts> -->
-        <canvas class="p-3 px-2 w-100" id="chartz" style="height: 300px;"></canvas>
+        <canvas class="p-3 px-2 w-100" id="weekly-bar" style="height: 300px;"></canvas>
     </section>
 </div>

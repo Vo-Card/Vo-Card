@@ -1,6 +1,6 @@
 import { snowfallEffect } from "/js/workspace/snowfall.js";
 import {
-    homePageChart,
+    loadWeeklyChart,
     statsLoader,
 } from "/js/workspace/handler/charts-handler.js";
 import {
@@ -20,7 +20,7 @@ let currentController = null;
 // Map top-level pages to optional JS + CSS
 const pageComponents = {
     "/workspace/home": {
-        js: () => homePageChart(),
+        js: () => loadWeeklyChart(),
         css: "/css/workspace/home.css",
     },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },

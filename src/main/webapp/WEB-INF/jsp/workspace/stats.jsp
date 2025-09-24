@@ -60,21 +60,36 @@
     <div class="monthly-gamemode content-container">
         <div class="monthly-header">Monthly Stats: Definetion to word</div>
         <div class="monthly-gamemode-items">
-            <div>Total card played</div>
-            <div>100 cards</div>
+            <p>Total card played</p>
+            <total-cards>0 cards</total-cards>
         </div>
 
         <div class="monthly-gamemode-items">
-            <div>Total correct answer</div>
-            <div>55 cards</div>
+            <p>Total correct answer</p>
+            <total-correct>0 cards</total-correct>
         </div>
 
         <div class="monthly-gamemode-items">
-            <div>Average</div>
-            <div>55 %</div>
+            <p>Total failed answer</p>
+            <total-failed>0 cards</total-failed>
         </div>
 
-        <div id="monthly-gamemode-stats"></div>
+        <div class="monthly-gamemode-items">
+            <p>Total out of time</p>
+            <total-outoftime>0 cards</total-outoftime>
+        </div>
+
+        <div class="monthly-gamemode-items">
+            <p>Average</p>
+            <average-passing>55 %</average-passing>
+        </div>
+
+        <div id="total-stats" style="
+    display: flex;
+    height: 17px;
+    overflow: hidden;
+    border-radius: 10px;
+"></div>
 
     </div>
 
@@ -89,6 +104,6 @@
     <div class="stats_7d content-container">
         <div class="stats-header">Stat Review</div>
         <p>Reviewed Stats: Monday–Sunday</p>
-        <canvas class="stats-canvas" id="stats-bar"></canvas>
+        <canvas class="stats-canvas" id="weekly-bar"></canvas>
     </div>
 </div>

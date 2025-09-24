@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "/js/auth/auth.js";
+
 export async function statsLoader() {
     // mock up data change later
     const reviewData = {
@@ -28,81 +30,131 @@ export async function statsLoader() {
 
         barContainer.appendChild(progress);
     }
+    const response = await fetchWithAuth("/api/review/thisWeekStats");
+    const { stats: data } = await response.json();
 
-    var myCanvas = /** @type {HTMLCanvasElement} */ (
-        document.getElementById("stats-bar")
-    ).getContext("2d");
-
-    let datetime = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    var chartConfig = {
-        type: "bar",
-        data: {
-            labels: datetime,
-            datasets: [
-                {
-                    label: "Words per day",
-                    data: [50, 20, 31, 15, 15, 12, 39],
-                    backgroundColor: ["rgba(108, 162, 51, 0.5)"],
-                    borderColor: ["rgba(108, 162, 51, 1)"],
-                    borderWidth: 1,
-                },
-            ],
-        },
-        options: {
-            scales: {
-                x: {
-                    gird: {
-                        offset: true,
-                    },
-                    ticks: {
-                        color: "white",
-                    },
-                },
-                y: {
-                    ticks: {
-                        stepSize: 5,
-                        color: "white",
-                    },
-                    grid: {
-                        color: " rgba(231, 231, 231, 0.2)",
-                        borderColor: "red",
-                    },
-                },
-                beginAtZero: true,
-            },
-        },
-    };
-    // Creating chart function
-    // dont delete this and dont care the error (if you see)
-    // the module is imported via html
-    // @ts-ignore
-    new Chart(myCanvas, chartConfig);
+    await loadWeeklyChart(data);
+    loadWeekTotalStats(data);
 }
 
-export function homePageChart() {
-    var myCanvas = /** @type {HTMLCanvasElement} */ (
-        document.getElementById("chartz")
-    ).getContext("2d");
-    // get month/day
-    let datetime = [];
+function loadWeekTotalStats(data) {
+    const totalReviews = data.reduce(
+        (sum, entry) => sum + entry.total_reviews,
+        0
+    );
+    const totalCorrect = data.reduce(
+        (sum, entry) => sum + entry.total_correct,
+        0
+    );
+    const totalFailed = data.reduce(
+        (sum, entry) => sum + entry.total_failed,
+        0
+    );
+    const totalOutOfTime = totalReviews - totalCorrect - totalFailed;
 
-    for (let i = 0; i < 7; i++) {
-        let today = new Date();
-        today.setDate(today.getDate() - i);
-        datetime.push(today.toISOString().split("T")[0].slice(5));
+    const totalStatsBar = document.getElementById("total-stats");
+
+    // Create custom bar chart
+    const stats = [
+        { label: "Correct", count: totalCorrect, color: "#2D9CDB" },
+        { label: "Failed", count: totalFailed, color: "#F2994A" },
+        { label: "Out of Time", count: totalOutOfTime, color: "#EB5757" },
+    ];
+
+    stats.forEach((stat) => {
+        const percent = totalReviews ? (stat.count / totalReviews) * 100 : 0;
+        const segment = document.createElement("div");
+        segment.style.width = `${percent}%`;
+        segment.style.height = "30px";
+        segment.style.backgroundColor = stat.color;
+        segment.title = `${stat.label}: ${stat.count} (${percent.toFixed(1)}%)`;
+        totalStatsBar.appendChild(segment);
+    });
+
+    // Update text fields
+    document.querySelector("total-cards").textContent = `${totalReviews} cards`;
+    document.querySelector("total-failed").textContent = `${totalFailed} cards`;
+
+    document.querySelector(
+        "total-correct"
+    ).textContent = `${totalCorrect} cards`;
+    document.querySelector(
+        "total-outoftime"
+    ).textContent = `${totalOutOfTime} cards`;
+    const averagePassing = totalReviews
+        ? ((totalCorrect / totalReviews) * 100).toFixed(1)
+        : "0.0";
+    document.querySelector(
+        "average-passing"
+    ).textContent = `${averagePassing} %`;
+}
+
+export async function loadWeeklyChart(data) {
+    if (!data || data.length === 0) {
+        const response = await fetchWithAuth("/api/review/thisWeekStats");
+        data = (await response.json()).stats;
+    }
+    const ctx = /** @type {HTMLCanvasElement} */ (
+        document.getElementById("weekly-bar")
+    ).getContext("2d");
+
+    const sortedData = [...data].sort((a, b) => a.day_of_week - b.day_of_week);
+
+    const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    function normalizeDayIndex(mysqlDay) {
+        return (mysqlDay + 5) % 7;
     }
 
-    // chart
-    var chart = {
+    const labels = [];
+    const correctPerDay = Array(7).fill(0);
+    const failedPerDay = Array(7).fill(0);
+    const outOfTimePerDay = Array(7).fill(0);
+
+    // (MM-DD + weekday)
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        const monthDay = day.toISOString().slice(5, 10);
+        labels.push(`${monthDay} (${weekdays[i]})`);
+    }
+
+    for (const entry of sortedData) {
+        const i = normalizeDayIndex(entry.day_of_week);
+        correctPerDay[i] = entry.total_correct;
+        failedPerDay[i] = entry.total_failed;
+        outOfTimePerDay[i] =
+            entry.total_reviews - entry.total_correct - entry.total_failed;
+    }
+
+    const chartConfig = {
         type: "bar",
         data: {
-            labels: datetime,
+            labels,
             datasets: [
                 {
-                    label: "Words per day",
-                    data: [50, 20, 31, 15, 15, 12, 39],
-                    backgroundColor: ["rgba(108, 162, 51, 0.5)"],
-                    borderColor: ["rgba(108, 162, 51, 1)"],
+                    label: "Out of time",
+                    data: outOfTimePerDay,
+                    backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 1,
+                },
+                {
+                    label: "Correct",
+                    data: correctPerDay,
+                    backgroundColor: "rgba(51, 110, 162, 0.5)",
+                    borderColor: "rgba(51, 112, 162, 1)",
+                    borderWidth: 1,
+                },
+                {
+                    label: "Failed",
+                    data: failedPerDay,
+                    backgroundColor: "rgba(255, 206, 86, 0.5)",
+                    borderColor: "rgba(255, 206, 86, 1)",
                     borderWidth: 1,
                 },
             ],
@@ -110,7 +162,7 @@ export function homePageChart() {
         options: {
             scales: {
                 x: {
-                    gird: {
+                    grid: {
                         offset: true,
                     },
                     ticks: {
@@ -118,21 +170,20 @@ export function homePageChart() {
                     },
                 },
                 y: {
+                    beginAtZero: true,
                     ticks: {
                         stepSize: 10,
                         color: "white",
                     },
                     grid: {
-                        color: " rgba(231, 231, 231, 0.2)",
+                        color: "rgba(231, 231, 231, 0.2)",
                         borderColor: "red",
                     },
                 },
-                beginAtZero: true,
             },
         },
     };
-    // Creating chart function
-    // dont delete this and dont care the error (if you see)
+
     // @ts-ignore
-    new Chart(myCanvas, chart);
+    new Chart(ctx, chartConfig);
 }

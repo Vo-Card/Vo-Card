@@ -76,6 +76,20 @@ export async function sendPackDeckId(ids) {
 }
 
 /**
+ * Get deckId for a given cardId
+ * @param {string} cardId
+ * @returns {string|null} deckId or null if not found
+ */
+function getDeckIdByCardId(cardId) {
+    for (const [deckId, cards] of Cache.entries()) {
+        if (cards.some((card) => card.card_id_PK === cardId)) {
+            return deckId;
+        }
+    }
+    return null; // not found
+}
+
+/**
  * Return and remove 1 random card from the global pool.
  * @param {boolean} isPop
  * @returns {Object|null} one card or null if pool empty
@@ -155,7 +169,18 @@ async function nextCard() {
     ).toString();
 
     if (sessionData.remaining <= 0 || CardPool.length < 4) {
-        console.log(sessionData);
+        await fetchWithAuth("/api/review/addCompletedSession", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                totalCards: sessionData.total_card,
+                totalCorrect: sessionData.total_pass,
+                totalFailed: sessionData.total_failed,
+            }),
+        });
+
         Cache.clear();
         sessionData = {};
         CardPool = [];
@@ -231,10 +256,20 @@ async function renderCard(selectedCard) {
                 sessionData.total_failed += 1;
             }
 
-            allCardAns.forEach((element) => {
+            allCardAns.forEach(async (element) => {
                 const cardId = element.getAttribute("item-id");
                 if (cardId == selectedCard.card_id_PK) {
                     element.classList.add("correct");
+                    await fetchWithAuth("/api/review/addLearnedCard", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            cardId: cardId,
+                            deckId: getDeckIdByCardId(cardId),
+                        }),
+                    });
                 } else {
                     // @ts-ignore
                     element.style.opacity = 0.5;
