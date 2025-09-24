@@ -441,3 +441,45 @@ selected-card::-webkit-scrollbar-thumb:hover {
     }
 }
 
+#sort-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    background-color: #3c3c3c;
+    list-style-type: none;
+    margin: 0;
+    padding: 0px;
+    border-radius: 8px;
+}
+
+.sort-option {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.sort-option:hover {
+    border-radius: 8px;
+    background: #f0f0f0;
+}
+
+.review-left, .explore-right {
+    position: relative;
+    font-family: Arial, sans-serif;
+    width: 150px;
+}
+
+.review-sort-selected, .explore-sort-selected {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    background: #f9f9f900;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -51,9 +52,70 @@ public class DeckApiController {
         public String cardWord;
     }
 
+    private static class ForkDeckRequest {
+        public Long deckId;
+    }
+
+    private static class VoteRequest {
+        public Long deckId;
+    }
+
     /* ----------- */
     /* PUT MAPPING */
     /* ----------- */
+
+    @PutMapping("/downvote")
+    public ResponseEntity<Map<String, Object>> downvoteDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody VoteRequest voteData) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 2);
+            response.put("message", message);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @PutMapping("/upvote")
+    public ResponseEntity<Map<String, Object>> upvoteDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody VoteRequest voteData) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 1);
+            response.put("message", message);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @PutMapping("/fork")
+    public ResponseEntity<Map<String, Object>> forkDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody ForkDeckRequest forkData) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean success = DeckManager.forkDeck(userId.get(), forkData.deckId);
+            if (success) {
+                response.put("message", "Successfully forked Deck");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to fork Deck");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
 
     @PutMapping("/create")
     public ResponseEntity<Map<String, Object>> createDeck(
@@ -169,6 +231,21 @@ public class DeckApiController {
         }
     }
 
+    @GetMapping("/public")
+    public ResponseEntity<Map<String, Object>> getPublicDecks(
+            @RequestHeader(value = "Authorization", required = false) String authToken) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            List<Row> publicDecks = DeckManager.getPublicDecks(userId.get());
+            response.put("publicDecks", publicDecks);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
+    }
+
     @GetMapping("/{deckId}")
     public ResponseEntity<Map<String, Object>> getDeckData(
             @RequestHeader(value = "Authorization", required = false) String authToken,
@@ -251,6 +328,30 @@ public class DeckApiController {
         } else {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(401).body(response);
+        }
+    }
+
+    /* ------------- */
+    /* POST MAPPINGS */
+    /* ------------- */
+
+    /* --------------- */
+    /* DELETE MAPPINGS */
+    /* --------------- */
+
+    @DeleteMapping("/removeVote")
+    public ResponseEntity<Map<String, Object>> deleteVote(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody VoteRequest voteData) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 0);
+            response.put("message", message);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
         }
     }
 }

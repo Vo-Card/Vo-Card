@@ -31,7 +31,7 @@
     align-items: center;
 }
 
-.review-right .review-create div:hover {
+.review-right div:hover {
     transition: 400ms ease-out;
     background-color: white;
     color: black;
@@ -70,30 +70,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-#sort-options {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 10;
-    width: 100%;
-    background-color: #3c3c3c;
-    list-style-type: none;
-    margin: 0;
-    padding: 0px;
-    border-radius: 8px;
-}
-
-.sort-option {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.sort-option:hover {
-    border-radius: 8px;
-    background: #f0f0f0;
 }
 
 .crd-ss-group{

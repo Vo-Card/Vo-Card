@@ -447,6 +447,33 @@ public class DeckManager {
         return rows;
     }
 
+    public static List<Row> getPublicDecks(Long userId) {
+        // Also include upvote and downvote count from reviewtb
+
+        String sql = """
+                    SELECT d.*,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern,
+                        u.username AS owner_username,
+                        (SELECT COUNT(*) FROM reviewtb r WHERE r.deck_id_FK = d.deck_id_PK AND r.review_action = 1) AS upvotes,
+                        (SELECT COUNT(*) FROM reviewtb r WHERE r.deck_id_FK = d.deck_id_PK AND r.review_action = 2) AS downvotes,
+                        CAST((SELECT r.review_action FROM reviewtb r WHERE r.deck_id_FK = d.deck_id_PK AND r.user_id_FK = ?) AS UNSIGNED) AS user_review_action
+                    FROM decktb d
+                    LEFT JOIN themetb t ON d.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON d.modifier_id_FK = m.modifier_id_PK
+                    LEFT JOIN usertb u ON d.user_id_FK = u.user_id_PK
+                    WHERE d.deck_is_public = 1 AND d.user_id_FK != ?
+                    ORDER BY d.deck_created_date DESC
+                """;
+
+        SQLResult publicDecksList = DatabaseUtils.sqlPrepareStatement(sql, userId, userId);
+        List<Row> rows = publicDecksList.getData();
+
+        Convertors.convertIdsToString(rows, "deck_id_PK", "user_id_FK", "theme_id_FK", "modifier_id_FK");
+
+        return rows;
+    }
+
     public static Long getDeckIdFromCardId(Long cardId) {
         String sql = """
                     SELECT dck.deck_id_PK
@@ -458,6 +485,10 @@ public class DeckManager {
         Row res = DatabaseUtils.sqlSingleRowStatement(sql, cardId);
         return ((Number) res.get("deck_id_PK")).longValue();
     }
+
+    /* -------------------------- */
+    /* ----- CREATE Methods ----- */
+    /* -------------------------- */
 
     /**
      * 
@@ -592,24 +623,31 @@ public class DeckManager {
     // add deck_id to forktb first
     // otherwise add user_id
     public static boolean forkDeck(Long deck_id, Long user_id) {
-        // Check if they're trying to fork their own deck
-        Row isOwnDeck = DatabaseUtils.sqlSingleRowStatement("SELECT deck_id_PK FROM decktb WHERE user_id_FK = ?",
-                user_id);
-
-        if (isOwnDeck != null)
+        // Prevent forking own deck
+        Row ownDeck = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT deck_id_PK FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deck_id, user_id);
+        if (ownDeck != null) {
             return false;
-
-        // Check if deck already paired
-        SQLResult deckFork = DatabaseUtils
-                .sqlPrepareStatement("SELECT * FROM forktb WHERE deck_id_FK = ? AND user_id_FK = ?", deck_id, user_id);
-
-        if (deckFork.getData().isEmpty()) {
-            DatabaseUtils.sqlPrepareStatement("INSERT INTO forktb (deck_id_FK, user_id_FK) VALUES (?, ?)", deck_id,
-                    user_id);
-            return true;
         }
-        // not sure there anything more
-        return false;
+
+        // Check if deck is public
+        Row deckInfo = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT deck_is_public FROM decktb WHERE deck_id_PK = ?", deck_id);
+        if (deckInfo == null || !(Boolean) deckInfo.get("deck_is_public")) {
+            return false;
+        }
+
+        // Check if already forked
+        Row forkExists = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT * FROM forktb WHERE deck_id_FK = ? AND user_id_FK = ?", deck_id, user_id);
+        if (forkExists != null) {
+            return false;
+        }
+
+        // Insert fork record
+        DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO forktb (deck_id_FK, user_id_FK) VALUES (?, ?)", deck_id, user_id);
+        return true;
     }
 
     public static String deleteDeck(Long deck_id, Long user_id) {
@@ -622,6 +660,38 @@ public class DeckManager {
             return "This Deck has been deleted successfully";
         }
         return "Deck was not found";
+    }
+
+    /* -------------------------- */
+    /* ----- UPDATE Methods ----- */
+    /* -------------------------- */
+
+    public static String addReviewToDeck(Long deck_id, Long user_id, int review_action) {
+        // review_action: 1 = upvote, 2 = downvote, 0 = neutral/remove vote
+
+        Row existingReview = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT * FROM reviewtb WHERE deck_id_FK = ? AND user_id_FK = ?", deck_id, user_id);
+        if (existingReview != null) {
+            if (review_action == 0) {
+                DatabaseUtils.sqlPrepareStatement(
+                        "DELETE FROM reviewtb WHERE deck_id_FK = ? AND user_id_FK = ?", deck_id, user_id);
+                return "Your review has been removed.";
+            } else {
+                DatabaseUtils.sqlPrepareStatement(
+                        "UPDATE reviewtb SET review_action = ? WHERE deck_id_FK = ? AND user_id_FK = ?",
+                        review_action, deck_id, user_id);
+                return "Your review has been updated.";
+            }
+        } else {
+            if (review_action == 0) {
+                return "No existing review to remove.";
+            } else {
+                DatabaseUtils.sqlPrepareStatement(
+                        "INSERT INTO reviewtb (deck_id_FK, user_id_FK, review_action) VALUES (?, ?, ?)",
+                        deck_id, user_id, review_action);
+                return "Your review has been added.";
+            }
+        }
     }
 
     public static String updateDeck(Long deck_id, String deckName, String deckDescription, boolean deckIsPublic) {

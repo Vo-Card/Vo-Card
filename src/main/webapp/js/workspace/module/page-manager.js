@@ -10,6 +10,7 @@ import {
     levelDetailLoader,
     loadAllDecksToReview,
 } from "../content/deck-loader.js";
+import { displayPublicDecks } from "../handler/explorer-handler.js";
 import { createPopupBox } from "../handler/popup-handler.js";
 import { createLoader } from "../event/card-event-handler.js"
 
@@ -32,6 +33,10 @@ const pageComponents = {
             snowfallEffect();
         },
         css: "/css/workspace/playground.css",
+    },
+    "/workspace/explore": {
+        js: displayPublicDecks,
+        css: "/css/workspace/explore.css",
     },
     "/workspace/review": {
         js: loadAllDecksToReview,

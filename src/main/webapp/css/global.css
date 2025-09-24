@@ -64,6 +64,10 @@
     
     --information-container-width-close: 15px;
     --information-container-width-open : 250px;
+
+    --like-color: #76a4f3;
+    --dislike-color: #ff8989;
+
     --alert: #ff8989;
 }
 
