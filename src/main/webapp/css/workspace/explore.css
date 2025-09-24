@@ -1,0 +1,4 @@
+liked-value.voted, dislikes-value.voted {
+    font-weight: bold;
+    color: var(--like-color)!important;
+}

@@ -8,6 +8,12 @@
             </li>
 
             <li>
+                <a href="/workspace/explore" data-workspace>
+                    <i class="nf nf-md-view_grid"></i>Explore
+                </a>
+            </li>
+
+            <li>
                 <a href="/workspace/stats" data-workspace>
                     <i class="nf nf-cod-graph"></i>Stats
                 </a>
