@@ -447,6 +447,18 @@ public class DeckManager {
         return rows;
     }
 
+    public static Long getDeckIdFromCardId(Long cardId) {
+        String sql = """
+                    SELECT dck.deck_id_PK
+                    FROM cardtb c
+                    INNER JOIN card_leveltb cl ON c.level_id_FK = cl.level_id_PK
+                    INNER JOIN decktb dck ON cl.deck_id_FK = dck.deck_id_PK
+                    WHERE c.card_id_PK = ?
+                """;
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, cardId);
+        return ((Number) res.get("deck_id_PK")).longValue();
+    }
+
     /**
      * 
      * @param themeId
