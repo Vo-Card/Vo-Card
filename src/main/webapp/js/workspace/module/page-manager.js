@@ -3,12 +3,15 @@ import {
     loadWeeklyChart,
     statsLoader,
 } from "/js/workspace/handler/charts-handler.js";
+import { TokenManager } from "/js/auth/auth.js";
 import {
     deckLoader,
     deckDetailLoader,
     levelDetailLoader,
     loadAllDecksToReview,
 } from "../content/deck-loader.js";
+import { createPopupBox } from "../handler/popup-handler.js";
+import { createLoader } from "../event/card-event-handler.js"
 
 // Use to cache pages
 const cache = new Map();
@@ -228,7 +231,21 @@ navbar.addEventListener("mouseover", (event) => {
         }
     }, 120); // only trigger if hovered ~0.1s+
 });
+/**
+ * 
+ * @param {*} path 
+ */
+async function userLoader(path) {
+    const displayName = TokenManager.getDisplayName();
+    const username = TokenManager.getUsername();
 
+    const temp = document.createElement("div");
+    const template = await (await fetch(path)).text();
+    temp.innerHTML = template;
+
+    
+    return temp;
+}
 document.addEventListener("click", async (event) => {
     const target = event.target;
     if (target instanceof Element) {
@@ -248,6 +265,14 @@ document.addEventListener("click", async (event) => {
             switch (popupType) {
                 case "setting":
                     // A fucking place holder
+                    createPopupBox(
+                        "60vw",
+                        "60vh",
+                        "User Setting : ",
+                        await userLoader(
+                            "/components/content/popup/setting.jsp"
+                        )
+                    )
                     break;
                 default:
                     console.error("Invalid popup type.");
