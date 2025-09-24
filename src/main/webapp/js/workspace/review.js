@@ -175,7 +175,11 @@ async function nextCard() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                totalCards: sessionData.total_card,
+                totalCards: Math.max(
+                    sessionData.total_card,
+                    sessionData.total_pass + sessionData.total_failed
+                ),
+                deckIds: sessionData.deckIds,
                 totalCorrect: sessionData.total_pass,
                 totalFailed: sessionData.total_failed,
             }),
