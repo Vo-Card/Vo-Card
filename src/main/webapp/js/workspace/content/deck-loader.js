@@ -114,7 +114,13 @@ export async function populateContainer(
             .replace(/{secondary_color}/g, item.secondary_color)
             .replace(
                 /{ii}/g,
-                ownership === "forked" ? "" : ownership === "owned" ? "" : ""
+                ownership === "forked"
+                    ? ""
+                    : ownership === "owned"
+                    ? ""
+                    : ownership === "public"
+                    ? ""
+                    : ""
             );
         switch (type) {
             case "deck":

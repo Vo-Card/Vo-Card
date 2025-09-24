@@ -9,6 +9,7 @@ import {
     levelDetailLoader,
     loadAllDecksToReview,
 } from "../content/deck-loader.js";
+import { displayPublicDecks } from "../handler/explorer-handler.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -29,6 +30,10 @@ const pageComponents = {
             snowfallEffect();
         },
         css: "/css/workspace/playground.css",
+    },
+    "/workspace/explore": {
+        js: displayPublicDecks,
+        css: "/css/workspace/explore.css",
     },
     "/workspace/review": {
         js: loadAllDecksToReview,
