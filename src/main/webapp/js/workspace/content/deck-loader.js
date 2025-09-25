@@ -283,10 +283,14 @@ export async function levelDetailLoader(path) {
         await appendTemplate(
             cardContainer,
             "/components/template/new_card.svg",
-            null,
+            "create-card",
             "card-item-container"
         );
+        insertCreateEventActions(cardContainer, "#create-card", "Card");
     }
+
+    cardContainer.setAttribute("primary-color", data.theme.primary_color);
+    cardContainer.setAttribute("secondary-color", data.theme.secondary_color);
 
     insertDataEventActions(cardContainer, {
         interactableSelector: ".item-interactable",

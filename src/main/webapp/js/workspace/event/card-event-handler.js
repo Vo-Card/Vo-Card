@@ -216,6 +216,9 @@ async function createLoader(path, itemType) {
                 console.error(err);
                 alert("Error updating deck.");
             }
+
+            // Refresh the page to show the new data
+            loadPage(document.location.pathname);
         });
     };
 
@@ -395,6 +398,55 @@ async function createLoader(path, itemType) {
             callCreate(`/api/decks/${deckId}/create`);
 
             break;
+        case "Card":
+            const cardTheme2 = await loadTemplate(
+                "/components/template/card_template.svg"
+            );
+
+            const cardId2 = "card_" + Date.now(); // or UUID
+
+            const match2 = winPath.match(
+                /^\/workspace\/decks\/([^/]+)\/([^/]+)/
+            );
+            if (!match2) return temp;
+
+            const deckId2 = match2[1];
+            const levelId2 = match2[2];
+
+            const container = document.getElementById("cards-container");
+            // Insert SVG into display
+            cardDisplay.innerHTML = cardTheme2
+                .replace(/{card_id}/g, cardId2)
+                .replace(/{top_indicator}/g, "Level's Name")
+                .replace(/{ii}/g, "")
+                .replace(
+                    /{primary_color}/g,
+                    container.getAttribute("primary-color")
+                )
+                .replace(
+                    /{secondary_color}/g,
+                    container.getAttribute("secondary-color")
+                );
+
+            const svgTitle2 = cardDisplay.querySelector("#fit-text");
+            svgTitle2.textContent = "New Card";
+            createForm(
+                "input",
+                form,
+                "Card Word :",
+                "text",
+                "New Card",
+                "cardWord",
+                {},
+                (e) => {
+                    if (svgTitle2) svgTitle2.textContent = e.target.value;
+                }
+            );
+
+            createForm("input", form, null, "submit", "Create Card");
+            callCreate(`/api/decks/${deckId2}/${levelId2}/create`);
+
+            break;
         default:
             console.error("Incorrect type");
             break;
@@ -444,7 +496,12 @@ export function insertDataEventActions(
 
             switch (itemType) {
                 case "deck":
-                    showDeckInformation(selectionContainer, itemData, element);
+                    showDeckInformation(
+                        selectionContainer,
+                        itemData,
+                        element,
+                        element.getAttribute("owner-type")
+                    );
                     break;
                 case "level":
                     showLevelInformation(selectionContainer, itemData, element);
