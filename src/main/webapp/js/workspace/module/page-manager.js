@@ -278,10 +278,23 @@ document.addEventListener("click", async (event) => {
                         )
                     )
                     break;
+
+                case "session":
+                    console.log("SEssion in");
+
+                    createPopupBox(
+                        "60vw",
+                        "60vh",
+                        "Session Setting : ",
+                        await userLoader(
+                            "/components/content/popup/session.jsp"
+                        )
+                    )
+                    break;
                 default:
                     console.error("Invalid popup type.");
                     break;
-            }
+            };
         }
     }
 });
