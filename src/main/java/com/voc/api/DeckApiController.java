@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -294,7 +295,10 @@ public class DeckApiController {
             response.put("ownership_type", ownershipType.get());
 
             List<Row> deckLevels = DeckManager.getCardsOfLevel(levelId);
+            Row levelInfo = DeckManager.getLevelColor(levelId);
+
             response.put("cards", deckLevels);
+            response.put("theme", levelInfo);
             return ResponseEntity.ok(response);
         } else {
             response.put("message", "JWT missing userData");
@@ -335,6 +339,86 @@ public class DeckApiController {
     /* POST MAPPINGS */
     /* ------------- */
 
+    // NOTE: Toggle will be merge with update in the future
+
+    @PostMapping("/{deckId}/togglePublic")
+    public ResponseEntity<Map<String, Object>> toggleDeckPublic(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean isPublic = DeckManager.toggleDeckPublic(deckId, userId.get());
+            if (isPublic == null) {
+                response.put("message", "Failed to toggle Deck public status");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+            response.put("is_public", isPublic);
+            response.put("message", "Successfully toggled Deck public status");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @PostMapping("/{deckId}/toggleClonePerm")
+    public ResponseEntity<Map<String, Object>> toggleDeckClonePerm(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean canClone = DeckManager.toggleCloneDeck(deckId, userId.get());
+            if (canClone == null) {
+                response.put("message", "Failed to toggle Deck clone permission");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+            response.put("can_clone", canClone);
+            response.put("message", "Successfully toggled Deck clone permission");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @PostMapping("/{deckId}/clone")
+    public ResponseEntity<Map<String, Object>> cloneDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean success = DeckManager.cloneDeck(deckId, userId.get());
+            if (success) {
+                response.put("message", "Successfully cloned Deck");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to clone Deck");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
     /* --------------- */
     /* DELETE MAPPINGS */
     /* --------------- */
@@ -349,6 +433,108 @@ public class DeckApiController {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 0);
             response.put("message", message);
             return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/{deckId}/unfork")
+    public ResponseEntity<Map<String, Object>> unForkDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean success = DeckManager.unForkDeck(userId.get(), deckId);
+            if (success) {
+                response.put("message", "Successfully un-forked Deck");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to un-fork Deck");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/{deckId}/delete")
+    public ResponseEntity<Map<String, Object>> deleteDeck(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean success = DeckManager.deleteDeckCascade(deckId, userId.get());
+            if (success) {
+                response.put("message", "Successfully deleted Deck");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to delete Deck");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/{deckId}/{levelId}")
+    public ResponseEntity<Map<String, Object>> deleteLevel(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean success = DeckManager.deleteLevelCascade(levelId, deckId);
+            if (success) {
+                response.put("message", "Successfully deleted Level");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to delete Level");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/{deckId}/{levelId}/{cardId}")
+    public ResponseEntity<Map<String, Object>> deleteCard(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId,
+            @PathVariable Long cardId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            Boolean success = DeckManager.deleteCardCascade(cardId, levelId);
+            if (success) {
+                response.put("message", "Successfully deleted Card");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("message", "Failed to delete Card");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
         } else {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);

@@ -111,7 +111,7 @@ public class AuthManager {
      * @param username Username to check
      * @return true if user exists, false otherwise
      */
-    private static boolean isUserExist(String username) {
+    public static boolean isUserExist(String username) {
         String sql = "SELECT COUNT(*) AS total FROM usertb WHERE username = ?";
         Row result = DatabaseUtils.sqlSingleRowStatement(sql, username);
 

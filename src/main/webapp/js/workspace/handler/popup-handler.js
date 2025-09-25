@@ -26,6 +26,65 @@ export async function createPopupBox(width, height, title, contentElement) {
     contentContainer.appendChild(contentElement);
 }
 
+export async function createConfirmationPopup(
+    width,
+    height,
+    title,
+    message,
+    onConfirm
+) {
+    const contentElement = document.createElement("div");
+    contentElement.classList.add(
+        "d-flex",
+        "flex-column",
+        "h-full",
+        "p-4",
+        "justify-content-between"
+    );
+
+    const messageBox = document.createElement("p");
+    messageBox.textContent = message;
+    messageBox.classList.add("flex-grow", "mb-4", "text-center");
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add(
+        "d-flex",
+        "justify-content-between",
+        "space-x-2",
+        "mt-auto"
+    );
+
+    const cancelButton = document.createElement("button");
+    cancelButton.textContent = "Cancel";
+    cancelButton.classList.add("btn", "btn-secondary");
+    cancelButton.addEventListener("click", () => {
+        closePopup();
+    });
+
+    const confirmButton = document.createElement("button");
+    confirmButton.textContent = "Confirm";
+    confirmButton.classList.add("btn", "btn-primary");
+    confirmButton.addEventListener("click", () => {
+        onConfirm();
+        closePopup();
+    });
+
+    buttonContainer.appendChild(cancelButton);
+    buttonContainer.appendChild(confirmButton);
+
+    contentElement.appendChild(messageBox);
+    contentElement.appendChild(buttonContainer);
+
+    backdrop.classList.add("active");
+
+    popupTitleBox.textContent = title;
+
+    popupBox.style.width = width;
+    popupBox.style.height = height;
+
+    contentContainer.appendChild(contentElement);
+}
+
 export async function updatePopup(width, height, title, contentElement) {
     popupTitleBox.textContent = title;
 

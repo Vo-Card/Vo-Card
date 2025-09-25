@@ -104,4 +104,9 @@ public class SessionManager {
         String sql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
         DatabaseUtils.sqlPrepareStatement(sql, sessionId);
     }
+
+    public static void deleteAllSessionsForUser(Long userId) {
+        String sql = "DELETE FROM sessiontb WHERE user_id_FK = ?";
+        DatabaseUtils.sqlPrepareStatement(sql, userId);
+    }
 }

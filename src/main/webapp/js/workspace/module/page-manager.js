@@ -235,9 +235,10 @@ navbar.addEventListener("mouseover", (event) => {
         }
     }, 120); // only trigger if hovered ~0.1s+
 });
+
 /**
- * 
- * @param {*} path 
+ *
+ * @param {*} path
  */
 async function userLoader(path) {
     const displayName = TokenManager.getDisplayName();
@@ -246,7 +247,6 @@ async function userLoader(path) {
     const temp = document.createElement("div");
     const template = await (await fetch(path)).text();
     temp.innerHTML = template;
-
 
     return temp;
 }
@@ -276,7 +276,7 @@ document.addEventListener("click", async (event) => {
                         await userLoader(
                             "/components/content/popup/setting.jsp"
                         )
-                    )
+                    );
                     break;
 
                 case "session":

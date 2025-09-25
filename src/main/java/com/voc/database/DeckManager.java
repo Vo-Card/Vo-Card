@@ -1,7 +1,10 @@
 package com.voc.database;
 
+import static com.voc.utils.AnsiColor.TAG_DEBUG;
+
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +182,157 @@ public class DeckManager {
             }
         }
         return false;
+    }
+
+    public static Boolean toggleCloneDeck(Long deckId, Long userId) {
+        try {
+            Row deckRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT * FROM decktb WHERE deck_id_PK = ?", deckId);
+            if (deckRow == null)
+                return null;
+
+            Boolean currentPerm = (Boolean) deckRow.get("deck_clone_perm");
+            Boolean newPerm = !currentPerm;
+
+            DatabaseUtils.sqlPrepareStatement(
+                    "UPDATE decktb SET deck_clone_perm = ?, deck_lastest_updated = NOW() WHERE deck_id_PK = ?",
+                    newPerm, deckId);
+
+            return newPerm;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Boolean cloneDeck(Long deckId, Long userId) {
+        try {
+            Row deckRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT * FROM decktb WHERE deck_id_PK = ?", deckId);
+            System.err.println(TAG_DEBUG + "Deck to be cloned: " + deckRow);
+            if (deckRow == null)
+                return false;
+
+            Long newDeckId = Snowflake.nextId();
+
+            DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO decktb (deck_id_PK, deck_name, deck_description, deck_is_public, " +
+                            "theme_id_FK, modifier_id_FK, user_id_FK, deck_clone_perm, deck_created_date, deck_lastest_updated) "
+                            +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                    newDeckId,
+                    deckRow.get("deck_name") + " (Clone)",
+                    deckRow.get("deck_description"),
+                    deckRow.get("deck_is_public"),
+                    deckRow.get("theme_id_FK"),
+                    deckRow.get("modifier_id_FK"),
+                    userId,
+                    false);
+
+            List<Row> levels = DatabaseUtils.sqlPrepareStatement(
+                    "SELECT * FROM card_leveltb WHERE deck_id_FK = ?", deckId).getData();
+
+            Map<Long, Long> levelMap = new HashMap<>();
+            List<Object[]> levelBatch = new ArrayList<>();
+
+            for (Row level : levels) {
+                Long oldLevelId = ((Number) level.get("level_id_PK")).longValue();
+                Long newLevelId = Snowflake.nextId();
+                levelMap.put(oldLevelId, newLevelId);
+
+                levelBatch.add(new Object[] {
+                        newLevelId,
+                        level.get("level_name"),
+                        level.get("level_weight"),
+                        level.get("theme_id_FK"),
+                        level.get("modifier_id_FK"),
+                        newDeckId
+                });
+            }
+
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "
+                            +
+                            "VALUES (?, ?, ?, ?, ?, ?)",
+                    levelBatch);
+
+            List<Row> cards = DatabaseUtils.sqlPrepareStatement(
+                    "SELECT * FROM cardtb WHERE level_id_FK IN " +
+                            "(SELECT level_id_PK FROM card_leveltb WHERE deck_id_FK = ?)",
+                    deckId).getData();
+
+            Map<Long, Long> cardMap = new HashMap<>();
+            List<Object[]> cardBatch = new ArrayList<>();
+
+            for (Row card : cards) {
+                Long oldCardId = ((Number) card.get("card_id_PK")).longValue();
+                Long newCardId = Snowflake.nextId();
+                cardMap.put(oldCardId, newCardId);
+
+                cardBatch.add(new Object[] {
+                        newCardId,
+                        levelMap.get(((Number) card.get("level_id_FK")).longValue()),
+                        card.get("card_word")
+                });
+            }
+
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)", cardBatch);
+
+            List<Row> poses = DatabaseUtils.sqlPrepareStatement(
+                    "SELECT * FROM postb WHERE card_id_FK IN " +
+                            "(SELECT card_id_PK FROM cardtb WHERE level_id_FK IN " +
+                            "(SELECT level_id_PK FROM card_leveltb WHERE deck_id_FK = ?))",
+                    deckId).getData();
+
+            Map<Long, Long> posMap = new HashMap<>();
+            List<Object[]> posBatch = new ArrayList<>();
+
+            for (Row pos : poses) {
+                Long oldPosId = ((Number) pos.get("pos_id_PK")).longValue();
+                Long newPosId = Snowflake.nextId();
+                posMap.put(oldPosId, newPosId);
+
+                posBatch.add(new Object[] {
+                        newPosId,
+                        cardMap.get(((Number) pos.get("card_id_FK")).longValue()),
+                        pos.get("part_of_speech")
+                });
+            }
+
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
+
+            List<Row> defs = DatabaseUtils.sqlPrepareStatement(
+                    "SELECT * FROM definitiontb WHERE pos_id_FK IN " +
+                            "(SELECT pos_id_PK FROM postb WHERE card_id_FK IN " +
+                            "(SELECT card_id_PK FROM cardtb WHERE level_id_FK IN " +
+                            "(SELECT level_id_PK FROM card_leveltb WHERE deck_id_FK = ?)))",
+                    deckId).getData();
+
+            List<Object[]> defBatch = new ArrayList<>();
+
+            for (Row def : defs) {
+                Long newDefId = Snowflake.nextId();
+
+                defBatch.add(new Object[] {
+                        newDefId,
+                        posMap.get(((Number) def.get("pos_id_FK")).longValue()),
+                        def.get("definition")
+                });
+            }
+
+            DatabaseUtils.sqlExecuteBatch(
+                    "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
+
+            updateAllLevelContainCards(newDeckId);
+            updateDeckContainCard(newDeckId);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -666,6 +820,19 @@ public class DeckManager {
     /* ----- UPDATE Methods ----- */
     /* -------------------------- */
 
+    public static Boolean toggleDeckPublic(Long deckId, Long userId) {
+        Row deck = DatabaseUtils.sqlSingleRowStatement(
+                "SELECT deck_is_public FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deckId, userId);
+        if (deck != null) {
+            boolean currentStatus = (Boolean) deck.get("deck_is_public");
+            DatabaseUtils.sqlPrepareStatement(
+                    "UPDATE decktb SET deck_is_public = ? WHERE deck_id_PK = ? AND user_id_FK = ?",
+                    !currentStatus, deckId, userId);
+            return !currentStatus;
+        }
+        return null;
+    }
+
     public static String addReviewToDeck(Long deck_id, Long user_id, int review_action) {
         // review_action: 1 = upvote, 2 = downvote, 0 = neutral/remove vote
 
@@ -835,6 +1002,52 @@ public class DeckManager {
                 """;
 
         DatabaseUtils.sqlPrepareStatement(sql, deckId);
+    }
+
+    public static Row getLevelColor(Long levelId) {
+        // Get pricolor and secolor from theme_modifiertb
+        String sql = """
+                    SELECT m.primary_color, m.secondary_color
+                    FROM card_leveltb cl
+                    LEFT JOIN theme_modifiertb m ON cl.modifier_id_FK = m.modifier_id_PK
+                    WHERE cl.level_id_PK = ?
+                """;
+        Row levelInfo = DatabaseUtils.sqlSingleRowStatement(sql, levelId);
+        return levelInfo;
+    }
+
+    // ------------------------------------- //
+    // //
+    // DELETE METHODS //
+    // //
+    // ------------------------------------- //
+
+    public static Boolean deleteDeckCascade(Long deckId, Long userId) {
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(
+                "DELETE FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?",
+                deckId, userId);
+        return res.getAffectedRow() > 0;
+    }
+
+    public static Boolean deleteLevelCascade(Long levelId, Long deckId) {
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(
+                "DELETE FROM card_leveltb WHERE level_id_PK = ? AND deck_id_FK = ?",
+                levelId, deckId);
+        return res.getAffectedRow() > 0;
+    }
+
+    public static Boolean deleteCardCascade(Long cardId, Long levelId) {
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(
+                "DELETE FROM cardtb WHERE card_id_PK = ?",
+                cardId);
+        return res.getAffectedRow() > 0;
+    }
+
+    public static Boolean unForkDeck(Long deckId, Long userId) {
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(
+                "DELETE FROM forktb WHERE deck_id_FK = ? AND user_id_FK = ?",
+                deckId, userId);
+        return res.getAffectedRow() > 0;
     }
 
 }

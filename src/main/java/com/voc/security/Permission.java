@@ -69,6 +69,14 @@ public class Permission {
         return (permissionLevel & Values.ROOT_USER) != 0;
     }
 
+    public static Boolean isUserRoot(Long userId) {
+        Long permissionLevel = getPermissionViaUserId(userId);
+        if (permissionLevel == null)
+            return false;
+
+        return (permissionLevel & Values.ROOT_USER) != 0;
+    }
+
     public static void createRole(Long userId, Long permissionBitmask, String roleName, String roleDesc) {
         Long permissionLevel = getPermissionViaUserId(userId);
 
