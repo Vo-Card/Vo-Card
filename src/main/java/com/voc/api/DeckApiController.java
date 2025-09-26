@@ -1,5 +1,6 @@
 package com.voc.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.voc.database.DatabaseUtils;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
 import com.voc.server.Snowflake;
@@ -33,6 +35,57 @@ public class DeckApiController {
             return JwtManager.validateJwt(token);
         }
         return Optional.empty();
+    }
+
+    private static class UpdateCardRequest {
+        public String newCardName;
+        public List<DeleteData> deleteData;
+        public List<EditData> editData;
+        public List<CreateData> addData;
+
+        public static class DeleteData {
+            public Long posId;
+            public Boolean isPos;
+            public List<Definitions> definitions;
+
+            public static class Definitions {
+                public Long defId;
+            }
+        }
+
+        public static class EditData {
+            public Long posId;
+            public String newPos;
+            public List<Definitions> definitions;
+
+            public static class Definitions {
+                public Long defId;
+                public String newDef;
+            }
+        }
+
+        public static class CreateData {
+            public String dataType;
+            public String targetId;
+            public String updatedContent;
+            public String uuid;
+        }
+    }
+
+    private static class UpdateDeckRequest {
+        public String deckName;
+        public String deckDescription;
+        public String primaryColor;
+        public String secondaryColor;
+        public Boolean isPublic;
+        public Boolean allowCloning;
+    }
+
+    private static class UpdateLevelRequest {
+        public String levelValue;
+        public int levelWeight;
+        public String primaryColor;
+        public String secondaryColor;
     }
 
     private static class DeckCreateRequest {
@@ -104,7 +157,7 @@ public class DeckApiController {
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean success = DeckManager.forkDeck(userId.get(), forkData.deckId);
+            Boolean success = DeckManager.forkDeck(forkData.deckId, userId.get());
             if (success) {
                 response.put("message", "Successfully forked Deck");
                 return ResponseEntity.ok(response);
@@ -128,16 +181,18 @@ public class DeckApiController {
 
         if (userId.isPresent()) {
             Long deckId = Snowflake.nextId();
-            Long themeId = DeckManager.createNewTheme("Custom_" + deckId,
+            DeckManager.createNewDeck(deckId, deckData.deckName,
+                    deckData.deckDescription, false, null,
+                    null, userId.get());
+            Long themeId = DeckManager.createNewTheme(deckId, "Custom_" + deckId,
                     ThemeTypes.Deck,
                     "/components/template/deck_template.svg");
-            Long modifierId = DeckManager.createNewModifier(deckData.primaryColor,
+            Long modifierId = DeckManager.createNewModifier(deckId, deckData.primaryColor,
                     deckData.secondaryColor, "dots",
                     ThemeTypes.Deck);
-
-            DeckManager.createNewDeck(deckId, deckData.deckName,
-                    deckData.deckDescription, false, themeId,
-                    modifierId, userId.get());
+            DatabaseUtils.sqlPrepareStatement(
+                    "UPDATE decktb SET theme_id_FK = ?, modifier_id_FK = ? WHERE deck_id_PK = ?",
+                    themeId, modifierId, deckId);
 
             response.put("message", "Successfully created Deck");
             return ResponseEntity.ok(response);
@@ -162,15 +217,19 @@ public class DeckApiController {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
-
             Long levelId = Snowflake.nextId();
-            Long themeId = DeckManager.createNewTheme("Custom_" + levelId, ThemeTypes.Deck,
-                    "/components/template/card_template.svg");
-            Long modifierId = DeckManager.createNewModifier(levelData.primaryColor, levelData.secondaryColor, "dots",
-                    ThemeTypes.Deck);
+            DeckManager.createNewLevel(levelId, levelData.levelValue, levelData.levelWeight, null,
+                    null, deckId);
 
-            DeckManager.createNewLevel(levelId, levelData.levelValue, levelData.levelWeight, themeId,
-                    modifierId, deckId);
+            Long themeId = DeckManager.createNewTheme(levelId, "Custom_" + levelId, ThemeTypes.Card,
+                    "/components/template/card_template.svg");
+            Long modifierId = DeckManager.createNewModifier(levelId, levelData.primaryColor, levelData.secondaryColor,
+                    "dots",
+                    ThemeTypes.Card);
+
+            DatabaseUtils.sqlPrepareStatement(
+                    "UPDATE card_leveltb SET theme_id_FK = ?, modifier_id_FK = ? WHERE level_id_PK = ?",
+                    themeId, modifierId, levelId);
 
             response.put("message", "Successfully created Level");
             return ResponseEntity.ok(response);
@@ -339,38 +398,219 @@ public class DeckApiController {
     /* POST MAPPINGS */
     /* ------------- */
 
-    // NOTE: Toggle will be merge with update in the future
-
-    @PostMapping("/{deckId}/togglePublic")
-    public ResponseEntity<Map<String, Object>> toggleDeckPublic(
+    @PostMapping("/{deckId}/{levelId}/{cardId}/update")
+    public ResponseEntity<Map<String, Object>> updateCard(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @PathVariable Long deckId) {
+            @PathVariable Long deckId,
+            @PathVariable Long levelId,
+            @PathVariable Long cardId,
+            @RequestBody UpdateCardRequest updateReq) {
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
-        if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
-            if (!validateOwner) {
-                response.put("message", "You don't have permission.");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
-            }
-            Boolean isPublic = DeckManager.toggleDeckPublic(deckId, userId.get());
-            if (isPublic == null) {
-                response.put("message", "Failed to toggle Deck public status");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
-            }
-            response.put("is_public", isPublic);
-            response.put("message", "Successfully toggled Deck public status");
-            return ResponseEntity.ok(response);
-        } else {
+        if (userId.isEmpty()) {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
         }
+        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
+        if (!validateOwner) {
+            response.put("message", "You don't have permission.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+        }
+
+        // Prepare data
+        Map<Long, String> posToDelete = new HashMap<>();
+        Map<Long, List<Long>> defToDelete = new HashMap<>();
+        Map<Long, String> posToEdit = new HashMap<>();
+        Map<Long, Map<Long, String>> defToEdit = new HashMap<>();
+        Map<String, Map<Long, String>> posToCreate = new HashMap<>();
+        Map<String, Map<Long, String>> defToCreate = new HashMap<>();
+
+        // Skip definition deletes if the parent POS is already deleted
+        if (updateReq.deleteData != null) {
+            for (UpdateCardRequest.DeleteData delPos : updateReq.deleteData) {
+                if (delPos.posId != null) {
+                    boolean isPosDelete = delPos.isPos != null && delPos.isPos;
+                    if (isPosDelete) {
+                        // mark the POS for deletion
+                        posToDelete.put(delPos.posId, "pos");
+                    }
+
+                    // Only process definition-level deletes if POS itself is NOT deleted
+                    if (!isPosDelete && delPos.definitions != null && !delPos.definitions.isEmpty()) {
+                        for (UpdateCardRequest.DeleteData.Definitions def : delPos.definitions) {
+                            if (def.defId != null) {
+                                defToDelete
+                                        .computeIfAbsent(delPos.posId, k -> new ArrayList<>())
+                                        .add(def.defId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Filter editData to exclude any edits for POS marked deleted
+        if (updateReq.editData != null) {
+            for (UpdateCardRequest.EditData editPos : updateReq.editData) {
+                if (editPos.posId != null) {
+                    // skip pos edits if pos is deleted
+                    if (editPos.newPos != null && !posToDelete.containsKey(editPos.posId)) {
+                        posToEdit.put(editPos.posId, editPos.newPos);
+                    }
+
+                    // skip definition edits if pos is deleted or definition itself is deleted
+                    if (editPos.definitions != null && !editPos.definitions.isEmpty()) {
+                        for (UpdateCardRequest.EditData.Definitions def : editPos.definitions) {
+                            if (def.defId != null &&
+                                    def.newDef != null &&
+                                    !defToDelete.getOrDefault(editPos.posId, List.of()).contains(def.defId) &&
+                                    !posToDelete.containsKey(editPos.posId)) {
+                                defToEdit
+                                        .computeIfAbsent(editPos.posId, k -> new HashMap<>())
+                                        .put(def.defId, def.newDef);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (updateReq.addData != null) {
+            for (UpdateCardRequest.CreateData createData : updateReq.addData) {
+                if (createData.dataType == null || createData.dataType.isBlank()
+                        || createData.updatedContent == null || createData.updatedContent.isBlank()
+                        || createData.uuid == null || createData.uuid.isBlank()) {
+                    continue;
+                }
+
+                switch (createData.dataType) {
+                    case "pos":
+                        posToCreate.put(
+                                createData.uuid,
+                                Map.of(Snowflake.nextId(), createData.updatedContent));
+                        break;
+                    case "definition":
+                        if (createData.targetId == null)
+                            continue;
+
+                        String[] split = createData.targetId.split("_");
+                        if (split.length == 1) {
+                            try {
+                                Long targetPosId = Long.valueOf(createData.targetId);
+                                if (posToDelete.containsKey(targetPosId)) {
+                                    continue;
+                                }
+                                Map<Long, String> defMap = new HashMap<>();
+                                defMap.put(targetPosId, createData.updatedContent);
+                                defToCreate.put(createData.uuid, defMap);
+                            } catch (NumberFormatException e) {
+                                response.put("message", "invalid def id");
+                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+                            }
+                        } else if (split.length > 1 && split[0].equals("fake")) {
+                            Map<Long, String> posMap = posToCreate.get(createData.targetId);
+                            if (posMap != null && !posMap.isEmpty()) {
+                                Long generatedPosId = posMap.keySet().iterator().next();
+                                Map<Long, String> defMap = new HashMap<>();
+                                defMap.put(generatedPosId, createData.updatedContent);
+                                defToCreate.put(createData.uuid, defMap);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (updateReq.newCardName != null && !updateReq.newCardName.isBlank()) {
+            DeckManager.updateCard(cardId, updateReq.newCardName);
+        }
+
+        for (Map.Entry<Long, String> entry : posToDelete.entrySet()) {
+            validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId,
+                    cardId, entry.getKey(), null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+
+            DeckManager.deletePos(entry.getKey());
+        }
+
+        for (Map.Entry<Long, List<Long>> entry : defToDelete.entrySet()) {
+            for (Long defId : entry.getValue()) {
+                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId,
+                        cardId, entry.getKey(), defId);
+                if (!validateOwner) {
+                    response.put("message", "You don't have permission.");
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+                }
+                DeckManager.deleteDefinition(defId);
+            }
+        }
+
+        // Edit POS
+        for (Map.Entry<Long, String> entry : posToEdit.entrySet()) {
+            validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, entry.getKey(), null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            DeckManager.updatePos(entry.getKey(), entry.getValue());
+        }
+
+        // Edit Definitions
+        for (Map.Entry<Long, Map<Long, String>> entry : defToEdit.entrySet()) {
+            Long posId = entry.getKey();
+            Map<Long, String> defs = entry.getValue();
+            for (Map.Entry<Long, String> defEntry : defs.entrySet()) {
+                Long defId = defEntry.getKey();
+                String newDef = defEntry.getValue();
+                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, posId, defId);
+                if (!validateOwner) {
+                    response.put("message", "You don't have permission.");
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+                }
+                DeckManager.updateDefinition(defId, newDef);
+            }
+        }
+
+        // Create POS and Def
+        for (Map.Entry<String, Map<Long, String>> entry : posToCreate.entrySet()) {
+            Map<Long, String> posMap = entry.getValue();
+            for (Map.Entry<Long, String> posEntry : posMap.entrySet()) {
+                Long newPosId = posEntry.getKey();
+                String newPosValue = posEntry.getValue();
+                DeckManager.createNewPartOfSpeech(newPosId, cardId, newPosValue);
+            }
+        }
+
+        for (Map.Entry<String, Map<Long, String>> entry : defToCreate.entrySet()) {
+
+            Map<Long, String> defMap = entry.getValue();
+
+            for (Map.Entry<Long, String> defEntry : defMap.entrySet()) {
+                Long posId = defEntry.getKey();
+                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, posId, null);
+                if (!validateOwner) {
+                    response.put("message", "You don't have permission.");
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+                }
+                String newDefValue = defEntry.getValue();
+                DeckManager.createNewDefinition(Snowflake.nextId(), posId, newDefValue);
+            }
+        }
+
+        response.put("message", "Data passed");
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{deckId}/toggleClonePerm")
-    public ResponseEntity<Map<String, Object>> toggleDeckClonePerm(
+    @PostMapping("/{deckId}/update")
+    public ResponseEntity<Map<String, Object>> deckUpdate(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @PathVariable Long deckId) {
+            @PathVariable Long deckId,
+            @RequestBody UpdateDeckRequest deckUpd) {
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
@@ -379,13 +619,11 @@ public class DeckApiController {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
-            Boolean canClone = DeckManager.toggleCloneDeck(deckId, userId.get());
-            if (canClone == null) {
-                response.put("message", "Failed to toggle Deck clone permission");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
-            }
-            response.put("can_clone", canClone);
-            response.put("message", "Successfully toggled Deck clone permission");
+            DeckManager.updateDeck(
+                    deckId, deckUpd.deckName, deckUpd.deckDescription,
+                    deckUpd.primaryColor, deckUpd.secondaryColor, deckUpd.isPublic,
+                    deckUpd.allowCloning);
+            response.put("message", "Successfully toggled Deck public status");
             return ResponseEntity.ok(response);
         } else {
             response.put("message", "JWT missing userData");
@@ -419,6 +657,31 @@ public class DeckApiController {
         }
     }
 
+    @PostMapping("/{deckId}/{levelId}/update")
+    public ResponseEntity<Map<String, Object>> levelUpdate(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable Long deckId,
+            @PathVariable Long levelId,
+            @RequestBody UpdateLevelRequest levelUpd) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
+            if (!validateOwner) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+            DeckManager.updateLevel(
+                    levelId, levelUpd.levelValue, levelUpd.levelWeight,
+                    levelUpd.primaryColor, levelUpd.secondaryColor);
+            response.put("message", "Successfully toggled Deck public status");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
     /* --------------- */
     /* DELETE MAPPINGS */
     /* --------------- */
@@ -446,7 +709,7 @@ public class DeckApiController {
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean success = DeckManager.unForkDeck(userId.get(), deckId);
+            Boolean success = DeckManager.unForkDeck(deckId, userId.get());
             if (success) {
                 response.put("message", "Successfully un-forked Deck");
                 return ResponseEntity.ok(response);
@@ -486,7 +749,7 @@ public class DeckApiController {
         }
     }
 
-    @DeleteMapping("/{deckId}/{levelId}")
+    @DeleteMapping("/{deckId}/{levelId}/delete")
     public ResponseEntity<Map<String, Object>> deleteLevel(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId,
@@ -513,7 +776,7 @@ public class DeckApiController {
         }
     }
 
-    @DeleteMapping("/{deckId}/{levelId}/{cardId}")
+    @DeleteMapping("/{deckId}/{levelId}/{cardId}/delete")
     public ResponseEntity<Map<String, Object>> deleteCard(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId,

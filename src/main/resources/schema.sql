@@ -49,30 +49,6 @@ CREATE TABLE `permissiontb` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- vo_card.theme_modifiertb definition
-
-CREATE TABLE `theme_modifiertb` (
-  `modifier_id_PK` bigint(20) unsigned NOT NULL,
-  `primary_color` varchar(255) NOT NULL DEFAULT '0',
-  `secondary_color` varchar(255) NOT NULL DEFAULT '0',
-  `card_pattern` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`modifier_id_PK`),
-  KEY `theme_modifiertb_modifier_id_PK_IDX` (`modifier_id_PK`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- vo_card.themetb definition
-
-CREATE TABLE `themetb` (
-  `theme_id_PK` bigint(20) unsigned NOT NULL,
-  `theme_name` varchar(255) NOT NULL DEFAULT 'New theme',
-  `theme_type` enum('Card','Deck') NOT NULL,
-  `theme_url` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`theme_id_PK`),
-  KEY `deck_themetb_theme_id_PK_IDX` (`theme_id_PK`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
 -- vo_card.workertb definition
 
 CREATE TABLE `workertb` (
@@ -86,7 +62,7 @@ CREATE TABLE `workertb` (
   PRIMARY KEY (`worker_id`),
   UNIQUE KEY `workertb_unique` (`uuid`),
   KEY `workertb_expires_at_IDX` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- vo_card.usertb definition
@@ -102,21 +78,6 @@ CREATE TABLE `usertb` (
   UNIQUE KEY `usertb_unique` (`username`),
   KEY `usertb_permissiontb_FK_IDX` (`permission_level_FK`),
   CONSTRAINT `usertb_permissiontb_FK` FOREIGN KEY (`permission_level_FK`) REFERENCES `permissiontb` (`permission_id_PK`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
--- vo_card.learned_resulttb definition
-
-CREATE TABLE `learned_resulttb` (
-  `result_id_PK` bigint(20) unsigned NOT NULL,
-  `user_id_FK` bigint(20) unsigned NOT NULL,
-  `completed_date` datetime DEFAULT current_timestamp(),
-  `passed` int(10) unsigned NOT NULL,
-  `failed` int(10) unsigned NOT NULL,
-  `total_cards` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`result_id_PK`),
-  KEY `learned_resulttb_usertb_FK` (`user_id_FK`),
-  CONSTRAINT `learned_resulttb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -138,8 +99,6 @@ CREATE TABLE `decktb` (
   KEY `decktb_usertb_FK_IDX` (`user_id_FK`),
   KEY `decktb_deck_themetb_FK` (`theme_id_FK`),
   KEY `decktb_theme_modifiertb_FK` (`modifier_id_FK`),
-  CONSTRAINT `decktb_theme_modifiertb_FK` FOREIGN KEY (`modifier_id_FK`) REFERENCES `theme_modifiertb` (`modifier_id_PK`),
-  CONSTRAINT `decktb_themetb_FK` FOREIGN KEY (`theme_id_FK`) REFERENCES `themetb` (`theme_id_PK`),
   CONSTRAINT `decktb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -170,6 +129,21 @@ CREATE TABLE `inboxtb` (
   KEY `inboxtb_usertb_FK` (`user_id_FK`),
   KEY `inboxtb_exp_date_IDX` (`exp_date`) USING BTREE,
   CONSTRAINT `inboxtb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- vo_card.learned_resulttb definition
+
+CREATE TABLE `learned_resulttb` (
+  `result_id_PK` bigint(20) unsigned NOT NULL,
+  `user_id_FK` bigint(20) unsigned NOT NULL,
+  `completed_date` datetime DEFAULT current_timestamp(),
+  `passed` int(10) unsigned NOT NULL,
+  `failed` int(10) unsigned NOT NULL,
+  `total_cards` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`result_id_PK`),
+  KEY `learned_resulttb_usertb_FK` (`user_id_FK`),
+  CONSTRAINT `learned_resulttb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -268,9 +242,7 @@ CREATE TABLE `card_leveltb` (
   KEY `card_leveltb_decktb_FK_IDX` (`deck_id_FK`),
   KEY `card_leveltb_themetb_FK` (`theme_id_FK`),
   KEY `card_leveltb_theme_modifiertb_FK` (`modifier_id_FK`),
-  CONSTRAINT `card_leveltb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
-  CONSTRAINT `card_leveltb_theme_modifiertb_FK` FOREIGN KEY (`modifier_id_FK`) REFERENCES `theme_modifiertb` (`modifier_id_PK`),
-  CONSTRAINT `card_leveltb_themetb_FK` FOREIGN KEY (`theme_id_FK`) REFERENCES `themetb` (`theme_id_PK`)
+  CONSTRAINT `card_leveltb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -313,6 +285,42 @@ CREATE TABLE `postb` (
   KEY `postb_cardtb_FK_IDX` (`card_id_FK`),
   CONSTRAINT `postb_cardtb_FK` FOREIGN KEY (`card_id_FK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- vo_card.theme_modifiertb definition
+
+CREATE TABLE `theme_modifiertb` (
+  `modifier_id_PK` bigint(20) unsigned NOT NULL,
+  `primary_color` varchar(255) NOT NULL DEFAULT '0',
+  `secondary_color` varchar(255) NOT NULL DEFAULT '0',
+  `card_pattern` varchar(255) DEFAULT NULL,
+  `level_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`modifier_id_PK`),
+  KEY `theme_modifiertb_modifier_id_PK_IDX` (`modifier_id_PK`) USING BTREE,
+  KEY `theme_modifiertb_card_leveltb_FK` (`level_id_FK`),
+  KEY `theme_modifiertb_decktb_FK` (`deck_id_FK`),
+  CONSTRAINT `theme_modifiertb_card_leveltb_FK` FOREIGN KEY (`level_id_FK`) REFERENCES `card_leveltb` (`level_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `theme_modifiertb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- vo_card.themetb definition
+
+CREATE TABLE `themetb` (
+  `theme_id_PK` bigint(20) unsigned NOT NULL,
+  `theme_name` varchar(255) NOT NULL DEFAULT 'New theme',
+  `theme_type` enum('Card','Deck') NOT NULL,
+  `theme_url` varchar(255) DEFAULT NULL,
+  `level_id_FK` bigint(20) unsigned DEFAULT NULL,
+  `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`theme_id_PK`),
+  KEY `deck_themetb_theme_id_PK_IDX` (`theme_id_PK`) USING BTREE,
+  KEY `themetb_card_leveltb_FK` (`level_id_FK`),
+  KEY `themetb_decktb_FK` (`deck_id_FK`),
+  CONSTRAINT `themetb_card_leveltb_FK` FOREIGN KEY (`level_id_FK`) REFERENCES `card_leveltb` (`level_id_PK`) ON DELETE CASCADE,
+  CONSTRAINT `themetb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- vo_card.definitiontb definition

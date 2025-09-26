@@ -151,7 +151,6 @@
     background-color: var(--splitter-hover);
 }
 
-
 /* ----------------- */
 /* Right bar Styles  */
 /* ----------------- */
@@ -188,6 +187,243 @@
     min-width: 240px;
 }
 
+.description-info {
+    text-align: center;
+    color: #98a4b1 !important;
+}
+
+.info-wraper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.bool-true {
+    color: lightgreen !important;
+}
+.bool-false {
+    color: lightcoral !important;
+}
+
+hr.sep-info {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.btn-warned {
+    background-color: #5d2626;
+    border: none;
+    height: 32px;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.btn-act {
+    background-color: #2b4561;
+    border: none;
+    width: 100%;
+    height: 32px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-act:hover {
+    background-color: #4f6f92;
+}
+
+.btn-warned:hover {
+    background-color: #8a4242;
+}
+
+.action-wraper {
+    border-radius: 5px;
+    width: 32px;
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+}
+
+/* ----------------- */
+/* CARD EDIT SECTION */
+/* ----------------- */
+
+.popup-card-create-buttons {
+    height: 32px;
+    border: none;
+    width: 100%;
+    border-radius: 5px;
+    background-color: #3c455e;
+}
+
+.card-edit-value-wraper {
+    width: 100%;
+    display: flex;
+    gap: 5px;
+}
+
+.edit-del-btn {
+    border: none;
+    width: 32px;
+    border-radius: 5px;
+    background-color: #3c455e;
+}
+
+.popup-card-create-buttons[active] {
+    background-color: #626f92;
+}
+/* EDIT */
+
+.popup-card-create-buttons[edited] {
+    background-color: #977046;
+}
+
+.popup-card-create-buttons[edited][active] {
+    background-color: #9e744a;
+}
+
+.definition-edit-input[edited] {
+    background-color: #977046;
+}
+
+/* DELETE */
+
+.card-edit-value-wraper:has(.edit-del-btn:hover) .definition-edit-input,
+.edit-del-btn:hover,
+.card-edit-value-wraper:has(.edit-del-btn:hover) [pos_append] {
+    background-color: #664141;
+}
+
+.edit-del-btn[deleted] {
+    background-color: #9e4a4a;
+}
+
+.popup-card-create-buttons:hover {
+    background-color: #495370;
+}
+
+.popup-card-create-buttons[deleted] {
+    background-color: #664141;
+}
+
+.popup-card-create-buttons[deleted]:hover {
+    background-color: #8d6262;
+}
+
+.popup-card-create-buttons[deleted][active] {
+    background-color: #9e4a4a;
+}
+
+.definition-edit-input[deleted] {
+    background-color: #9e4a4a;
+}
+
+.definition-edit-input {
+    width: 100%;
+    border-radius: 5px;
+    background-color: #3c455e;
+}
+
+.popup-card-create-buttons[created]:hover {
+    background-color: #5b885a;
+}
+
+.popup-card-create-buttons[created][active] {
+    background-color: #5d8e62;
+}
+
+.definition-edit-input[created],
+.popup-card-create-buttons[created] {
+    background-color: #3c5e3f;
+}
+
+.edit-value-container {
+    padding: 4px;
+    height: 100%;
+    background-color: #363941;
+    border-radius: 5px;
+    overflow-y: auto;
+}
+
+#editPOSName {
+    background-color: #646a7d;
+}
+
+/* Import */
+
+.checkbox-wrapper-59 input[type="checkbox"] {
+    visibility: hidden;
+    display: none;
+}
+
+.checkbox-wrapper-59 *,
+.checkbox-wrapper-59 ::after,
+.checkbox-wrapper-59 ::before {
+    box-sizing: border-box;
+}
+
+.checkbox-wrapper-59 .switch {
+    width: 60px;
+    height: 30px;
+    position: relative;
+    display: inline-block;
+}
+
+.checkbox-wrapper-59 .slider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 30px;
+    box-shadow: 0 0 0 2px #777, 0 0 4px #777;
+    cursor: pointer;
+    border: 4px solid transparent;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+.checkbox-wrapper-59 .slider:before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    background-color: #777;
+    border-radius: 30px;
+    transform: translateX(-30px);
+    transition: 0.2s;
+}
+
+.checkbox-wrapper-59 input:checked + .slider:before {
+    transform: translateX(30px);
+    background-color: limeGreen;
+}
+
+.checkbox-wrapper-59 input:checked + .slider {
+    box-shadow: 0 0 0 2px limeGreen, 0 0 8px limeGreen;
+}
+
+@keyframes move-right-36 {
+    0% {
+        left: 8px;
+    }
+    75% {
+        left: 78px;
+    }
+    100% {
+        left: 72px;
+    }
+}
+
+@keyframes move-left-36 {
+    0% {
+        left: 72px;
+    }
+    75% {
+        left: 2px;
+    }
+    100% {
+        left: 8px;
+    }
+}
 
 /* ----------------- */
 /* Main Content Area */
@@ -256,7 +492,7 @@
     transition: backdrop-filter 0.5s ease-in-out;
 }
 
-#backdrop.active>#popup-container {
+#backdrop.active > #popup-container {
     border: rgb(217, 217, 217) 1px solid;
     transition: all 0.2s ease-in-out;
 }
@@ -280,7 +516,7 @@
     padding: 5px;
     display: flex;
     justify-content: space-between;
-    border-bottom: #4C5259 2px solid;
+    border-bottom: #4c5259 2px solid;
 }
 
 #popup-title-text {
@@ -299,6 +535,7 @@
 
 #popup-content-container::-webkit-scrollbar,
 create-input-area::-webkit-scrollbar,
+edit-input-area::-webkit-scrollbar,
 card-data::-webkit-scrollbar,
 selected-card::-webkit-scrollbar {
     width: 8px;
@@ -306,6 +543,7 @@ selected-card::-webkit-scrollbar {
 
 #popup-content-container::-webkit-scrollbar-thumb,
 create-input-area::-webkit-scrollbar-thumb,
+edit-input-area::-webkit-scrollbar-thumb,
 card-data::-webkit-scrollbar-thumb,
 selected-card::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.1);
@@ -314,6 +552,7 @@ selected-card::-webkit-scrollbar-thumb {
 
 #popup-content-container::-webkit-scrollbar-thumb:hover,
 create-input-area::-webkit-scrollbar-thumb:hover,
+edit-input-area::-webkit-scrollbar-thumb:hover,
 card-data::-webkit-scrollbar-thumb:hover,
 selected-card::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.2);
@@ -334,7 +573,6 @@ delete-user:hover {
 
 logout:hover {
     background-color: #a75555 !important;
-
 }
 
 save:hover {
@@ -360,7 +598,10 @@ save:hover {
     display: grid;
     width: 100%;
     gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(var(--card-width), max-content));
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(var(--card-width), max-content)
+    );
     justify-content: center;
     padding: 20px;
 }
@@ -401,10 +642,17 @@ save:hover {
     top: -50px;
     left: -50px;
     z-index: 1;
-    background: linear-gradient(45deg, transparent 40%, #ffffff 40%,
-            #ffffff 50%, transparent 50%,
-            transparent 60%, #ffffff 60%,
-            #ffffff 62%, transparent 62%);
+    background: linear-gradient(
+        45deg,
+        transparent 40%,
+        #ffffff 40%,
+        #ffffff 50%,
+        transparent 50%,
+        transparent 60%,
+        #ffffff 60%,
+        #ffffff 62%,
+        transparent 62%
+    );
     background-position-y: -150px;
     mix-blend-mode: overlay;
     opacity: 0;
@@ -425,7 +673,6 @@ save:hover {
         background-position-y: calc(var(--card-height) + 100px - 150px);
     }
 }
-
 
 /* ------------------------- */
 /*  Definition Content Area  */

@@ -1,27 +1,166 @@
 // This module will be handling displaying page metadata
 
 import { loadPage } from "../module/page-manager.js";
-import { createConfirmationPopup } from "./popup-handler.js";
+import { editLoader } from "./form-handler.js";
+import { createConfirmationPopup, createPopupBox } from "./popup-handler.js";
 import { fetchWithAuth } from "/js/auth/auth.js";
 
+/**
+ *
+ * @param {Array} arr
+ * @returns
+ */
 function toDate(arr) {
     // @ts-ignore
     return Array.isArray(arr) ? new Date(...arr) : null;
 }
 
-// Create element to display datas
+/**
+ *
+ * @param {Date} date
+ * @returns
+ */
 function formatDate(date) {
-    // @ts-ignore
-    if (!(date instanceof Date) || isNaN(date)) return "";
-    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const mm = String(date.getMonth()).padStart(2, "0");
     const dd = String(date.getDate()).padStart(2, "0");
     const yyyy = date.getFullYear();
     return `${mm}/${dd}/${yyyy}`;
 }
 
 /**
+ *
+ * @param {HTMLElement} target
+ * @param {String} type
+ * @param {String|null} infoName
+ * @param {String|Array|Boolean} infoData
+ */
+function createInfo(target, type, infoName, infoData) {
+    switch (type) {
+        case "description": {
+            const desc = document.createElement("p");
+            desc.classList.add("description-info");
+            desc.textContent = /**@type {String} */ (infoData);
+            target.appendChild(desc);
+            break;
+        }
+        case "date": {
+            const wraper = document.createElement("div");
+            wraper.className = "info-wraper";
+
+            const dateTitle = document.createElement("p");
+            dateTitle.textContent = infoName;
+
+            const date = document.createElement("p");
+            date.textContent = formatDate(
+                toDate(/**@type {Array} */ (infoData))
+            );
+            date.className = "info-date";
+            date.title = toDate(/**@type {Array} */ (infoData)).toDateString();
+
+            wraper.appendChild(dateTitle);
+            wraper.appendChild(date);
+            target.appendChild(wraper);
+            break;
+        }
+        case "boolean": {
+            const wraper = document.createElement("div");
+            wraper.className = "info-wraper";
+
+            const boolTitle = document.createElement("p");
+            boolTitle.textContent = infoName;
+
+            const bool = document.createElement("p");
+            bool.className = `bool-${infoData}`;
+            bool.textContent = infoData ? "Yes" : "No";
+
+            wraper.appendChild(boolTitle);
+            wraper.appendChild(bool);
+            target.appendChild(wraper);
+            break;
+        }
+        case "text": {
+            const wraper = document.createElement("div");
+            wraper.className = "info-wraper";
+
+            const textTitle = document.createElement("p");
+            textTitle.textContent = infoName;
+
+            const text = document.createElement("p");
+            text.textContent = /**@type {String} */ (infoData);
+
+            wraper.appendChild(textTitle);
+            wraper.appendChild(text);
+            target.appendChild(wraper);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+function addedOwnedButtonActions(
+    target,
+    type,
+    data,
+    delText,
+    delConfirm,
+    delEndPoint,
+    editText,
+    editTemplate
+) {
+    const actionWraper = document.createElement("div");
+    actionWraper.className = "action-wraper";
+
+    const removeAct = document.createElement("button");
+    removeAct.textContent = "Delete";
+    removeAct.classList = "btn-warned";
+
+    removeAct.addEventListener("click", () => {
+        createConfirmationPopup(
+            "50vw",
+            "fit-content",
+            delText,
+            delConfirm,
+            async () => {
+                const response = await fetchWithAuth(delEndPoint, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    console.log(data.message);
+                    loadPage(window.location.pathname);
+                } else {
+                    console.error(data.message);
+                }
+            }
+        );
+    });
+
+    const editAct = document.createElement("button");
+    editAct.textContent = "Edit";
+    editAct.classList = "btn-act";
+
+    editAct.addEventListener("click", async () => {
+        await createPopupBox(
+            "60vw",
+            "60vh",
+            editText,
+            await editLoader(editTemplate, type, data)
+        );
+    });
+    actionWraper.appendChild(removeAct);
+    actionWraper.appendChild(editAct);
+    target.appendChild(actionWraper);
+}
+
+/**
  * @param {HTMLElement} container
  * @param {Object} deckData
+ * @param {HTMLElement} target
+ * @param {String} ownershipType - "owned" or "forked"
  */
 export function showDeckInformation(
     container,
@@ -29,7 +168,9 @@ export function showDeckInformation(
     target,
     ownershipType
 ) {
-    const dataContainer = container.querySelector("deck-data-container");
+    const dataContainer = /**@type {HTMLElement} */ (
+        container.querySelector("deck-data-container")
+    );
 
     const sel = container.querySelector("selection");
 
@@ -43,169 +184,79 @@ export function showDeckInformation(
 
     if (rip != null) rip.remove();
 
-    const dataToStore = {
-        "Deck Name": deckData.deck_name,
-        "Contained Cards": deckData.deck_contain_card,
-        "Deck Description": deckData.deck_description,
-        "Created Date": formatDate(toDate(deckData.deck_created_date)),
-        "Last Update": formatDate(toDate(deckData.deck_lastest_updated)),
-    };
-    // "Is Public": deckData.deck_is_public,
-    // "Allow Cloning": deckData.deck_clone_perm,
-
     dataContainer.innerHTML = "";
 
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
-    });
+    createInfo(dataContainer, "description", null, deckData.deck_description);
+    createInfo(
+        dataContainer,
+        "date",
+        "Created Date",
+        deckData.deck_created_date
+    );
+    createInfo(
+        dataContainer,
+        "date",
+        "Last Update",
+        deckData.deck_lastest_updated
+    );
+    createInfo(
+        dataContainer,
+        "text",
+        "Contained",
+        `${deckData.deck_contain_card} Cards`
+    );
+    createInfo(
+        dataContainer,
+        "boolean",
+        "Public Deck",
+        deckData.deck_is_public
+    );
+    createInfo(
+        dataContainer,
+        "boolean",
+        "Allow Cloning",
+        deckData.deck_clone_perm
+    );
 
     //hr
     const hr = document.createElement("hr");
-    hr.classList.add("my-2", "w-100");
-    hr.style.borderTop = "1px solid #ccc";
+    hr.classList = "sep-info";
     dataContainer.append(hr);
 
-    // add check box for public and clone perm
     if (ownershipType === "owned") {
-        const publicLabel = document.createElement("label");
-        publicLabel.classList.add("d-flex", "w-100");
-
-        const publicCheckbox = document.createElement("input");
-        publicCheckbox.type = "checkbox";
-        publicCheckbox.checked = deckData.deck_is_public;
-        publicCheckbox.classList.add("form-checkbox", "h-5", "w-5");
-
-        publicCheckbox.addEventListener("change", async () => {
-            const response = await fetchWithAuth(
-                `/api/decks/${deckData.deck_id_PK}/togglePublic`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log(data.message);
-                loadPage(window.location.pathname);
-            } else {
-                console.error(data.message);
-                // Revert the checkbox state on error
-                publicCheckbox.checked = !publicCheckbox.checked;
-            }
-        });
-
-        const publicSpan = document.createElement("span");
-        publicSpan.classList.add("w-100", "self-center");
-        publicSpan.textContent = "Set Public";
-        publicLabel.appendChild(publicSpan);
-
-        dataContainer.appendChild(publicLabel);
-        publicLabel.appendChild(publicCheckbox);
-
-        // clone perm
-        const cloneLabel = document.createElement("label");
-        cloneLabel.classList.add("d-flex", "w-100", "mt-2");
-
-        const cloneCheckbox = document.createElement("input");
-        cloneCheckbox.type = "checkbox";
-        cloneCheckbox.checked = deckData.deck_clone_perm;
-        cloneCheckbox.classList.add("form-checkbox", "h-5", "w-5");
-
-        cloneCheckbox.addEventListener("change", async () => {
-            const response = await fetchWithAuth(
-                `/api/decks/${deckData.deck_id_PK}/toggleClonePerm`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log(data.message);
-                loadPage(window.location.pathname);
-            } else {
-                console.error(data.message);
-                // Revert the checkbox state on error
-                cloneCheckbox.checked = !cloneCheckbox.checked;
-            }
-        });
-
-        const cloneSpan = document.createElement("span");
-        cloneSpan.classList.add("w-100", "self-center");
-        cloneSpan.textContent = "Allow Cloning";
-        cloneLabel.appendChild(cloneSpan);
-
-        dataContainer.appendChild(cloneLabel);
-        cloneLabel.appendChild(cloneCheckbox);
-    }
-
-    const actionBtn = document.createElement("button");
-    actionBtn.textContent =
-        ownershipType === "owned" ? "Delete Deck" : "UnFork Deck";
-
-    actionBtn.classList.add("btn", "btn-danger", "w-100", "mt-2");
-
-    actionBtn.addEventListener("click", () => {
-        createConfirmationPopup(
-            "50vw",
-            "fit-content",
-            ownershipType === "owned" ? "Delete Deck" : "UnFork Deck",
-            ownershipType === "owned"
-                ? "Are you sure you want to delete this deck? This action cannot be undone."
-                : "Are you sure you want to unfork this deck? This action cannot be undone.",
-            async () => {
-                const response = await fetchWithAuth(
-                    `/api/decks/${deckData.deck_id_PK}/${
-                        ownershipType === "owned" ? "delete" : "unfork"
-                    }`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    console.log(data.message);
-                    loadPage(window.location.pathname);
-                } else {
-                    console.error(data.message);
-                }
-            }
+        addedOwnedButtonActions(
+            dataContainer,
+            "deck",
+            deckData,
+            "Delete Deck",
+            "Are you sure you want to delete this deck? This action cannot be undone.",
+            `/api/decks/${deckData.deck_id_PK}/delete`,
+            "Deck Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
         );
-    });
-    dataContainer.appendChild(actionBtn);
+    } else {
+        const actionWraper = document.createElement("div");
+        actionWraper.className = "action-wraper";
 
-    if (ownershipType === "forked" && deckData.deck_clone_perm) {
-        // Add clone button
-        const cloneBtn = document.createElement("button");
-        cloneBtn.textContent = "Clone Deck";
+        const removeAct = document.createElement("button");
+        removeAct.textContent = "UnFork";
 
-        cloneBtn.classList.add("btn", "btn-primary", "w-100", "mt-2");
-
-        cloneBtn.addEventListener("click", () => {
+        removeAct.classList.add("btn-warned", "w-100");
+        removeAct.addEventListener("click", () => {
             createConfirmationPopup(
                 "50vw",
                 "fit-content",
-                "Clone Deck",
-                "Are you sure you want to clone this deck? This will create a copy of the deck in your account.",
+                "UnFork Deck",
+                ownershipType === "owned"
+                    ? "Are you sure you want to delete this deck? This action cannot be undone."
+                    : "Are you sure you want to unfork this deck? This action cannot be undone.",
                 async () => {
                     const response = await fetchWithAuth(
-                        `/api/decks/${deckData.deck_id_PK}/clone`,
+                        `/api/decks/${deckData.deck_id_PK}/${
+                            ownershipType === "owned" ? "delete" : "unfork"
+                        }`,
                         {
-                            method: "POST",
+                            method: "DELETE",
                             headers: {
                                 "Content-Type": "application/json",
                             },
@@ -223,16 +274,65 @@ export function showDeckInformation(
                 }
             );
         });
-        dataContainer.appendChild(cloneBtn);
+
+        if (ownershipType === "forked" && deckData.deck_clone_perm) {
+            removeAct.style.borderRadius = "5px 0 0 5px";
+
+            const cloneBtn = document.createElement("button");
+            cloneBtn.textContent = "Clone";
+            cloneBtn.classList.add("w-100", "btn-act");
+            cloneBtn.style.borderRadius = "0 5px 5px 0";
+
+            cloneBtn.addEventListener("click", () => {
+                createConfirmationPopup(
+                    "50vw",
+                    "fit-content",
+                    "Clone Deck",
+                    "Are you sure you want to clone this deck? This will create a copy of the deck in your account.",
+                    async () => {
+                        const response = await fetchWithAuth(
+                            `/api/decks/${deckData.deck_id_PK}/clone`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                            }
+                        );
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            console.log(data.message);
+                            loadPage(window.location.pathname);
+                        } else {
+                            console.error(data.message);
+                        }
+                    }
+                );
+            });
+            actionWraper.appendChild(removeAct);
+            actionWraper.appendChild(cloneBtn);
+        }
+        dataContainer.appendChild(actionWraper);
     }
 }
 
 /**
  * @param {HTMLElement} container
  * @param {Object} levelData
+ * @param {HTMLElement} target
+ * @param {String} ownershipType - "owned" or "forked"
  */
-export function showLevelInformation(container, levelData, target) {
-    const dataContainer = container.querySelector("deck-data-container");
+export async function showLevelInformation(
+    container,
+    levelData,
+    target,
+    ownershipType
+) {
+    const dataContainer = /**@type {HTMLElement} */ (
+        container.querySelector("deck-data-container")
+    );
 
     const sel = container.querySelector("selection");
 
@@ -243,76 +343,71 @@ export function showLevelInformation(container, levelData, target) {
     cardContainer.appendChild(target.cloneNode(true));
 
     const rip = cardContainer.querySelector(".ripple");
-
     if (rip != null) rip.remove();
-
-    const dataToStore = {
-        "Level Value": levelData.level_name,
-        "Level Weight": levelData.level_weight,
-        "Created Date": formatDate(toDate(levelData.level_created_date)),
-        "Contained Cards": levelData.level_contain_card,
-    };
 
     dataContainer.innerHTML = "";
 
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
-    });
-
-    // hr
-    const hr = document.createElement("hr");
-    hr.classList.add("my-2", "w-100");
-    hr.style.borderTop = "1px solid #ccc";
-    dataContainer.append(hr);
-
-    //get deck id from url
-    const match = window.location.pathname.match(
-        /^\/workspace\/decks\/([^/]+)/
+    createInfo(
+        dataContainer,
+        "text",
+        "Level Difficulty",
+        levelData.level_weight
     );
-    const deckId = match ? match[1] : null;
+    createInfo(
+        dataContainer,
+        "date",
+        "Created Date",
+        levelData.level_created_date
+    );
+    createInfo(
+        dataContainer,
+        "text",
+        "Contained Cards",
+        `${levelData.level_contain_card} Cards`
+    );
 
-    // Add delete level button
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete Level";
-    deleteBtn.classList.add("btn", "btn-danger", "w-100", "mt-2");
+    console.log(ownershipType);
 
-    deleteBtn.addEventListener("click", () => {
-        createConfirmationPopup(
-            "50vw",
-            "fit-content",
+    if (ownershipType === "owned") {
+        const hr = document.createElement("hr");
+        hr.className = "sep-info";
+        dataContainer.append(hr);
+
+        const match = window.location.pathname.match(
+            /^\/workspace\/decks\/([^/]+)/
+        );
+        const deckId = match ? match[1] : null;
+
+        // Add delete level button
+        addedOwnedButtonActions(
+            dataContainer,
+            "level",
+            levelData,
             "Delete Level",
             "Are you sure you want to delete this level? This action cannot be undone.",
-            async () => {
-                const response = await fetchWithAuth(
-                    `/api/decks/${deckId}/${levelData.level_id_PK}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    console.log(data.message);
-                    loadPage(window.location.pathname);
-                } else {
-                    console.error(data.message);
-                }
-            }
+            `/api/decks/${deckId}/${levelData.level_id_PK}/delete`,
+            "Level Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
         );
-    });
-
-    dataContainer.appendChild(deleteBtn);
+    }
 }
 
-export function showCardInformation(container, cardData, target) {
-    const dataContainer = container.querySelector("deck-data-container");
+/**
+ *
+ * @param {HTMLElement} container
+ * @param {Object} cardData
+ * @param {HTMLElement} target
+ * @param {String} ownershipType
+ */
+export async function showCardInformation(
+    container,
+    cardData,
+    target,
+    ownershipType
+) {
+    const dataContainer = /**@type {HTMLElement} */ (
+        container.querySelector("deck-data-container")
+    );
 
     const sel = container.querySelector("selection");
 
@@ -326,65 +421,40 @@ export function showCardInformation(container, cardData, target) {
 
     if (rip != null) rip.remove();
 
-    const dataToStore = {
-        "Card Word": cardData.card_word,
-        "Created Date": formatDate(toDate(cardData.card_created_date)),
-    };
-
     dataContainer.innerHTML = "";
 
-    Object.entries(dataToStore).forEach(([key, value]) => {
-        const p = document.createElement("p");
-        const formattedString = key + " : " + value;
-        p.textContent = formattedString;
-        dataContainer.append(p);
-    });
-
-    // hr
-    const hr = document.createElement("hr");
-    hr.classList.add("my-2", "w-100");
-    hr.style.borderTop = "1px solid #ccc";
-    dataContainer.append(hr);
-
-    const match = window.location.pathname.match(
-        /^\/workspace\/decks\/([^/]+)\/([^/]+)/
+    createInfo(dataContainer, "text", "Word", cardData.card_word);
+    createInfo(
+        dataContainer,
+        "date",
+        "Created Date",
+        cardData.card_created_date
     );
-    const deckId = match ? match[1] : null;
-    const levelId = match ? match[2] : null;
 
-    // Add delete card button
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete Card";
-    deleteBtn.classList.add("btn", "btn-danger", "w-100", "mt-2");
+    if (ownershipType === "owned") {
+        const hr = document.createElement("hr");
+        hr.className = "sep-info";
+        dataContainer.append(hr);
 
-    deleteBtn.addEventListener("click", () => {
-        createConfirmationPopup(
-            "50vw",
-            "fit-content",
+        const match = window.location.pathname.match(
+            /^\/workspace\/decks\/([^/]+)\/([^/]+)/
+        );
+        const deckId = match ? match[1] : null;
+        const levelId = match ? match[2] : null;
+
+        addedOwnedButtonActions(
+            dataContainer,
+            "card",
+            await (
+                await fetchWithAuth(
+                    `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}`
+                )
+            ).json(),
             "Delete Card",
             "Are you sure you want to delete this card? This action cannot be undone.",
-            async () => {
-                const response = await fetchWithAuth(
-                    `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    console.log(data.message);
-                    loadPage(window.location.pathname);
-                } else {
-                    console.error(data.message);
-                }
-            }
+            `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}/delete`,
+            "Card Information: Edit Mode",
+            "/components/content/popup/card-edit.jsp"
         );
-    });
-
-    dataContainer.appendChild(deleteBtn);
+    }
 }
