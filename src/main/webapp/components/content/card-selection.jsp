@@ -1,4 +1,5 @@
-<div id="card-selection-container" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+<div id="card-selection-container"
+    style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 10px; ">
     <card-container class="card-item-container">
         <svg width="174" height="237" viewBox="0 0 174 237" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="0.5" y="0.5" width="172.17" height="235.93" rx="7.5" fill="url(#paint0_linear_1143_804)" />
@@ -17,9 +18,8 @@
         </svg>
         <div class="hoverOverlay"></div>
     </card-container>
-    <selection style="font-size: 20px;">No Selection</selection>
-    <span style="width: 90%; height: 3px; background-color: white; margin-top: 1rem; margin-bottom: 1rem;"></span>
-    <deck-data-container
-        style="display: flex; flex-direction: column; align-items: center; width: 100%; padding: 10px; padding-top: 0;">
+    <hr class="sep-info">
+    <deck-data-container style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <selection style="font-size: 20px;">No Selection</selection>
     </deck-data-container>
 </div>
