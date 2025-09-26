@@ -42,7 +42,6 @@ public class DeckManager {
     public static void initializeDeckTable() {
         long deckCount = ((Number) DatabaseUtils.sqlSingleRowStatement(
                 "SELECT COUNT(*) FROM decktb").get("COUNT(*)")).longValue();
-
         if (deckCount != 0)
             return;
 
@@ -50,13 +49,16 @@ public class DeckManager {
                 "SELECT user_id_PK FROM usertb WHERE username = ?", DatabaseUtils.getRootUsername())
                 .get("user_id_PK")).longValue();
 
-        Long themeId = createNewTheme("Default", ThemeTypes.Deck, "/components/template/deck_template.svg");
+        Long deckId = Snowflake.nextId();
+        createNewDeck(deckId, "Default", "This is the VoCard official default deck.", true,
+                null, null, rootUserID);
 
-        Long themeModifierId = createNewModifier("#0f1114", "#C38A39", null, ThemeTypes.Deck);
+        Long themeId = createNewTheme(deckId, "Default", ThemeTypes.Deck, "/components/template/deck_template.svg");
+        Long themeModifierId = createNewModifier(deckId, "#0f1114", "#C38A39", null, ThemeTypes.Deck);
 
-        Long deckId = createNewDeck(Snowflake.nextId(), "Default", "This is the VoCard official default deck.", true,
-                themeId,
-                themeModifierId, rootUserID);
+        DatabaseUtils.sqlPrepareStatement(
+                "UPDATE decktb SET theme_id_FK = ?, modifier_id_FK = ? WHERE deck_id_PK = ?",
+                themeId, themeModifierId, deckId);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -71,6 +73,7 @@ public class DeckManager {
             Map<String, Map<String, Map<String, List<String>>>> defaultDeck = rootJson.get("default");
 
             List<Object[]> levelBatch = new ArrayList<>();
+            List<Long> levelIds = new ArrayList<>();
             List<Object[]> cardBatch = new ArrayList<>();
             List<Object[]> posBatch = new ArrayList<>();
             List<Object[]> defBatch = new ArrayList<>();
@@ -78,47 +81,11 @@ public class DeckManager {
             int weight = 1;
             for (Map.Entry<String, Map<String, Map<String, List<String>>>> levelData : defaultDeck.entrySet()) {
                 Long levelId = Snowflake.nextId();
-                Long levelThemeId = null;
-                Long levelThemeModifierId = null;
-                switch (weight) {
-                    case 1:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#395B8E", "dots", ThemeTypes.Card);
-                        break;
-                    case 2:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#26226B", "dots", ThemeTypes.Card);
-                        break;
-                    case 3:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#6B1D42", "dots", ThemeTypes.Card);
-                        break;
-                    case 4:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#AF3935", "dots", ThemeTypes.Card);
-                        break;
-                    case 5:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#6CA233", "dots", ThemeTypes.Card);
-                        break;
-                    case 6:
-                        levelThemeId = createNewTheme("Default", ThemeTypes.Card,
-                                "/components/template/card_template.svg");
-                        levelThemeModifierId = createNewModifier("#000000", "#277243", "dots", ThemeTypes.Card);
-                        break;
-                    default:
-                        break;
-                }
+                levelIds.add(levelId);
 
-                levelBatch.add(new Object[] { levelId, levelData.getKey(), weight, levelThemeId, levelThemeModifierId,
-                        deckId });
+                // Insert level with NULL theme/modifier initially
+                levelBatch.add(new Object[] { levelId, levelData.getKey(), weight, null, null, deckId });
 
-                weight++;
                 for (Map.Entry<String, Map<String, List<String>>> cardData : levelData.getValue().entrySet()) {
                     Long cardId = Snowflake.nextId();
                     cardBatch.add(new Object[] { cardId, levelId, cardData.getKey() });
@@ -133,12 +100,14 @@ public class DeckManager {
                         }
                     }
                 }
+
+                weight++;
             }
 
-            // Execute batches
+            // Batch insert levels, cards, poses, definitions
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO card_leveltb " +
-                            "(level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) " +
+                    "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "
+                            +
                             "VALUES (?, ?, ?, ?, ?, ?)",
                     levelBatch);
             DatabaseUtils.sqlExecuteBatch(
@@ -147,8 +116,73 @@ public class DeckManager {
                     "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
             DatabaseUtils.sqlExecuteBatch(
                     "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
+
+            // Now create themes/modifiers per level and update them
+            weight = 1;
+            for (Long levelId : levelIds) {
+                Long levelThemeId = null;
+                Long levelThemeModifierId = null;
+
+                switch (weight) {
+                    case 1: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#395B8E", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    case 2: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#26226B", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    case 3: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#6B1D42", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    case 4: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#AF3935", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    case 5: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#6CA233", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    case 6: {
+                        levelThemeId = createNewTheme(levelId, "Default", ThemeTypes.Card,
+                                "/components/template/card_template.svg");
+                        levelThemeModifierId = createNewModifier(levelId, "#000000", "#277243", "dots",
+                                ThemeTypes.Card);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+
+                if (levelThemeId != null || levelThemeModifierId != null) {
+                    DatabaseUtils.sqlPrepareStatement(
+                            "UPDATE card_leveltb SET theme_id_FK = ?, modifier_id_FK = ? WHERE level_id_PK = ?",
+                            levelThemeId, levelThemeModifierId, levelId);
+                }
+
+                weight++;
+            }
+
             updateAllLevelContainCards(deckId);
             updateDeckContainCard(deckId);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -209,52 +243,138 @@ public class DeckManager {
         try {
             Row deckRow = DatabaseUtils.sqlSingleRowStatement(
                     "SELECT * FROM decktb WHERE deck_id_PK = ?", deckId);
-            System.err.println(TAG_DEBUG + "Deck to be cloned: " + deckRow);
             if (deckRow == null)
                 return false;
 
             Long newDeckId = Snowflake.nextId();
 
-            DatabaseUtils.sqlPrepareStatement(
-                    "INSERT INTO decktb (deck_id_PK, deck_name, deck_description, deck_is_public, " +
-                            "theme_id_FK, modifier_id_FK, user_id_FK, deck_clone_perm, deck_created_date, deck_lastest_updated) "
-                            +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+            Long originalThemeId = ((Number) deckRow.get("theme_id_FK")).longValue();
+            Long originalModifierId = ((Number) deckRow.get("modifier_id_FK")).longValue();
+
+            Row themeRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT * FROM themetb WHERE theme_id_PK = ?", originalThemeId);
+            Row modifierRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT * FROM theme_modifiertb WHERE modifier_id_PK = ?", originalModifierId);
+
+            createNewDeck(
                     newDeckId,
                     deckRow.get("deck_name") + " (Clone)",
-                    deckRow.get("deck_description"),
-                    deckRow.get("deck_is_public"),
-                    deckRow.get("theme_id_FK"),
-                    deckRow.get("modifier_id_FK"),
-                    userId,
-                    false);
+                    (String) deckRow.get("deck_description"),
+                    false, null, null, userId);
+
+            Long newThemeId = Snowflake.nextId();
+            DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO themetb (theme_id_PK, theme_name, theme_type, theme_url, deck_id_FK) VALUES (?, ?, ?, ?, ?)",
+                    newThemeId,
+                    themeRow.get("theme_name") + " (Clone)",
+                    themeRow.get("theme_type"),
+                    themeRow.get("theme_url"),
+                    newDeckId);
+
+            Long newModifierId = Snowflake.nextId();
+            DatabaseUtils.sqlPrepareStatement(
+                    "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color, card_pattern, deck_id_FK) VALUES (?, ?, ?, ?, ?)",
+                    newModifierId,
+                    modifierRow.get("primary_color"),
+                    modifierRow.get("secondary_color"),
+                    modifierRow.get("card_pattern"),
+                    newDeckId);
+
+            DatabaseUtils.sqlPrepareStatement(
+                    "UPDATE decktb SET theme_id_FK = ?, modifier_id_FK = ? WHERE deck_id_PK = ?",
+                    newThemeId, newModifierId, newDeckId);
 
             List<Row> levels = DatabaseUtils.sqlPrepareStatement(
                     "SELECT * FROM card_leveltb WHERE deck_id_FK = ?", deckId).getData();
 
             Map<Long, Long> levelMap = new HashMap<>();
             List<Object[]> levelBatch = new ArrayList<>();
+            Map<Long, Long> levelThemeMap = new HashMap<>();
+            Map<Long, Long> levelModifierMap = new HashMap<>();
 
             for (Row level : levels) {
                 Long oldLevelId = ((Number) level.get("level_id_PK")).longValue();
                 Long newLevelId = Snowflake.nextId();
                 levelMap.put(oldLevelId, newLevelId);
 
+                // Create independent theme & modifier for this level
+                Long levelThemeId = Snowflake.nextId();
+
+                Long levelModifierId = Snowflake.nextId();
+
+                levelThemeMap.put(oldLevelId, levelThemeId);
+                levelModifierMap.put(oldLevelId, levelModifierId);
+
                 levelBatch.add(new Object[] {
                         newLevelId,
                         level.get("level_name"),
                         level.get("level_weight"),
-                        level.get("theme_id_FK"),
-                        level.get("modifier_id_FK"),
                         newDeckId
                 });
             }
 
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, theme_id_FK, modifier_id_FK, deck_id_FK) "
-                            +
-                            "VALUES (?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO card_leveltb (level_id_PK, level_name, level_weight, deck_id_FK) VALUES (?, ?, ?, ?)",
                     levelBatch);
+
+            // insert theme and modifier to level
+            List<Object[]> themeBatch = new ArrayList<>();
+            List<Object[]> modifierBatch = new ArrayList<>();
+
+            for (Row level : levels) {
+                Long oldLevelId = ((Number) level.get("level_id_PK")).longValue();
+                Long newLevelId = levelMap.get(oldLevelId);
+
+                // Clone theme
+                Row oldTheme = null;
+                if (level.get("theme_id_FK") != null) {
+                    oldTheme = DatabaseUtils.sqlSingleRowStatement(
+                            "SELECT * FROM themetb WHERE theme_id_PK = ?", level.get("theme_id_FK"));
+                }
+                Long newLevelThemeId = levelThemeMap.get(oldLevelId);
+                if (oldTheme != null) {
+                    themeBatch.add(new Object[] {
+                            newLevelThemeId,
+                            oldTheme.get("theme_name") + " (Clone)",
+                            newLevelId,
+                            oldTheme.get("theme_type"),
+                            oldTheme.get("theme_url")
+                    });
+                }
+
+                // Clone modifier
+                Row oldModifier = null;
+                if (level.get("modifier_id_FK") != null) {
+                    oldModifier = DatabaseUtils.sqlSingleRowStatement(
+                            "SELECT * FROM theme_modifiertb WHERE modifier_id_PK = ?", level.get("modifier_id_FK"));
+                }
+                Long newLevelModifierId = levelModifierMap.get(oldLevelId);
+                if (oldModifier != null) {
+                    modifierBatch.add(new Object[] {
+                            newLevelModifierId,
+                            oldModifier.get("primary_color"),
+                            newLevelId,
+                            oldModifier.get("secondary_color"),
+                            oldModifier.get("card_pattern")
+                    });
+                }
+
+                // Update new level with theme/modifier
+                DatabaseUtils.sqlPrepareStatement(
+                        "UPDATE card_leveltb SET theme_id_FK = ?, modifier_id_FK = ? WHERE level_id_PK = ?",
+                        newLevelThemeId, newLevelModifierId, newLevelId);
+            }
+
+            if (!themeBatch.isEmpty()) {
+                DatabaseUtils.sqlExecuteBatch(
+                        "INSERT INTO themetb (theme_id_PK, theme_name, level_id_FK, theme_type, theme_url) VALUES (?, ?, ?, ?, ?)",
+                        themeBatch);
+            }
+            if (!modifierBatch.isEmpty()) {
+                DatabaseUtils.sqlExecuteBatch(
+                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, level_id_FK, secondary_color, card_pattern) VALUES (?, ?, ?, ?, ?)",
+                        modifierBatch);
+            }
 
             List<Row> cards = DatabaseUtils.sqlPrepareStatement(
                     "SELECT * FROM cardtb WHERE level_id_FK IN " +
@@ -277,7 +397,8 @@ public class DeckManager {
             }
 
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)", cardBatch);
+                    "INSERT INTO cardtb (card_id_PK, level_id_FK, card_word) VALUES (?, ?, ?)",
+                    cardBatch);
 
             List<Row> poses = DatabaseUtils.sqlPrepareStatement(
                     "SELECT * FROM postb WHERE card_id_FK IN " +
@@ -301,7 +422,8 @@ public class DeckManager {
             }
 
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posBatch);
+                    "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)",
+                    posBatch);
 
             List<Row> defs = DatabaseUtils.sqlPrepareStatement(
                     "SELECT * FROM definitiontb WHERE pos_id_FK IN " +
@@ -311,10 +433,8 @@ public class DeckManager {
                     deckId).getData();
 
             List<Object[]> defBatch = new ArrayList<>();
-
             for (Row def : defs) {
                 Long newDefId = Snowflake.nextId();
-
                 defBatch.add(new Object[] {
                         newDefId,
                         posMap.get(((Number) def.get("pos_id_FK")).longValue()),
@@ -323,7 +443,8 @@ public class DeckManager {
             }
 
             DatabaseUtils.sqlExecuteBatch(
-                    "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)", defBatch);
+                    "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
+                    defBatch);
 
             updateAllLevelContainCards(newDeckId);
             updateDeckContainCard(newDeckId);
@@ -651,12 +772,23 @@ public class DeckManager {
      * @param themeType
      * @param themeURL
      */
-    public static Long createNewTheme(String themeName, ThemeTypes themeType, String themeURL) {
+    public static Long createNewTheme(Long targetId, String themeName, ThemeTypes themeType, String themeURL) {
         Long themeId = Snowflake.nextId();
 
-        DatabaseUtils.sqlPrepareStatement(
-                "INSERT INTO themetb (theme_id_PK, theme_name, theme_type, theme_url) VALUES (?, ?, ?, ?)",
-                themeId, themeName, themeType.getValue(), themeURL);
+        switch (themeType) {
+            case Card:
+                DatabaseUtils.sqlPrepareStatement(
+                        "INSERT INTO themetb (theme_id_PK, theme_name, level_id_FK, theme_type, theme_url) VALUES (?, ?, ?, ?, ?)",
+                        themeId, themeName, targetId, themeType.getValue(), themeURL);
+                break;
+            case Deck:
+                DatabaseUtils.sqlPrepareStatement(
+                        "INSERT INTO themetb (theme_id_PK, theme_name, deck_id_FK, theme_type, theme_url) VALUES (?, ?, ?, ?, ?)",
+                        themeId, themeName, targetId, themeType.getValue(), themeURL);
+                break;
+            default:
+                break;
+        }
         return themeId;
     }
 
@@ -668,19 +800,19 @@ public class DeckManager {
      * @param themeType
      * @return
      */
-    public static Long createNewModifier(String primaryColor, String secondaryColor, String pattern,
+    public static Long createNewModifier(Long targetId, String primaryColor, String secondaryColor, String pattern,
             ThemeTypes themeType) {
         Long modifierId = Snowflake.nextId();
         switch (themeType) {
             case Card:
                 DatabaseUtils.sqlPrepareStatement(
-                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color, card_pattern) VALUES (?, ?, ?, ?)",
-                        modifierId, primaryColor, secondaryColor, pattern);
+                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, level_id_FK, secondary_color, card_pattern) VALUES (?, ?, ?, ?, ?)",
+                        modifierId, primaryColor, targetId, secondaryColor, pattern);
                 break;
             case Deck:
                 DatabaseUtils.sqlPrepareStatement(
-                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, secondary_color) VALUES (?, ?, ?)",
-                        modifierId, primaryColor, secondaryColor);
+                        "INSERT INTO theme_modifiertb (modifier_id_PK, primary_color, deck_id_FK, secondary_color) VALUES (?, ?, ?, ?)",
+                        modifierId, primaryColor, targetId, secondaryColor);
                 break;
             default:
                 break;
@@ -804,21 +936,39 @@ public class DeckManager {
         return true;
     }
 
-    public static String deleteDeck(Long deck_id, Long user_id) {
-        Row deleteDeck = DatabaseUtils.sqlSingleRowStatement(
-                "SELECT * FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deck_id, user_id);
-
-        if (deleteDeck != null) {
-            DatabaseUtils.sqlSingleRowStatement("DELETE FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deck_id,
-                    user_id);
-            return "This Deck has been deleted successfully";
+    public static Boolean createPOS(Long cardId, String posName) {
+        Long posId = Snowflake.nextId();
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO postb (pos_id_PK, card_id_FK, part_of_speech) VALUES (?, ?, ?)", posId, cardId, posName);
+        if (!result.isSuccess()) {
+            return false;
         }
-        return "Deck was not found";
+        return true;
+    }
+
+    public static Boolean createDefinition(Long posId, String definitionText) {
+        Long definitionId = Snowflake.nextId();
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "INSERT INTO definitiontb (definition_id_PK, pos_id_FK, definition) VALUES (?, ?, ?)",
+                definitionId, posId, definitionText);
+        if (!result.isSuccess()) {
+            return false;
+        }
+        return true;
     }
 
     /* -------------------------- */
     /* ----- UPDATE Methods ----- */
     /* -------------------------- */
+
+    public static Boolean updateCard(Long cardId, String cardWord) {
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "UPDATE cardtb SET card_word = ? WHERE card_id_PK = ?", cardWord, cardId);
+        if (!result.isSuccess()) {
+            return false;
+        }
+        return true;
+    }
 
     public static Boolean toggleDeckPublic(Long deckId, Long userId) {
         Row deck = DatabaseUtils.sqlSingleRowStatement(
@@ -861,11 +1011,23 @@ public class DeckManager {
         }
     }
 
-    public static String updateDeck(Long deck_id, String deckName, String deckDescription, boolean deckIsPublic) {
+    public static String updateDeck(Long deck_id, String deckName, String deckDescription, String primaryColor,
+            String secondaryColor, boolean deckIsPublic,
+            boolean clonePerm) {
         SQLResult result = DatabaseUtils.sqlPrepareStatement(
-                "UPDATE decktb SET deck_name = ?, deck_description = ?, deck_is_public = ? WHERE deck_id_PK = ?",
-                deckName, deckDescription, deckIsPublic,
-                deck_id);
+                "UPDATE decktb SET deck_name = ?, deck_description = ?, deck_is_public = ?, deck_clone_perm = ?, deck_lastest_updated = NOW() WHERE deck_id_PK = ?",
+                deckName, deckDescription, deckIsPublic, clonePerm, deck_id);
+
+        if (primaryColor != null || secondaryColor != null) {
+            Row deckRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT modifier_id_FK FROM decktb WHERE deck_id_PK = ?", deck_id);
+            if (deckRow != null && deckRow.get("modifier_id_FK") != null) {
+                Long modifierId = ((Number) deckRow.get("modifier_id_FK")).longValue();
+                DatabaseUtils.sqlPrepareStatement(
+                        "UPDATE theme_modifiertb SET primary_color = ?, secondary_color = ? WHERE modifier_id_PK = ?",
+                        primaryColor, secondaryColor, modifierId);
+            }
+        }
 
         if (result.isSuccess()) {
             return "This Deck has been updated successfully";
@@ -874,11 +1036,23 @@ public class DeckManager {
         return "Deck was not found";
     }
 
-    public static String updateLevel(Long level_id, int level_weight, String level_name) {
+    public static String updateLevel(Long levelId, String levelValue, int levelWeight, String primaryColor,
+            String secondaryColor) {
 
         SQLResult result = DatabaseUtils.sqlPrepareStatement(
                 "UPDATE card_leveltb SET level_weight = ?, level_name = ? WHERE level_id_PK = ?",
-                level_weight, level_name, level_id);
+                levelWeight, levelValue, levelId);
+
+        if (primaryColor != null || secondaryColor != null) {
+            Row levelRow = DatabaseUtils.sqlSingleRowStatement(
+                    "SELECT modifier_id_FK FROM card_leveltb WHERE level_id_PK = ?", levelId);
+            if (levelRow != null && levelRow.get("modifier_id_FK") != null) {
+                Long modifierId = ((Number) levelRow.get("modifier_id_FK")).longValue();
+                DatabaseUtils.sqlPrepareStatement(
+                        "UPDATE theme_modifiertb SET primary_color = ?, secondary_color = ? WHERE modifier_id_PK = ?",
+                        primaryColor, secondaryColor, modifierId);
+            }
+        }
         if (result.isSuccess()) {
             return "This level has been updated successfully";
         }
@@ -900,51 +1074,14 @@ public class DeckManager {
 
     public static String updateDefinition(Long definition_id, String new_definition) {
 
-        SQLResult result = DatabaseUtils.sqlPrepareStatement("UPDATE definition SET definition = ? WHERE = ?",
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(
+                "UPDATE definitiontb SET definition = ? WHERE definition_id_PK = ?",
                 new_definition, definition_id);
 
         if (result.isSuccess()) {
             return "Definition has been updated successfully";
         }
 
-        return "Definition was not found";
-    }
-
-    public static String deleteLevel(Long level_id, Long deck_id) {
-
-        SQLResult result = DatabaseUtils
-                .sqlPrepareStatement("DELETE FROM card_leveltb WHERE level_id_PK = ? AND deck_id_FK = ? ", level_id,
-                        deck_id);
-        if (result.isSuccess()) {
-            return "Level has been deleted successfully";
-        }
-        return "Level was not found";
-    }
-
-    public static String deleteCard(Long card_id) {
-        SQLResult result = DatabaseUtils
-                .sqlPrepareStatement("DELETE FROM cardtb WHERE card_id_PK = ?", card_id);
-        if (result.isSuccess()) {
-            return "Card has been deleted successfully";
-        }
-        return "Card was not found";
-    }
-
-    public static String deletePos(Long pos_id, Long card_id) {
-        SQLResult result = DatabaseUtils
-                .sqlPrepareStatement("DELETE FROM postb WHERE pos_id_PK = ? AND card_id_FK = ?", pos_id, card_id);
-        if (result.isSuccess()) {
-            return "Part of Speech has been deleted successfully";
-        }
-        return "Part of Speech was not found on current card";
-    }
-
-    public static String deleteDefinition(Long definition_id) {
-        SQLResult result = DatabaseUtils
-                .sqlPrepareStatement("DELETE FROM definitiontb WHERE definition_id_PK = ?", definition_id);
-        if (result.isSuccess()) {
-            return "Definition has been deleted successfully";
-        }
         return "Definition was not found";
     }
 
@@ -1016,11 +1153,27 @@ public class DeckManager {
         return levelInfo;
     }
 
-    // ------------------------------------- //
-    // //
+    // -------------- //
     // DELETE METHODS //
-    // //
-    // ------------------------------------- //
+    // -------------- //
+
+    public static String deletePos(Long pos_id) {
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM postb WHERE pos_id_PK = ?", pos_id);
+        if (result.isSuccess()) {
+            return "Part of Speech has been deleted successfully";
+        }
+        return "Part of Speech was not found on current card";
+    }
+
+    public static String deleteDefinition(Long definition_id) {
+        SQLResult result = DatabaseUtils
+                .sqlPrepareStatement("DELETE FROM definitiontb WHERE definition_id_PK = ?", definition_id);
+        if (result.isSuccess()) {
+            return "Definition has been deleted successfully";
+        }
+        return "Definition was not found";
+    }
 
     public static Boolean deleteDeckCascade(Long deckId, Long userId) {
         SQLResult res = DatabaseUtils.sqlPrepareStatement(
