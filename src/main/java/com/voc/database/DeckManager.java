@@ -1,7 +1,5 @@
 package com.voc.database;
 
-import static com.voc.utils.AnsiColor.TAG_DEBUG;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
