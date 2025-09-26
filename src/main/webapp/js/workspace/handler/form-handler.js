@@ -1036,6 +1036,7 @@ function clearCardCache() {
 }
 
 function createCache(cardData) {
+    cardCache.set("cardId", cardData.card_id_PK);
     cardCache.set("cardName", cardData.card_word);
     cardCache.set("pos", cardData.pos);
 
@@ -1061,7 +1062,7 @@ async function prepareCardData() {
     const levelId = match[2];
 
     const response = await fetchWithAuth(
-        `/api/decks/${deckId}/${levelId}/${postCache.get("cardId")}/update`,
+        `/api/decks/${deckId}/${levelId}/${cardCache.get("cardId")}/update`,
         {
             method: "POST",
             headers: {
