@@ -51,6 +51,8 @@ export const TokenManager = {
     },
 };
 
+let isFetching = false;
+
 /**
  * Refresh the access token using the HttpOnly refresh token cookie.
  * Stores the new access token in sessionStorage.
@@ -58,17 +60,20 @@ export const TokenManager = {
  */
 export async function refreshToken() {
     try {
+        isFetching = true;
         const response = await fetch("/api/auth/refresh", {
             method: "POST",
             credentials: "include",
         });
-
         if (!response.ok) {
+            isFetching = false;
             TokenManager.clearAccessToken();
             return null;
         }
 
         const data = await response.json();
+        isFetching = false;
+
         const newAccessToken = data.access_token;
 
         if (newAccessToken) {
@@ -79,6 +84,7 @@ export async function refreshToken() {
             return null;
         }
     } catch (error) {
+        isFetching = false;
         console.error("Error refreshing token:", error);
         TokenManager.clearAccessToken();
         return null;
@@ -93,6 +99,8 @@ export async function refreshToken() {
  * @returns {Promise<Response>} The response from the fetch call.
  */
 export async function fetchWithAuth(url, options = {}) {
+    if (isFetching) return null;
+
     let accessToken = TokenManager.getAccessToken();
 
     if (!accessToken) {
