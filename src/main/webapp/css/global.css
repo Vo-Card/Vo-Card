@@ -16,7 +16,7 @@
 
 :root {
     --primary-font: 'CodeNewRoman Nerd Font', monospace;
-    
+
     --primary-font-color: #d0d7e9;
 
     --brand-color: linear-gradient(35deg, #ffbf76, #76a4f3);
@@ -61,14 +61,20 @@
     --header-height: 56px;
     --menu-width: 200px;
     --splitter-width: 5px;
-    
+
     --information-container-width-close: 15px;
-    --information-container-width-open : 250px;
+    --information-container-width-open: 250px;
 
     --like-color: #76a4f3;
     --dislike-color: #ff8989;
 
     --alert: #ff8989;
+
+    --root-button-color: #394999;
+    --root-button-hover: #5468cd;
+    --root-list-item: #8d8d8d6f;
+
+    --root-role-ul: #2B2730;
 }
 
 *:not(#clr-picker *) {
