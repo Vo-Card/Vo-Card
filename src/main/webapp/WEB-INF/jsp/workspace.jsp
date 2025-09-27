@@ -12,6 +12,7 @@
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             <link rel="stylesheet" type="text/css" href="/css/workspace.css">
             <link rel="stylesheet" type="text/css" href="/css/library/coloris.min.css">
+            <link rel="icon" type="image/x-icon" href="/imgs/icon.svg">
 
             <!-- Imported modules -->
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
