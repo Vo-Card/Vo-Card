@@ -6,6 +6,7 @@ import {
     insertDataEventActions,
 } from "../event/card-event-handler.js";
 import { cardSessionPlay } from "../review.js";
+import { loadPage } from "../module/page-manager.js";
 
 const templateCache = new Map();
 
@@ -198,6 +199,12 @@ export async function deckLoader() {
         "searchDeckButton",
         "card-item-container"
     );
+
+    forkedDeckContainer
+        .querySelector("#searchDeckButton")
+        .addEventListener("click", () => {
+            loadPage("/workspace/explore");
+        });
 
     await appendTemplate(
         ownedDeckContainer,
