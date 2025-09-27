@@ -62,6 +62,27 @@ public class ReviewApiController {
         return null;
     }
 
+    @GetMapping("/mostRecentLearning")
+    public static ResponseEntity<Map<String, Object>> getMostRecentLearning(
+            @RequestHeader(value = "Authorization", required = false) String authToken) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<Long> userId = DeckApiController.getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+
+            Row row = ReviewManager.getLastestReview(userId.get());
+
+            response.put("recent_review", row);
+            response.put("message", "successfully send the review");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(401).body(response);
+        }
+
+    }
+
     @GetMapping("/thisWeekStats")
     public static ResponseEntity<Map<String, Object>> getThisWeekStats(
             @RequestHeader(value = "Authorization", required = false) String authToken) {

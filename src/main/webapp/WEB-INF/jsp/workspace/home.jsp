@@ -1,10 +1,13 @@
 <script src="/js/workspace/page-fixer.js"></script>
 <div class="grid-container">
-    <div class="greeting content-container">
-        <p class="font-fixed">{daily_welcome_message}, {username}!</p>
-        <p>Create your own flashcard decks, review with spaced repetition, and track
-            your
-            progess .</p>
+    <div class="greeting content-container"
+        style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <p class="font-fixed" id="welcome-message"></p>
+            <p>Build decks for any subject and review them with proven spaced repetition. Each session helps you
+                remember more, while progress tracking keeps you motivated. Learning becomes easier when you can see how
+                far you’ve already come.</p>
+        </div>
         <div class="px-3 pb-2">
             <div class="d-flex gap-2">
                 <a href="/workspace/review">
@@ -19,29 +22,12 @@
 
     <div class="daily content-container">
         <div class="pt-4  pb-2">
-            <p class="font-fixed text-center">Your Today Card</p>
+            <p class="font-fixed text-center">Your today recent card!</p>
         </div>
 
-        <div class="preview card-wel" id="card_preview">
-            <div class="deck default a1" style="z-index: 1;">
-                <div class="background">
-                    <p class="category">A1</p>
-                    <div class="decorations">
-                        <div>
-                            <span
-                                style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;"></span>
-                            <span
-                                style="background-color: white; width: 70px; height: 2px; display: block; position: relative; top :10px;"></span>
-                            <span
-                                style="background-color: white; width: 2px; height: 100px; display: block; position: relative; bottom :12px; left: 50px;"></span>
-                        </div>
-                        <span
-                            style="background-color: white; width: 10px; height: 10px; display: block; position: relative; left: 60px;">
-                    </div>
-                </div>
-                <p class="word">Something</p>
-            </div>
-        </div>
+        <daily-card-container style="width: 100%; display: flex; justify-content: center;">
+
+        </daily-card-container>
     </div>
 
     <!-- chart recently 7 days -->
