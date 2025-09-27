@@ -262,13 +262,14 @@ CREATE TABLE `cardtb` (
 -- vo_card.learned_cardtb definition
 
 CREATE TABLE `learned_cardtb` (
-  `latest_review` datetime NOT NULL DEFAULT current_timestamp(),
+  `lastest_review` datetime NOT NULL DEFAULT current_timestamp(),
   `card_id_FK` bigint(20) unsigned DEFAULT NULL,
   `user_id_FK` bigint(20) unsigned DEFAULT NULL,
   `deck_id_FK` bigint(20) unsigned DEFAULT NULL,
   KEY `learned_cardtb_cardtb_FK_IDX` (`card_id_FK`),
   KEY `learned_cardtb_usertb_FK_IDX` (`user_id_FK`),
   KEY `learned_cardtb_decktb_FK` (`deck_id_FK`),
+  KEY `learned_cardtb_latest_review_IDX` (`lastest_review`,`user_id_FK`) USING BTREE,
   CONSTRAINT `learned_cardtb_cardtb_FK` FOREIGN KEY (`card_id_FK`) REFERENCES `cardtb` (`card_id_PK`) ON DELETE CASCADE,
   CONSTRAINT `learned_cardtb_decktb_FK` FOREIGN KEY (`deck_id_FK`) REFERENCES `decktb` (`deck_id_PK`) ON DELETE CASCADE,
   CONSTRAINT `learned_cardtb_usertb_FK` FOREIGN KEY (`user_id_FK`) REFERENCES `usertb` (`user_id_PK`) ON DELETE CASCADE
