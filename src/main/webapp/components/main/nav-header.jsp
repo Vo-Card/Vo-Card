@@ -4,8 +4,6 @@
             <div class="icon"></div>
             <li><a href="/home" style="font-size: 25px; border-right: solid white 2px; padding-right: 20px;">Vo-Card</a>
             </li>
-            <li><a href="/explore">Explore</a></li>
-            <li><a href="/products">Products</a></li>
             <li><a href="/about">About Us</a></li>
             <li><a href="/support">Support</a></li>
         </ul>

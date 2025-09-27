@@ -34,12 +34,12 @@
                     id="deckSecondaryColor" data-coloris=""></div>
             <div class="info-wraper" style="height: 40px; align-items: center; margin: 10px 0px 0px;">
                 <p style="margin: 0px;">Set Public</p>
-                <div class="checkbox-wrapper-59"><label class="switch"><input type="checkbox" id="deckIsPublic"
+                <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="deckIsPublic"
                             name="isPublic"><span class="slider"></span></label></div>
             </div>
             <div class="info-wraper" style="height: 40px; align-items: center; margin: 10px 0px 0px;">
                 <p style="margin: 0px;">Set Clone</p>
-                <div class="checkbox-wrapper-59"><label class="switch"><input type="checkbox" id="deckAllowCloning"
+                <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="deckAllowCloning"
                             name="allowCloning"><span class="slider"></span></label></div>
             </div>
             <div><br><input type="submit" value="Save" name="undefined" id="undefined"></div>
