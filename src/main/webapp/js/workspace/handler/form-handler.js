@@ -363,10 +363,15 @@ export async function editLoader(path, type, data) {
 
     switch (type) {
         case "deck":
-            const form = document.createElement("form");
-            temp.querySelector("edit-input-area").appendChild(form);
+            const deckForm = /**@type {HTMLFormElement} */ (
+                temp.querySelector("#deckEditForm")
+            );
+            deckForm.style.display = "block";
 
-            const deckId = data.deck_id_PK; // For API
+            const deckId = data.deck_id_PK; // For an api call
+
+            // Setup Display Deck
+
             const deckThemeSVG = (await loadTemplate(data.theme_url))
                 .replace(/{deck_id}/g, data.deck_id_PK)
                 .replace(/{deck_name}/g, data.deck_name)
@@ -387,157 +392,76 @@ export async function editLoader(path, type, data) {
                     DeckContainer.querySelectorAll("linearGradient")
                 );
 
-            createForm(
-                "input",
-                form,
-                "Deck Name :",
-                "text",
-                data.deck_name,
-                "deckName",
-                {},
-                (e) => {
-                    if (deckSVGTitle) deckSVGTitle.textContent = e.target.value;
-                }
+            // Import all input variables
+            const deckNameInput = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckName")
+            );
+            const deckDescriptionInput = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckDescription")
+            );
+            const deckPrimaryInput = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckPrimaryColor")
+            );
+            const deckSecondaryInput = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckSecondaryColor")
+            );
+            const deckIsPublicCheckbox = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckIsPublic")
+            );
+            const deckAllowCloningCheckbox = /**@type {HTMLInputElement} */ (
+                deckForm.querySelector("#deckAllowCloning")
             );
 
-            createForm(
-                "textarea",
-                form,
-                "Description :",
-                "textarea",
-                data.deck_description,
-                "deckDescription"
-            );
+            deckNameInput.value = data.deck_name;
+            deckNameInput.oninput = (e) => {
+                if (deckSVGTitle)
+                    deckSVGTitle.textContent = /**@type {HTMLInputElement} */ (
+                        e.target
+                    ).value;
+            };
 
-            const deckPriColor = createForm(
-                "input",
-                form,
-                "Primary Color :",
-                "text",
-                data.primary_color,
-                "primaryColor",
-                { "data-coloris": "" },
-                (e) => {
-                    deckSVGGradients.forEach((gradient) => {
-                        const stops = gradient.querySelectorAll("stop");
-                        stops.forEach((stop, index) => {
-                            if (index === 0)
-                                stop.setAttribute(
-                                    "stop-color",
-                                    /**@type {HTMLInputElement} */ (
-                                        deckPriColor
-                                    ).value
-                                );
-                        });
+            deckDescriptionInput.value = data.deck_description;
+
+            deckPrimaryInput.value = data.primary_color;
+            deckPrimaryInput.oninput = (e) => {
+                deckSVGGradients.forEach((gradient) => {
+                    const stops = gradient.querySelectorAll("stop");
+                    stops.forEach((stop, index) => {
+                        if (index === 0)
+                            stop.setAttribute(
+                                "stop-color",
+                                /**@type {HTMLInputElement} */ (e.target).value
+                            );
                     });
-                }
-            );
+                });
+            };
 
-            const deckSecColor = createForm(
-                "input",
-                form,
-                "Secondary Color :",
-                "text",
-                data.secondary_color,
-                "secondaryColor",
-                { "data-coloris": "" },
-                (e) => {
-                    deckSVGGradients.forEach((gradient) => {
-                        const stops = gradient.querySelectorAll("stop");
-                        stops.forEach((stop, index) => {
-                            if (index === 1)
-                                stop.setAttribute(
-                                    "stop-color",
-                                    /**@type {HTMLInputElement} */ (
-                                        deckSecColor
-                                    ).value
-                                );
-                        });
+            deckSecondaryInput.value = data.secondary_color;
+            deckSecondaryInput.oninput = (e) => {
+                deckSVGGradients.forEach((gradient) => {
+                    const stops = gradient.querySelectorAll("stop");
+                    stops.forEach((stop, index) => {
+                        if (index === 1)
+                            stop.setAttribute(
+                                "stop-color",
+                                /**@type {HTMLInputElement} */ (e.target).value
+                            );
                     });
-                }
-            );
+                });
+            };
 
-            // custom checkbox [Import]
+            deckIsPublicCheckbox.checked = data.deck_is_public;
+            deckAllowCloningCheckbox.checked = data.deck_clone_perm;
 
-            const deckPublicWraper = document.createElement("div");
-            deckPublicWraper.className = "info-wraper";
-            deckPublicWraper.style.height = "40px";
-            deckPublicWraper.style.alignItems = "center";
-            deckPublicWraper.style.margin = "10px 0 0 0";
-
-            const deckPublicText = document.createElement("p");
-            deckPublicText.textContent = "Set Public";
-            deckPublicText.style.margin = "0";
-            deckPublicWraper.appendChild(deckPublicText);
-
-            const deckPublicDiv = document.createElement("div");
-            deckPublicDiv.className = "checkbox-wrapper-59";
-
-            const deckPublicLabel = document.createElement("label");
-            deckPublicLabel.className = "switch";
-
-            const deckPublicInput = document.createElement("input");
-            deckPublicInput.type = "checkbox";
-            deckPublicInput.id = "isPublic";
-            deckPublicInput.name = "isPublic";
-            deckPublicInput.checked = data.deck_is_public;
-
-            console.log(data);
-
-            const checkboxSpan = document.createElement("span");
-            checkboxSpan.className = "slider";
-
-            deckPublicLabel.appendChild(deckPublicInput);
-            deckPublicLabel.appendChild(checkboxSpan);
-
-            deckPublicDiv.appendChild(deckPublicLabel);
-
-            deckPublicWraper.appendChild(deckPublicDiv);
-
-            form.appendChild(deckPublicWraper);
-
-            // custom checkbox [Import]
-
-            const deckCloneWraper = document.createElement("div");
-            deckCloneWraper.className = "info-wraper";
-            deckCloneWraper.style.height = "40px";
-            deckCloneWraper.style.alignItems = "center";
-            deckCloneWraper.style.margin = "10px 0 0 0";
-
-            const deckCloneText = document.createElement("p");
-            deckCloneText.textContent = "Set Clone";
-            deckCloneText.style.margin = "0";
-            deckCloneWraper.appendChild(deckCloneText);
-
-            const deckCloneDiv = document.createElement("div");
-            deckCloneDiv.className = "checkbox-wrapper-59";
-
-            const deckCloneLabel = document.createElement("label");
-            deckCloneLabel.className = "switch";
-
-            const deckCloneInput = document.createElement("input");
-            deckCloneInput.type = "checkbox";
-            deckCloneInput.id = "allowCloning";
-            deckCloneInput.name = "allowCloning";
-            deckCloneInput.checked = data.deck_clone_perm;
-
-            const checkboxSpan2 = document.createElement("span");
-            checkboxSpan2.className = "slider";
-
-            deckCloneLabel.appendChild(deckCloneInput);
-            deckCloneLabel.appendChild(checkboxSpan2);
-
-            deckCloneDiv.appendChild(deckCloneLabel);
-
-            deckCloneWraper.appendChild(deckCloneDiv);
-
-            form.appendChild(deckCloneWraper);
-            createForm("input", form, null, "submit", "Save");
-            callCreate("POST", `/api/decks/${deckId}/update`, form);
+            callCreate("POST", `/api/decks/${deckId}/update`, deckForm);
             break;
         case "level":
-            const levelForm = document.createElement("form");
-            temp.querySelector("edit-input-area").appendChild(levelForm);
+            const levelForm = /**@type {HTMLFormElement} */ (
+                temp.querySelector("#levelEditForm")
+            );
+            levelForm.style.display = "block";
+
+            // Handling Inserting Level Theme
 
             const levelId = "edit_" + data.deck_id_PK;
             const levelThemeSVG = (await loadTemplate(data.theme_url))
@@ -569,62 +493,49 @@ export async function editLoader(path, type, data) {
             );
             const levSvgTitle = LevelContainer.querySelector("#fit-text");
 
-            createForm(
-                "input",
-                levelForm,
-                "Level Name :",
-                "text",
-                data.level_name,
-                "levelValue",
-                {},
-                (e) => {
-                    if (levSvgTitle) levSvgTitle.textContent = e.target.value;
-                }
+            const levelValueInput = /**@type {HTMLInputElement} */ (
+                levelForm.querySelector("#levelValue")
             );
 
-            createForm(
-                "input",
-                levelForm,
-                "Level Weight :",
-                "number",
-                data.level_weight,
-                "levelWeight"
+            const levelWeightInput = /**@type {HTMLInputElement} */ (
+                levelForm.querySelector("#levelWeight")
             );
 
-            const lvlPriColor = createForm(
-                "input",
-                levelForm,
-                "Primary Color :",
-                "text",
-                data.primary_color,
-                "primaryColor",
-                { "data-coloris": "" },
-                (e) => {
-                    lev_svgPriColor.setAttribute(
-                        "fill",
-                        /**@type {HTMLInputElement} */ (lvlPriColor).value
-                    );
-                }
+            const lvlPriColorInput = /**@type {HTMLInputElement} */ (
+                levelForm.querySelector("#lvlPrimaryColor")
             );
 
-            const lvlSecColor = createForm(
-                "input",
-                levelForm,
-                "Secondary Color :",
-                "text",
-                data.secondary_color,
-                "secondaryColor",
-                { "data-coloris": "" },
-                (e) => {
-                    const stops = lev_radgradient.querySelectorAll("stop");
-                    stops[1].setAttribute(
-                        "stop-color",
-                        /**@type {HTMLInputElement} */ (lvlSecColor).value
-                    );
-                }
+            const lvlSecColorInput = /**@type {HTMLInputElement} */ (
+                levelForm.querySelector("#lvlSecondaryColor")
             );
 
-            createForm("input", levelForm, null, "submit", "Save");
+            levelValueInput.value = data.level_name;
+            levelValueInput.oninput = (e) => {
+                if (levSvgTitle)
+                    levSvgTitle.textContent = /**@type {HTMLInputElement} */ (
+                        e.target
+                    ).value;
+            };
+
+            levelWeightInput.value = data.level_weight;
+
+            lvlPriColorInput.value = data.primary_color;
+            lvlPriColorInput.oninput = (e) => {
+                lev_svgPriColor.setAttribute(
+                    "fill",
+                    /**@type {HTMLInputElement} */ (e.target).value
+                );
+            };
+
+            lvlSecColorInput.value = data.secondary_color;
+            lvlSecColorInput.oninput = (e) => {
+                const stops = lev_radgradient.querySelectorAll("stop");
+                stops[1].setAttribute(
+                    "stop-color",
+                    /**@type {HTMLInputElement} */ (e.target).value
+                );
+            };
+
             callCreate(
                 "POST",
                 `/api/decks/${lDeckId}/${data.level_id_PK}/update`,
@@ -1281,7 +1192,6 @@ function addCreateUpdate(dataType, targetId, updatedContent, uuid) {
     postCache.set("addData", addData);
 }
 
-// ----- REMOVE CREATE DATA -----
 function removeCreateUpdate(dataType, targetId, updatedContent, uuid) {
     let addData = postCache.get("addData") || [];
 
@@ -1318,7 +1228,6 @@ function removeCreateUpdate(dataType, targetId, updatedContent, uuid) {
     postCache.set("addData", addData);
 }
 
-// ----- GET CREATE DATA FOR DEFINITIONS -----
 function getCreateDefUpdate(posId) {
     const addData = postCache.get("addData") || [];
     // filter only "definition" type entries for the given posId
