@@ -15,7 +15,7 @@
 
             <li>
                 <a href="/workspace/stats" data-workspace>
-                    <i class="nf nf-cod-graph"></i>Stats
+                    <i class="nf nf-md-book_variant"></i>Stats
                 </a>
             </li>
 
@@ -44,8 +44,14 @@
             </li>
 
             <li>
+                <a sidebar-popup popup-type="session">
+                    <i class="nf nf-md-server_security"></i>Sessions
+                </a>
+            </li>
+
+            <li>
                 <a href="/logout">
-                    <i class="nf nf-md-logout_variant"></i>Logout
+                    <i class="nf nf-fa-door_open"></i>Logout
                 </a>
             </li>
         </ul>
