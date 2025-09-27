@@ -1,0 +1,133 @@
+root-menu {
+    padding: 0 10px;
+    display: block;
+}
+
+/* Top component */
+role-button,
+assign-role-button,
+role-create {
+    background-color: var(--root-button-color);
+    padding: 8px 15px;
+    border-radius: 10px;
+    transition: all ease-in 0.2s;
+    cursor: pointer;
+}
+
+root-div,
+root-div p {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    height: fit-content;
+    padding: 10px 0;
+    align-items: center;
+}
+
+root-div p {
+    width: fit-content;
+    margin: 0;
+}
+
+root-div div {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+/* List component */
+list-item {
+    margin-top: 10px;
+    border-radius: 8px;
+    display: block;
+    background-color: var(--root-list-item);
+    width: 100%;
+    height: 100vh;
+    padding: 10px;
+}
+
+role-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 15px;
+    background-color: #343343;
+    border-radius: 8px;
+    align-items: center;
+}
+
+role-front,
+role-front p {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 0;
+}
+
+role-mid,
+role-mid p {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 0;
+}
+
+role-behind {
+    background-color: #2B2730;
+    padding: 8px 60px;
+    border-radius: 8px;
+    transition: ease-in 0.2s;
+    user-select: none;
+    cursor: pointer;
+}
+
+/*----------*/
+/* Dropdown */
+/*----------*/
+role-dropdown {
+    min-width: 12em;
+}
+
+selected-role {
+    width: 100%;
+    background-color: #2B2730;
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 25px;
+    border-radius: 10px;
+    user-select: none;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.4s;
+    margin-bottom: 10px;
+}
+
+role-dropdown ul {
+    list-style: none;
+    padding: 0.2em 0.5em;
+    background-color: #2B2730;
+    border: 1px #5e526b solid;
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
+    position: absolute;
+    width: 100%;
+}
+
+
+/*-------*/
+/* HOVER */
+/*-------*/
+
+role-behind:hover {
+    background-color: #423b4b;
+}
+
+selected-role:hover {
+    background-color: #423b4b;
+
+}
+
+role-button:hover,
+role-create:hover,
+assign-role-button:hover {
+    background-color: var(--root-button-hover);
+}

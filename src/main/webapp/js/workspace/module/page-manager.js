@@ -42,6 +42,7 @@ const pageComponents = {
         css: "/css/workspace/review.css",
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
+    "/workspace/root": { js: null, css: "/css/workspace/root.css" },
 };
 
 /**
