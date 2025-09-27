@@ -1,55 +1,57 @@
-import { TokenManager } from '/js/auth/auth.js';
+import { TokenManager } from "/js/auth/auth.js";
 
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const messageDiv = document.getElementById("message");
+document
+    .getElementById("loginForm")
+    .addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const messageDiv = document.getElementById("message");
 
-    const submitBtn = /** @type {HTMLButtonElement} */ (
-        document.getElementById("loginButton")
-    );
-    
-    submitBtn.disabled = true;
+        const submitBtn = /** @type {HTMLButtonElement} */ (
+            document.getElementById("loginButton")
+        );
 
-    const payload = {
-        username: /** @type {HTMLInputElement} */ (
-            document.getElementById("username")
-        ).value.trim(),
+        submitBtn.disabled = true;
 
-        password: /** @type {HTMLInputElement} */ (
-            document.getElementById("password")
-        ).value.trim(),
+        const payload = {
+            username: /** @type {HTMLInputElement} */ (
+                document.getElementById("username")
+            ).value.trim(),
 
-        rememberMe: /** @type {HTMLInputElement} */ (
-            document.getElementById("rememberMe")
-        ).checked
-    };
+            password: /** @type {HTMLInputElement} */ (
+                document.getElementById("password")
+            ).value.trim(),
 
-    try {
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+            rememberMe: /** @type {HTMLInputElement} */ (
+                document.getElementById("rememberMe")
+            ).checked,
+        };
 
-        const data = await response.json();
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
 
-        if (response.ok) {
-            
-            TokenManager.setAccessToken(data.access_token);
+            const data = await response.json();
 
-            messageDiv.style.color = "green";
-            messageDiv.textContent = "Login successful!";
-            setTimeout(() => window.location.replace("/home"), 500);
-        } else {
+            if (response.ok) {
+                TokenManager.setAccessToken(data.access_token);
+
+                messageDiv.style.color = "green";
+                messageDiv.textContent = "Login successful!";
+                setTimeout(() => window.location.replace("/home"), 500);
+            } else {
+                messageDiv.style.color = "red";
+                messageDiv.textContent =
+                    data.error || "An unknown error occurred.";
+            }
+        } catch (err) {
+            console.error(err);
             messageDiv.style.color = "red";
-            messageDiv.textContent = data.error || "An unknown error occurred.";
+            messageDiv.textContent =
+                "Network or server error. Please try again.";
+        } finally {
+            submitBtn.disabled = false;
         }
-
-    } catch (err) {
-        console.error(err);
-        messageDiv.style.color = "red";
-        messageDiv.textContent = "Network or server error. Please try again.";
-    } finally {
-        submitBtn.disabled = false;
-    }
-});
+    });

@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap');
-@import url('/css/card_theme.css');
+@import url("https://fonts.googleapis.com/css2?family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap");
 
 :root {
     --theme-color: #d8974d;
@@ -41,6 +40,7 @@ nav ul {
     display: flex;
     list-style: none;
     flex-direction: row;
+    padding: 0;
     gap: 15px;
     align-items: center;
     height: 100%;
@@ -107,4 +107,61 @@ nav ul.right li a {
     justify-content: center;
     align-items: center;
     scale: 0.8;
+}
+
+.index-card-wraper {
+    perspective: 300px;
+    position: absolute;
+}
+
+.index-card-wraper.first {
+    bottom: 15vh;
+    left: 5vw;
+    z-index: -1;
+}
+
+.index-card-wraper.second {
+    bottom: 15vh;
+    right: 5vw;
+    z-index: -1;
+}
+
+.first-card {
+    animation: firstCardAnim 2s ease-in-out infinite;
+    box-shadow: 40px 40px 20px 0px rgb(12 12 12 / 50%);
+}
+
+.second-card {
+    animation: secondCardAnim 2s ease-in-out infinite;
+    box-shadow: -40px 40px 20px 0px rgb(12 12 12 / 50%);
+}
+
+@keyframes firstCardAnim {
+    0% {
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
+            translateZ(30px);
+    }
+    50% {
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
+            translateZ(0px);
+    }
+    100% {
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
+            translateZ(30px);
+    }
+}
+
+@keyframes secondCardAnim {
+    0% {
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
+            translateZ(30px);
+    }
+    50% {
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
+            translateZ(0px);
+    }
+    100% {
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
+            translateZ(30px);
+    }
 }

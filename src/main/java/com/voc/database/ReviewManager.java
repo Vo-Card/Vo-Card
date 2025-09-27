@@ -14,9 +14,9 @@ import com.voc.utils.Row;
 public class ReviewManager {
     public static Boolean updateReviewedCard(Long userId, Long deckId, Long cardId) {
         String sql = """
-                    INSERT INTO learned_cardtb (user_id_FK, deck_id_FK, card_id_FK, latest_review)
+                    INSERT INTO learned_cardtb (user_id_FK, deck_id_FK, card_id_FK, lastest_review)
                     VALUES (?, ?, ?, NOW())
-                    ON DUPLICATE KEY UPDATE latest_review = NOW();
+                    ON DUPLICATE KEY UPDATE lastest_review = NOW();
                 """;
         SQLResult res = DatabaseUtils.sqlPrepareStatement(sql, userId, deckId, cardId);
 
@@ -84,6 +84,27 @@ public class ReviewManager {
         }
 
         return finalStats;
+    }
+
+    public static Row getLastestReview(Long userId) {
+        String sql = """
+                    SELECT
+                        c.*,
+                        lv.level_name,
+                        t.theme_name, t.theme_type, t.theme_url,
+                        m.primary_color, m.secondary_color, m.card_pattern
+                    FROM learned_cardtb lc
+                    LEFT JOIN cardtb c ON lc.card_id_FK = c.card_id_PK
+                    LEFT JOIN card_leveltb lv ON c.level_id_FK = lv.level_id_PK
+                    LEFT JOIN themetb t ON lv.theme_id_FK = t.theme_id_PK
+                    LEFT JOIN theme_modifiertb m ON lv.modifier_id_FK = m.modifier_id_PK
+                    WHERE lc.user_id_FK = ?
+                      AND DATE(lc.lastest_review) = CURDATE()
+                    ORDER BY lc.lastest_review DESC
+                    LIMIT 1;
+                """;
+        Row row = DatabaseUtils.sqlSingleRowStatement(sql, userId);
+        return row;
     }
 
 }

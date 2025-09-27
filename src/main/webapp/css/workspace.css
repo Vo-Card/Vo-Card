@@ -251,7 +251,7 @@ hr.sep-info {
     border: none;
     width: 100%;
     border-radius: 5px;
-    background-color: #3c455e;
+    background-color: var(--card-normal-color);
 }
 
 .card-edit-value-wraper {
@@ -264,75 +264,67 @@ hr.sep-info {
     border: none;
     width: 32px;
     border-radius: 5px;
-    background-color: #3c455e;
+    background-color: var(--card-normal-color);
+}
+
+.popup-card-create-buttons:hover {
+    background-color: var(--card-normal-color-hover);
 }
 
 .popup-card-create-buttons[active] {
-    background-color: #626f92;
+    background-color: var(--card-normal-color-active);
 }
+
+.definition-edit-input {
+    width: 100%;
+    border-radius: 5px;
+    background-color: var(--card-normal-color);
+}
+
 /* EDIT */
 
 .popup-card-create-buttons[edited] {
-    background-color: #977046;
+    background-color: var(--card-edit-color);
 }
 
 .popup-card-create-buttons[edited][active] {
-    background-color: #9e744a;
+    background-color: var(--card-edit-color-active);
 }
 
 .definition-edit-input[edited] {
-    background-color: #977046;
+    background-color: var(--card-edit-color);
 }
 
 /* DELETE */
 
 .card-edit-value-wraper:has(.edit-del-btn:hover) .definition-edit-input,
 .edit-del-btn:hover,
-.card-edit-value-wraper:has(.edit-del-btn:hover) [pos_append] {
-    background-color: #664141;
-}
-
-.edit-del-btn[deleted] {
-    background-color: #9e4a4a;
-}
-
-.popup-card-create-buttons:hover {
-    background-color: #495370;
-}
-
+.card-edit-value-wraper:has(.edit-del-btn:hover) [pos_append],
 .popup-card-create-buttons[deleted] {
-    background-color: #664141;
+    background-color: var(--card-delete-color);
 }
 
 .popup-card-create-buttons[deleted]:hover {
-    background-color: #8d6262;
+    background-color: var(--card-delete-color-hover);
 }
 
+.edit-del-btn[deleted],
+.definition-edit-input[deleted],
 .popup-card-create-buttons[deleted][active] {
-    background-color: #9e4a4a;
-}
-
-.definition-edit-input[deleted] {
-    background-color: #9e4a4a;
-}
-
-.definition-edit-input {
-    width: 100%;
-    border-radius: 5px;
-    background-color: #3c455e;
-}
-
-.popup-card-create-buttons[created]:hover {
-    background-color: #5b885a;
-}
-
-.popup-card-create-buttons[created][active] {
-    background-color: #5d8e62;
+    background-color: var(--card-delete-color-active);
 }
 
 .definition-edit-input[created],
 .popup-card-create-buttons[created] {
-    background-color: #3c5e3f;
+    background-color: var(--card-create-color);
+}
+
+.popup-card-create-buttons[created]:hover {
+    background-color: var(--card-create-color-hover);
+}
+
+.popup-card-create-buttons[created][active] {
+    background-color: var(--card-create-color-active);
 }
 
 .edit-value-container {
@@ -349,25 +341,25 @@ hr.sep-info {
 
 /* Import */
 
-.checkbox-wrapper-59 input[type="checkbox"] {
+.checkbox-custom input[type="checkbox"] {
     visibility: hidden;
     display: none;
 }
 
-.checkbox-wrapper-59 *,
-.checkbox-wrapper-59 ::after,
-.checkbox-wrapper-59 ::before {
+.checkbox-custom *,
+.checkbox-custom ::after,
+.checkbox-custom ::before {
     box-sizing: border-box;
 }
 
-.checkbox-wrapper-59 .switch {
+.checkbox-custom .switch {
     width: 60px;
     height: 30px;
     position: relative;
     display: inline-block;
 }
 
-.checkbox-wrapper-59 .slider {
+.checkbox-custom .slider {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -381,7 +373,7 @@ hr.sep-info {
     transition: 0.2s;
 }
 
-.checkbox-wrapper-59 .slider:before {
+.checkbox-custom .slider:before {
     position: absolute;
     content: "";
     width: 100%;
@@ -392,13 +384,14 @@ hr.sep-info {
     transition: 0.2s;
 }
 
-.checkbox-wrapper-59 input:checked + .slider:before {
+.checkbox-custom input:checked + .slider:before {
     transform: translateX(30px);
-    background-color: limeGreen;
+    background-color: var(--checkbox-theme-color);
 }
 
-.checkbox-wrapper-59 input:checked + .slider {
-    box-shadow: 0 0 0 2px limeGreen, 0 0 8px limeGreen;
+.checkbox-custom input:checked + .slider {
+    box-shadow: 0 0 0 2px var(--checkbox-theme-color),
+        0 0 8px var(--checkbox-theme-color);
 }
 
 @keyframes move-right-36 {

@@ -12,6 +12,7 @@ import {
 } from "../content/deck-loader.js";
 import { displayPublicDecks } from "../handler/explorer-handler.js";
 import { createPopupBox } from "../handler/popup-handler.js";
+import { loadUserInformation } from "../handler/home-handler.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -23,7 +24,10 @@ let currentController = null;
 // Map top-level pages to optional JS + CSS
 const pageComponents = {
     "/workspace/home": {
-        js: () => loadWeeklyChart(),
+        js: () => {
+            loadWeeklyChart();
+            loadUserInformation();
+        },
         css: "/css/workspace/home.css",
     },
     "/workspace/stats": { js: statsLoader, css: "/css/workspace/stats.css" },
@@ -49,7 +53,7 @@ const pageComponents = {
  *
  * @param {String} path
  */
-function displayRightSidebar(path) {
+async function displayRightSidebar(path) {
     const informationPages = {
         "/workspace/decks": {
             template: "/components/content/card-selection.jsp",
@@ -62,25 +66,31 @@ function displayRightSidebar(path) {
     let match = false;
     const sidebarId = document.getElementById("information-container");
 
-    Object.keys(informationPages).forEach(async (pageKey) => {
+    for (const pageKey of Object.keys(informationPages)) {
         if (path.startsWith(pageKey) && !match) {
             sidebarId.setAttribute("active", "");
             match = true;
 
-            // Get the template for this key
+            // Get the template
             const template = informationPages[pageKey].template;
             const fragment = await fetchPage(template);
 
-            while (sidebarId.firstChild)
+            // Clear old content
+            while (sidebarId.firstChild) {
                 sidebarId.removeChild(sidebarId.firstChild);
-            sidebarId.appendChild(fragment);
+            }
 
+            // Append new fragment
+            sidebarId.appendChild(fragment);
             sidebarId.style.visibility = "visible";
-        } else if (!match) {
-            sidebarId.removeAttribute("active");
-            sidebarId.style.visibility = "hidden";
+            break; // stop after the first match
         }
-    });
+    }
+
+    if (!match) {
+        sidebarId.removeAttribute("active");
+        sidebarId.style.visibility = "hidden";
+    }
 }
 
 /**
@@ -183,6 +193,7 @@ export async function loadPage(path, addHistory = true) {
     // Inject content immediately (don’t wait for CSS)
     while (contentEl.firstChild) contentEl.removeChild(contentEl.firstChild);
     contentEl.appendChild(fragment);
+    await displayRightSidebar(path);
 
     // Run CSS + JS in parallel
     Promise.allSettled([cssPromise, jsPromise]);
@@ -200,8 +211,6 @@ export async function loadPage(path, addHistory = true) {
     changePageHeader(match ? match[1] + " Page" : "unknown Page");
 
     if (addHistory) window.history.pushState({ path }, "", path);
-
-    displayRightSidebar(path);
 }
 
 // Preload pages on hover
@@ -290,12 +299,12 @@ document.addEventListener("click", async (event) => {
                         await userLoader(
                             "/components/content/popup/session.jsp"
                         )
-                    )
+                    );
                     break;
                 default:
                     console.error("Invalid popup type.");
                     break;
-            };
+            }
         }
     }
 });

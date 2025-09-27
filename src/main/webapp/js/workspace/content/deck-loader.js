@@ -85,7 +85,7 @@ async function safeFetch(url) {
  * @param {String} id A string of ID (String because javascript sucks)
  * @param {String} additionalClass
  */
-async function appendTemplate(target, url, id, additionalClass = "") {
+export async function appendTemplate(target, url, id, additionalClass = "") {
     const html = await loadTemplate(url);
     const el = createElementFromHTML("div", html, [additionalClass], { id });
     const overlay = document.createElement("div");
