@@ -275,6 +275,39 @@ async function userLoader(path) {
         settingForm.querySelector("#setting-message")
     );
 
+    const deleteAccBtn = /**@type {HTMLElement} */ (
+        settingForm.querySelector("delete-user")
+    );
+
+    deleteAccBtn.addEventListener("click", async (e) => {
+        const formData = new FormData(settingForm);
+
+        // @ts-ignore
+        const data = Object.fromEntries(Array.from(formData.entries()));
+        console.log(data);
+
+        const res = await fetchWithAuth("/api/user/deleteUser", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        const message = (await res.json()).message;
+
+        if (res.ok) {
+            // Update TokenManager with new user data
+            TokenManager.setUserData({
+                username: usernameInput.value,
+                display_name: displayNameInput.value,
+            });
+            sMessage.textContent = message;
+            setTimeout(() => location.reload(), 500);
+        } else {
+            sMessage.textContent = message;
+        }
+    });
+
     usernameInput.value = username;
     displayNameInput.value = displayName;
 

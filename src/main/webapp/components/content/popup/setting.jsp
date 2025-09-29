@@ -36,7 +36,7 @@
                 ">Delete Account</delete-user>
 
             <div style="display: flex; gap: 6px;">
-                <logout style="background-color: #C26262;">Log-out</logout>
+                <a id="setting-logout" href="/logout" style="background-color: #C26262;">Logout</a>
 
                 <input type="submit" id="setting-submit" value="Save"
                     style="background-color: #628AC2; width: fit-content;">

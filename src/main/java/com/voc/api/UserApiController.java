@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.UserManager;
 import com.voc.jwt.JwtManager;
+import com.voc.security.Permission;
 import com.voc.security.SessionManager;
 
 @RestController
@@ -118,7 +119,41 @@ public class UserApiController {
     @DeleteMapping("/deleteUser")
     public ResponseEntity<Map<String, Object>> deleteUser(
             @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
             @RequestBody UserProfileBody profile) {
-        return null;
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            if (Permission.isUserRoot(userId.get())) {
+                response.put("message", "You are not allow to do that.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+            }
+
+            Boolean isComplete = UserManager.removeUser(userId.get(), profile.confirmPassword);
+
+            if (isComplete) {
+                response.put("message", "Remove user sucessfully");
+                return ResponseEntity.ok(response);
+            }
+            response.put("message", "Failed to delete user, please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
     }
 }
