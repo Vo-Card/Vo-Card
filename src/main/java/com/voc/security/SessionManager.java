@@ -65,7 +65,6 @@ public class SessionManager {
      * @return new sessionid
      */
     public static Optional<Row> refreshSession(String sessionId, String rawRefreshToken) {
-        // Step 1: Validate the session from the database.
         String sql = """
                     SELECT s.user_id_FK, s.refresh_token_hash, s.remember_me, s.ip_address, s.user_agent, u.username, u.display_name
                     FROM sessiontb s
@@ -99,14 +98,33 @@ public class SessionManager {
         return Optional.of(createSession(userId, username, displayName, rememberMe, ipAddress, userAgent));
     }
 
-    /** Optionally delete a session (logout) */
+    public static Boolean validateSessionToken(String sessionId, String rawRefreshToken, Long userId) {
+        String sql = """
+                    SELECT user_id_FK, refresh_token_hash, remember_me, ip_address, user_agent
+                    FROM sessiontb
+                    WHERE session_id_PK = ? AND expires_at > NOW() AND user_id_FK = ?
+                """;
+        Row sessionRow = DatabaseUtils.sqlSingleRowStatement(sql, sessionId, userId);
+
+        // if there any session row in table : return invalid if session is null
+        if (sessionRow == null) {
+            return false;
+        }
+
+        String hashedToken = (String) sessionRow.get("refresh_token_hash");
+        if (!BCrypt.checkpw(rawRefreshToken, hashedToken)) {
+            return false;
+        }
+        return true;
+    }
+
     public static void deleteSession(String sessionId) {
         String sql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
         DatabaseUtils.sqlPrepareStatement(sql, sessionId);
     }
 
-    public static void deleteAllSessionsForUser(Long userId) {
-        String sql = "DELETE FROM sessiontb WHERE user_id_FK = ?";
-        DatabaseUtils.sqlPrepareStatement(sql, userId);
+    public static void deleteAllSessionsForUser(Long userId, String currentSession) {
+        String sql = "DELETE FROM sessiontb WHERE user_id_FK = ? AND session_id_PK != ?";
+        DatabaseUtils.sqlPrepareStatement(sql, userId, currentSession);
     }
 }

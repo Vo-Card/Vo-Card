@@ -29,6 +29,7 @@ import java.util.Map;
 
 import com.voc.security.AuthManager;
 import com.voc.security.PasswordGenerator;
+import com.voc.security.Permission;
 import com.voc.utils.Row;
 
 /**
@@ -90,6 +91,7 @@ public class DatabaseUtils {
      * The root user is created only if it does not already exist in the
      * database.
      * </p>
+     * 
      * @param data
      */
     public static void initDatabase(Map<String, String> data) {
@@ -138,16 +140,35 @@ public class DatabaseUtils {
 
             if (row == null) {
                 String rootPassword = PasswordGenerator.generatePassword(32);
+
                 AuthManager.registerUser(ROOT_DISPLAYNAME, ROOT_USERNAME, rootPassword);
-        
                 Row result = sqlSingleRowStatement("SELECT user_id_PK FROM usertb WHERE username = ?", ROOT_USERNAME);
-        
-                System.out.println(TAG_IMPORTANT+"Root user has been initialize for this project.");
-                System.out.println(TAG_IMPORTANT+"Root ID: " + (BigInteger) result.get("user_id_PK"));
-                System.out.println(TAG_IMPORTANT+"Root Username: " + ROOT_USERNAME);
-                System.out.println(TAG_IMPORTANT+"Root Password: " + rootPassword);
-                System.out.println(TAG_IMPORTANT+"Please keep this password in a secure location.");
-                System.out.println(TAG_IMPORTANT+"The password will show only once.");
+
+                Long rootUserId = ((Number) result.get("user_id_PK")).longValue();
+
+                System.out.println(TAG_INFO + "Assigning Root Permissions to the root user");
+                Long rootPermId = Permission.createRole(rootUserId, Permission.Values.ROOT_USER, "Root",
+                        "The highest authority.");
+
+                if (rootPermId == null) {
+                    System.err.println(TAG_ERROR + "Failed to create Root user role. Please restart your program.");
+                    return;
+                }
+
+                String sql = """
+                        UPDATE usertb
+                        SET permission_level_FK = ?
+                        WHERE user_id_PK = ?
+                        """;
+
+                sqlPrepareStatement(sql, rootPermId, rootUserId);
+                System.out.println(TAG_SUCCESS + "Successfully assigned role to root user");
+                System.out.println(TAG_IMPORTANT + "Root user has been initialize for this project.");
+                System.out.println(TAG_IMPORTANT + "Root ID: " + (BigInteger) result.get("user_id_PK"));
+                System.out.println(TAG_IMPORTANT + "Root Username: " + ROOT_USERNAME);
+                System.out.println(TAG_IMPORTANT + "Root Password: " + rootPassword);
+                System.out.println(TAG_IMPORTANT + "Please keep this password in a secure location.");
+                System.out.println(TAG_IMPORTANT + "The password will show only once.");
 
                 System.out.println(TAG_SUCCESS + "Root user initialized");
             }
@@ -266,10 +287,11 @@ public class DatabaseUtils {
      * @throws SQLException
      */
     public static void sqlExecuteBatch(String sql, List<Object[]> batchArgs, int batchLimit) {
-        if (batchArgs == null || batchArgs.isEmpty()) return;
+        if (batchArgs == null || batchArgs.isEmpty())
+            return;
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
 
@@ -293,7 +315,7 @@ public class DatabaseUtils {
                 pstmt.executeBatch();
                 conn.commit();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             System.err.println("SQL Batch err: " + e.getMessage());
         }
     }
@@ -302,7 +324,6 @@ public class DatabaseUtils {
     public static void sqlExecuteBatch(String sql, List<Object[]> batchArgs) {
         sqlExecuteBatch(sql, batchArgs, 500);
     }
-
 
     /**
      * Validates the database condition.
@@ -327,8 +348,8 @@ public class DatabaseUtils {
         if (isConnected) {
             try {
                 Row result = DatabaseUtils.sqlSingleRowStatement(
-                    "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
-                );
+                        "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?",
+                        DB_NAME);
 
                 if (result != null && result.get("table_count") != null) {
                     isEmpty = ((Number) result.get("table_count")).longValue() == 0;
@@ -339,8 +360,8 @@ public class DatabaseUtils {
                     initializeDatabase();
 
                     result = DatabaseUtils.sqlSingleRowStatement(
-                        "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?", DB_NAME
-                    );
+                            "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = ?",
+                            DB_NAME);
                     if (result != null && result.get("table_count") != null) {
                         isEmpty = ((Number) result.get("table_count")).longValue() == 0;
                     }

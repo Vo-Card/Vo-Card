@@ -1,7 +1,6 @@
 package com.voc.database;
 
 import com.voc.security.Permission;
-
 import com.voc.security.AuthManager;
 import com.voc.security.PasswordUtils;
 import com.voc.security.SessionManager;
@@ -9,7 +8,7 @@ import com.voc.utils.Row;
 
 public class UserManager {
     public static Boolean updateUserInfo(Long userId, String newUsername, String newDisplayName,
-            String newPassword, String currentPassword) {
+            String newPassword, String currentPassword, String sessionId) {
 
         // Incase of no changes
         if (newUsername == null && newDisplayName == null && newPassword == null)
@@ -43,9 +42,8 @@ public class UserManager {
                 String sql = "UPDATE usertb SET password = ? WHERE user_id_PK = ?";
                 DatabaseUtils.sqlPrepareStatement(sql, newHashedPassword, userId);
                 // Clear all sessions
-                SessionManager.deleteAllSessionsForUser(userId);
+                SessionManager.deleteAllSessionsForUser(userId, sessionId);
             }
-
             return true;
         }
 
@@ -64,9 +62,6 @@ public class UserManager {
         if (isCorrectPassword) {
             String sql = "DELETE FROM usertb WHERE user_id_PK = ?";
             DatabaseUtils.sqlPrepareStatement(sql, userId);
-
-            // Clear all sessions
-            SessionManager.deleteAllSessionsForUser(userId);
 
             return true;
         }

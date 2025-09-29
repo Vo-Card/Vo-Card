@@ -1,13 +1,26 @@
 package com.voc.api;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.voc.database.UserManager;
+import com.voc.jwt.JwtManager;
+import com.voc.security.SessionManager;
 
 @RestController
 @RequestMapping("/api/user")
@@ -16,15 +29,96 @@ public class UserApiController {
 
     private static class UserProfileBody {
         public String username;
-        public String display_name;
-        public String new_password;
-        public String current_password;
+        public String displayName;
+        public String newPassword;
+        public String confirmPassword;
+    }
+
+    private static String getUserSessionToken(@NonNull HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("session_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private static Optional<Long> getUserIdFromJWT(String authToken) {
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+            String token = authToken.substring(7);
+            return JwtManager.validateJwt(token);
+        }
+        return Optional.empty();
     }
 
     @PostMapping("/updateProfile")
     public ResponseEntity<Map<String, Object>> updateProfile(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody UserProfileBody profileBody) {
+            @NonNull HttpServletRequest request,
+            @RequestBody UserProfileBody profile) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            // Rules validation
+            if (profile.username == null && profile.newPassword == null && profile.displayName == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "No update changes."));
+            }
+
+            if (profile.username != null
+                    && !Pattern.compile("^(?!.*_.*_)[a-z_]{3,20}$").matcher(profile.username).matches()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message",
+                                "Username must be 3-20 characters long, contain only lowercase letters and underscores, and cannot contain consecutive underscores."));
+            }
+
+            if (profile.newPassword != null
+                    && !Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@/$%^&*-]).{8,}$")
+                            .matcher(profile.newPassword)
+                            .matches()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message",
+                                "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character."));
+            }
+
+            Boolean isComplete = UserManager.updateUserInfo(userId.get(),
+                    profile.username, profile.displayName,
+                    profile.newPassword,
+                    profile.confirmPassword, sessionid);
+
+            if (isComplete) {
+                response.put("message", "Update user sucessfully");
+                return ResponseEntity.ok(response);
+            }
+            response.put("message", "Failed to update user, please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/deleteUser")
+    public ResponseEntity<Map<String, Object>> deleteUser(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody UserProfileBody profile) {
         return null;
     }
 }
