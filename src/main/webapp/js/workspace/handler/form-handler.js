@@ -363,6 +363,12 @@ export async function editLoader(path, type, data) {
 
     switch (type) {
         case "deck":
+            // Form clean up
+            const allform = temp.querySelectorAll("form");
+            allform.forEach((el) => {
+                el.style.display = "none";
+            });
+
             const deckForm = /**@type {HTMLFormElement} */ (
                 temp.querySelector("#deckEditForm")
             );
@@ -456,6 +462,12 @@ export async function editLoader(path, type, data) {
             callCreate("POST", `/api/decks/${deckId}/update`, deckForm);
             break;
         case "level":
+            // Form clean up
+            const allform2 = temp.querySelectorAll("form");
+            allform2.forEach((el) => {
+                el.style.display = "none";
+            });
+
             const levelForm = /**@type {HTMLFormElement} */ (
                 temp.querySelector("#levelEditForm")
             );
