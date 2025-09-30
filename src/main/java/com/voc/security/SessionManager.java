@@ -1,6 +1,7 @@
 package com.voc.security;
 
 import com.voc.database.DatabaseUtils;
+import com.voc.database.SQLResult;
 import com.voc.utils.Row;
 import com.voc.jwt.JwtManager; // Ensure this is the correct package for your JwtManager
 import org.mindrot.jbcrypt.BCrypt;
@@ -8,6 +9,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,9 +120,18 @@ public class SessionManager {
         return true;
     }
 
-    public static void deleteSession(String sessionId) {
+    public static List<Row> getAllSessionFromUser(Long userid) {
+        String sql = "SELECT user_id_FK, user_agent, session_id_PK, ip_address FROM sessiontb WHERE user_id_FK = ?";
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(sql, userid);
+        return res.getData();
+    }
+
+    public static Boolean deleteSession(String sessionId) {
         String sql = "DELETE FROM sessiontb WHERE session_id_PK = ?";
-        DatabaseUtils.sqlPrepareStatement(sql, sessionId);
+        SQLResult res = DatabaseUtils.sqlPrepareStatement(sql, sessionId);
+        if (res.isSuccess())
+            return true;
+        return false;
     }
 
     public static void deleteAllSessionsForUser(Long userId, String currentSession) {

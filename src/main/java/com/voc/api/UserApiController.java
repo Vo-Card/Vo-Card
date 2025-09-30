@@ -1,6 +1,7 @@
 package com.voc.api;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -12,16 +13,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.UserManager;
 import com.voc.jwt.JwtManager;
 import com.voc.security.Permission;
 import com.voc.security.SessionManager;
+import com.voc.utils.Row;
 
 @RestController
 @RequestMapping("/api/user")
@@ -53,6 +57,42 @@ public class UserApiController {
             return JwtManager.validateJwt(token);
         }
         return Optional.empty();
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<Map<String, Object>> getSessions(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            List<Row> sessions = SessionManager.getAllSessionFromUser(userId.get());
+
+            if (!sessions.isEmpty()) {
+                response.put("current_session_id", sessionid);
+                response.put("user_sessions", sessions);
+                return ResponseEntity.ok(response);
+            }
+            response.put("message", "Failed to query session, please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
     }
 
     @PostMapping("/updateProfile")
@@ -150,6 +190,42 @@ public class UserApiController {
                 return ResponseEntity.ok(response);
             }
             response.put("message", "Failed to delete user, please try again later.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
+    @DeleteMapping("/sessions")
+    public ResponseEntity<Map<String, Object>> deleteSession(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
+            @RequestParam String selectedSession) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            Boolean isSuccess = SessionManager.deleteSession(selectedSession);
+
+            if (isSuccess) {
+                response.put("message", "Complete deleted session");
+                return ResponseEntity.ok(response);
+            }
+            response.put("message", "Failed to delete session, please try again later.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
         } else {
             response.put("message", "JWT missing userData");
