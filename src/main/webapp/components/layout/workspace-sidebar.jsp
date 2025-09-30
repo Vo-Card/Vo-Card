@@ -35,6 +35,28 @@
 
     <div class="separator"></div>
 
+    <div id="authority" class="moderation selection">
+        <ul class="moderation menu">
+            <li id="staff-audit-log">
+                <a href="/workspace/mod-log" data-workspace>
+                    <i class="nf nf-md-newspaper_variant_multiple"></i>Mod Log
+                </a>
+            </li>
+            <li id="staff-moderation">
+                <a href="/workspace/moderation" data-workspace>
+                    <i class="nf nf-md-folder_edit"></i>Moderation
+                </a>
+            </li>
+            <li id="root-manager">
+                <a href="/workspace/root" data-workspace>
+                    <i class="nf nf-md-tools"></i>Root
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="separator"></div>
+
     <div class="user selection">
         <ul class="user menu">
             <li>
