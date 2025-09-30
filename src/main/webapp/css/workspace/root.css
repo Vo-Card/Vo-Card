@@ -10,7 +10,7 @@ role-create {
     background-color: var(--root-button-color);
     padding: 8px 15px;
     border-radius: 10px;
-    transition: all ease-in 0.2s;
+    transition: background-color ease-in 0.2s;
     cursor: pointer;
 }
 
@@ -42,14 +42,18 @@ list-item {
     display: block;
     background-color: var(--root-list-item);
     width: 100%;
-    height: 100vh;
+    height: 80vh;
     padding: 10px;
 }
 
-role-item {
+
+
+
+role-item,
+role-clickable {
     display: flex;
     justify-content: space-between;
-    padding: 8px 15px;
+    padding: 10px 15px;
     background-color: #343343;
     border-radius: 8px;
     align-items: center;
@@ -80,11 +84,85 @@ role-behind {
     cursor: pointer;
 }
 
+/*-----------*/
+/* Edit-Page */
+/*-----------*/
+
+
+permission-setting {
+    display: flex;
+    gap: 10px;
+}
+
+.permission-header,
+.permission-details {
+    padding: 10px;
+    background-color: var(--menu-primary-color);
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+list-item h5 {
+    margin-bottom: 5px;
+}
+
+.role-container,
+.role-container p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    font-size: 16px;
+}
+
+permission-container {
+    margin-top: 10px;
+    border-radius: 8px;
+    display: block;
+    background-color: var(--root-list-item);
+    width: 100%;
+    height: 68vh;
+    padding: 10px;
+}
+
+role-confirm {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    margin-top: 2vh;
+    width: 100%;
+    height: 10vh;
+    background-color: var(--root-list-item);
+    align-items: center;
+    padding: 5px 15px;
+}
+
+
+
+role-confirm .role-button {
+    display: flex;
+    gap: 10px;
+}
+
+#reset-role {
+    background-color: transparent;
+}
+
+#submit-role {
+    padding: 10px;
+}
+
+.role-container .checkbox-custom {
+    scale: 0.8;
+    align-items: center;
+}
+
 /*----------*/
 /* Dropdown */
 /*----------*/
 role-dropdown {
     min-width: 12em;
+    position: relative;
 }
 
 selected-role {
@@ -110,12 +188,37 @@ role-dropdown ul {
     border-radius: 0.5em;
     position: absolute;
     width: 100%;
+    cursor: pointer;
+    user-select: none;
+    top: 3em;
+    left: 50%;
+    transform: translate(-50%);
+    opacity: 0;
+    display: none;
+    transition: 0.2s;
+    z-index: 5;
+}
+
+/* prepare for Js */
+role-dropdown .menu-open {
+    display: block;
+    opacity: 1;
+}
+
+role-dropdown ul li {
+    padding: 0.7em 0.5em;
+    margin: 0.3em 0;
+    border-radius: 0.5em;
+    cursor: pointer;
 }
 
 
 /*-------*/
 /* HOVER */
 /*-------*/
+role-dropdown ul li:hover {
+    background-color: #453f4e;
+}
 
 role-behind:hover {
     background-color: #423b4b;
