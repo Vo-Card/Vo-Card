@@ -115,13 +115,13 @@ nav ul.right li a {
 }
 
 .index-card-wraper.first {
-    bottom: 15vh;
+    bottom: 10vh;
     left: 5vw;
     z-index: -1;
 }
 
 .index-card-wraper.second {
-    bottom: 15vh;
+    bottom: 10vh;
     right: 5vw;
     z-index: -1;
 }
@@ -138,30 +138,28 @@ nav ul.right li a {
 
 @keyframes firstCardAnim {
     0% {
-        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
-            translateZ(30px);
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1) translateZ(30px);
     }
+
     50% {
-        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
-            translateZ(0px);
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1) translateZ(0px);
     }
+
     100% {
-        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1.1)
-            translateZ(30px);
+        transform: rotateX(45deg) rotateY(20deg) rotateZ(45deg) scale(1) translateZ(30px);
     }
 }
 
 @keyframes secondCardAnim {
     0% {
-        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
-            translateZ(30px);
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1) translateZ(30px);
     }
+
     50% {
-        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
-            translateZ(0px);
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1) translateZ(0px);
     }
+
     100% {
-        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1.1)
-            translateZ(30px);
+        transform: rotateX(45deg) rotateY(-20deg) rotateZ(-45deg) scale(1) translateZ(30px);
     }
 }
