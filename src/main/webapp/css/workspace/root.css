@@ -221,6 +221,36 @@ mod-menu h2 {
     margin-bottom: 12px;
 }
 
+.mod-header {
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.log-header {
+    margin-bottom: 12px;
+}
+
+.log-header,
+.log-item {
+    width: 100%;
+    display: flex;
+    background-color: var(--menu-primary-color);
+    border-radius: 10px;
+    border: var(--content-border);
+}
+
+.title-name,
+.title-action-type,
+.title-message,
+.title-timestamp,
+#log-name,
+#log-action,
+#log-message,
+#log-timestamp {
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+}
 
 /*-------*/
 /* HOVER */
