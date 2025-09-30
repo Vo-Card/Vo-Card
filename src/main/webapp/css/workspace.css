@@ -418,6 +418,54 @@ hr.sep-info {
     }
 }
 
+/* SESSION POPUP */
+
+.session-box {
+    width: 100%;
+    padding: 10px 20px 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-normal-color);
+    border-radius: 5px;
+}
+
+.session-data {
+    display: flex;
+    flex-direction: column;
+}
+
+.session-delete-btn {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.session-delete-btn i:hover::before {
+    color: var(--alert);
+}
+
+.session-delete-btn i,
+.session-delete-btn i::before {
+    display: block;
+    position: relative;
+    width: 20px;
+    top: -1px;
+    font-size: 25px;
+    height: 20px;
+    transition: color 0.2s ease;
+}
+
+session .text-gray {
+    color: #777 !important;
+}
+
+session .light-gray {
+    color: #a0b1bf !important;
+}
+
 /* ----------------- */
 /* Main Content Area */
 /* ----------------- */

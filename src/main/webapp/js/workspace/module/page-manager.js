@@ -11,7 +11,10 @@ import {
     loadAllDecksToReview,
 } from "../content/deck-loader.js";
 import { displayPublicDecks } from "../handler/explorer-handler.js";
-import { createPopupBox } from "../handler/popup-handler.js";
+import {
+    createConfirmationPopup,
+    createPopupBox,
+} from "../handler/popup-handler.js";
 import { loadUserInformation } from "../handler/home-handler.js";
 import { rtDropdowns } from "../dropdown.js";
 
@@ -356,6 +359,135 @@ async function userLoader(path) {
 
     return temp;
 }
+
+function getDeviceInfo(ua) {
+    let platform = "Unknown";
+    if (/windows phone/i.test(ua)) {
+        platform = "Windows Phone";
+    } else if (/windows/i.test(ua)) {
+        platform = "Windows";
+    } else if (/android/i.test(ua)) {
+        platform = "Android";
+    } else if (/linux/i.test(ua)) {
+        platform = "Linux";
+    } else if (/iphone|ipad|ipod/i.test(ua)) {
+        platform = "iOS";
+    } else if (/mac os x/i.test(ua)) {
+        platform = "MacOS";
+    }
+
+    let device = "Desktop";
+    if (/mobi/i.test(ua)) {
+        device = "Mobile";
+    } else if (/tablet|ipad/i.test(ua)) {
+        device = "Tablet";
+    }
+
+    let browser = "Unknown";
+
+    if (/edg\//i.test(ua)) {
+        browser = "Edge";
+    } else if (/chrome|crios/i.test(ua)) {
+        browser = "Chrome";
+    } else if (/firefox|fxios/i.test(ua)) {
+        browser = "Firefox";
+    } else if (/safari/i.test(ua) && !/chrome|crios|edg/i.test(ua)) {
+        browser = "Safari";
+    } else if (/opr\//i.test(ua)) {
+        browser = "Opera";
+    } else if (/msie|trident/i.test(ua)) {
+        browser = "Internet Explorer";
+    }
+
+    return {
+        platform,
+        device: device + "|" + browser,
+    };
+}
+
+// Example usage
+console.log(getDeviceInfo());
+
+async function sessionLoader(path) {
+    const temp = document.createElement("div");
+    const template = await (await fetch(path)).text();
+    temp.innerHTML = template;
+
+    //prep data
+    const res = await fetchWithAuth("/api/user/sessions");
+
+    const data = await res.json();
+    const currentSession = data.current_session_id;
+
+    // get initial element
+    const sessionTemplate = temp.querySelector(".session-box");
+
+    const sessionClone = sessionTemplate.cloneNode(true);
+    sessionTemplate.remove(); // remove old template
+
+    const currentContain = /**@type {HTMLElement} */ (
+        temp.querySelector("current-session")
+    );
+
+    const otherContain = /**@type {HTMLElement} */ (
+        temp.querySelector("other-sessions")
+    );
+
+    const sessions = data.user_sessions;
+    console.log(sessions);
+    sessions.forEach((session) => {
+        //create new sessionBox
+        const currentSessionBox = /**@type {HTMLElement} */ (
+            sessionClone.cloneNode(true)
+        );
+
+        let setSession = otherContain;
+        if (session.session_id_PK === currentSession) {
+            setSession = currentContain;
+        } else {
+            otherContain.innerHTML = "";
+        }
+
+        const { device, platform } = getDeviceInfo(session.user_agent);
+        const deviceCont = /**@type {HTMLElement} */ (
+            currentSessionBox.querySelector(".session-device")
+        );
+        const platfCont = /**@type {HTMLElement} */ (
+            currentSessionBox.querySelector(".session-platform")
+        );
+
+        console.log(device, platform);
+
+        deviceCont.textContent = device;
+        platfCont.textContent = platform;
+
+        const delBtn = /**@type {HTMLElement} */ (
+            currentSessionBox.querySelector(".session-delete-btn")
+        );
+        if (session.session_id_PK !== currentSession) {
+            delBtn.addEventListener("click", async () => {
+                console.log("[Deleting] User session");
+                const res = await fetchWithAuth(
+                    "/api/user/sessions?selectedSession=" +
+                        session.session_id_PK,
+                    {
+                        method: "DELETE",
+                    }
+                );
+                if (res.ok) {
+                    currentSessionBox.remove();
+                }
+            });
+        } else {
+            delBtn.style.display = "none";
+        }
+
+        setSession.appendChild(currentSessionBox);
+    });
+
+    return temp;
+}
+
 document.addEventListener("click", async (event) => {
     const target = event.target;
     if (target instanceof Element) {
@@ -385,13 +517,11 @@ document.addEventListener("click", async (event) => {
                     break;
 
                 case "session":
-                    console.log("SEssion in");
-
                     createPopupBox(
                         "60vw",
                         "60vh",
                         "Session Setting : ",
-                        await userLoader(
+                        await sessionLoader(
                             "/components/content/popup/session.jsp"
                         )
                     );
