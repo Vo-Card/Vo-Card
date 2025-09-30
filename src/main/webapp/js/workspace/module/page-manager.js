@@ -13,6 +13,7 @@ import {
 import { displayPublicDecks } from "../handler/explorer-handler.js";
 import { createPopupBox } from "../handler/popup-handler.js";
 import { loadUserInformation } from "../handler/home-handler.js";
+import { rtDropdowns } from "../dropdown.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -46,7 +47,7 @@ const pageComponents = {
         css: "/css/workspace/review.css",
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
-    "/workspace/root": { js: null, css: "/css/workspace/root.css" },
+    "/workspace/root": { js: rtDropdowns, css: "/css/workspace/root.css" },
 };
 
 /**
