@@ -551,24 +551,33 @@ selected-card::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+.user-setting-inputs {
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    align-items: center;
+    display: flex;
+}
+
 delete-user,
-logout,
-save {
+#setting-logout,
+#setting-submit {
     padding: 6px 10px;
     border-radius: 10px;
     transition: background-color 0.2s ease-in;
     cursor: pointer;
+    text-decoration: none;
 }
 
 delete-user:hover {
     background-color: #7d2929 !important;
 }
 
-logout:hover {
+#setting-logout:hover {
     background-color: #a75555 !important;
 }
 
-save:hover {
+#setting-submit:hover {
     background-color: #4972ab !important;
 }
 

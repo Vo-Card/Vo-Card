@@ -3,7 +3,7 @@ import {
     loadWeeklyChart,
     statsLoader,
 } from "/js/workspace/handler/charts-handler.js";
-import { TokenManager } from "/js/auth/auth.js";
+import { fetchWithAuth, TokenManager } from "/js/auth/auth.js";
 import {
     deckLoader,
     deckDetailLoader,
@@ -259,6 +259,100 @@ async function userLoader(path) {
     const template = await (await fetch(path)).text();
     temp.innerHTML = template;
 
+    const settingForm = /**@type {HTMLFormElement} */ (
+        temp.querySelector("#user-setting")
+    );
+    const usernameInput = /**@type {HTMLInputElement} */ (
+        temp.querySelector("#setting-username")
+    );
+    const displayNameInput = /**@type {HTMLInputElement} */ (
+        temp.querySelector("#setting-display-name")
+    );
+    const passwordInput = /**@type {HTMLInputElement} */ (
+        settingForm.querySelector("#setting-new-password")
+    );
+    // setting-message
+    const sMessage = /**@type {HTMLInputElement} */ (
+        settingForm.querySelector("#setting-message")
+    );
+
+    const deleteAccBtn = /**@type {HTMLElement} */ (
+        settingForm.querySelector("delete-user")
+    );
+
+    deleteAccBtn.addEventListener("click", async (e) => {
+        const formData = new FormData(settingForm);
+
+        // @ts-ignore
+        const data = Object.fromEntries(Array.from(formData.entries()));
+        console.log(data);
+
+        const res = await fetchWithAuth("/api/user/deleteUser", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        const message = (await res.json()).message;
+
+        if (res.ok) {
+            // Update TokenManager with new user data
+            TokenManager.setUserData({
+                username: usernameInput.value,
+                display_name: displayNameInput.value,
+            });
+            sMessage.textContent = message;
+            setTimeout(() => location.reload(), 500);
+        } else {
+            sMessage.textContent = message;
+        }
+    });
+
+    usernameInput.value = username;
+    displayNameInput.value = displayName;
+
+    settingForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(settingForm);
+        // Remove unchanged fields from formData
+        if (usernameInput.value === username) {
+            formData.delete("username");
+        }
+        if (displayNameInput.value === displayName) {
+            formData.delete("displayName");
+        }
+        if (passwordInput && !passwordInput.value) {
+            formData.delete("newPassword");
+        }
+
+        // @ts-ignore
+        const data = Object.fromEntries(Array.from(formData.entries()));
+        console.log(data);
+
+        const res = await fetchWithAuth("/api/user/updateProfile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        const message = (await res.json()).message;
+
+        if (res.ok) {
+            // Update TokenManager with new user data
+            TokenManager.setUserData({
+                username: usernameInput.value,
+                display_name: displayNameInput.value,
+            });
+            sMessage.textContent = message;
+            setTimeout(() => location.reload(), 500);
+        } else {
+            sMessage.textContent = message;
+        }
+    };
+
     return temp;
 }
 document.addEventListener("click", async (event) => {
@@ -279,7 +373,6 @@ document.addEventListener("click", async (event) => {
             const popupType = popup.getAttribute("popup-type");
             switch (popupType) {
                 case "setting":
-                    // A fucking place holder
                     createPopupBox(
                         "60vw",
                         "fit-content",

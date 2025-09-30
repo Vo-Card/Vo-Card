@@ -77,22 +77,24 @@ public class Permission {
         return (permissionLevel & Values.ROOT_USER) != 0;
     }
 
-    public static void createRole(Long userId, Long permissionBitmask, String roleName, String roleDesc) {
-        Long permissionLevel = getPermissionViaUserId(userId);
+    public static Long createRole(Long userId, Long permissionBitmask, String roleName, String roleDesc) {
+        if (isRootUserPresent()) {
+            Long permissionLevel = getPermissionViaUserId(userId);
 
-        if (permissionLevel == null) {
-            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
-            return;
-        }
+            if (permissionLevel == null) {
+                System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+                return null;
+            }
 
-        if ((permissionLevel & Values.ROOT_USER) == 0) {
-            System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
-            return;
-        }
+            if ((permissionLevel & Values.ROOT_USER) == 0) {
+                System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+                return null;
+            }
 
-        if ((permissionBitmask & Values.ROOT_USER) != 0 && isRootUserPresent()) {
-            System.err.println(TAG_ERROR + "You cannot have more than 1 ROOT USER");
-            return;
+            if ((permissionBitmask & Values.ROOT_USER) != 0 && isRootUserPresent()) {
+                System.err.println(TAG_ERROR + "You cannot have more than 1 ROOT USER");
+                return null;
+            }
         }
 
         Long permId = Snowflake.nextId();
@@ -106,6 +108,8 @@ public class Permission {
         if (!res.isSuccess()) {
             System.err.println(TAG_ERROR + res.getErrorMessage());
         }
+
+        return permId;
     }
 
     public static void removeRole(Long userId, Long selectedRole) {
