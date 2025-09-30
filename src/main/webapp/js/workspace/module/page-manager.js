@@ -48,6 +48,7 @@ const pageComponents = {
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
     "/workspace/root": { js: rtDropdowns, css: "/css/workspace/root.css" },
+    "/workspace/mod-log": { js: null, css: "/css/workspace/root.css" },
 };
 
 /**

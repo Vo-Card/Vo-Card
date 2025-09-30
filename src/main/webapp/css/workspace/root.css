@@ -1,4 +1,5 @@
-root-menu {
+root-menu,
+mod-menu {
     padding: 0 10px;
     display: block;
 }
@@ -210,6 +211,14 @@ role-dropdown ul li {
     margin: 0.3em 0;
     border-radius: 0.5em;
     cursor: pointer;
+}
+
+/*---------*/
+/* MOD LOG */
+/*---------*/
+
+mod-menu h2 {
+    margin-bottom: 12px;
 }
 
 
