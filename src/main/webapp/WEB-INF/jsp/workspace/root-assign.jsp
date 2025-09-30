@@ -27,14 +27,14 @@
 
             <role-dropdown>
                 <!-- selected id -->
-                <selected-role>
+                <selected-role class="">
                     <span class="selected">None</span>
-                    <i class="nf nf-fa-arrow_down"></i>
+                    <i class="nf nf-md-chevron_down_circle"></i>
                 </selected-role>
                 <!-- Loadding role on this attribute as li -->
-                <ul>
-                    <li>none</li>
-                    <li>mod</li>
+                <ul class="">
+                    <li class="active">None</li>
+                    <li>Place-holder</li>
                 </ul>
             </role-dropdown>
         </role-item>
