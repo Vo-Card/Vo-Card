@@ -52,6 +52,7 @@ const pageComponents = {
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
     "/workspace/root": { js: rtDropdowns, css: "/css/workspace/root.css" },
     "/workspace/mod-log": { js: null, css: "/css/workspace/root.css" },
+    "/workspace/user-overview": { js: rtDropdowns, css: "/css/workspace/root.css" },
 };
 
 /**
@@ -469,7 +470,7 @@ async function sessionLoader(path) {
                 console.log("[Deleting] User session");
                 const res = await fetchWithAuth(
                     "/api/user/sessions?selectedSession=" +
-                        session.session_id_PK,
+                    session.session_id_PK,
                     {
                         method: "DELETE",
                     }

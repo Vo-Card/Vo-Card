@@ -252,6 +252,17 @@ mod-menu h2 {
     padding: 8px;
 }
 
+/*---------------*/
+/* USER-OVERVIEW */
+/*---------------*/
+delete-user {
+    padding: 5px 10px;
+}
+
+delete-user div {
+    padding: 2px 5px;
+}
+
 /*-------*/
 /* HOVER */
 /*-------*/
