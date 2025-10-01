@@ -8,10 +8,10 @@
         <assign-role-button>Assign Role</assign-role-button>
     </root-div>
 
-    <root-div style=" padding: 15px 10px 15px 0;">
-        <role-create>Create</role-create>
-        <input style="width: 50%;" type="text" id="search-roles" onkeyup="" placeholder="Search for roles..">
-    </root-div>
+    <form id="createNewRole" style=" padding: 15px 10px 15px 0;">
+        <input type="submit" style="width: fit-content;" value="Create">
+        <input style="width: 50%;" type="text" name="roleName" id="search-roles" placeholder="Search or Create roles..">
+    </form>
 
     <root-div style="border-bottom: 2px solid white;">
         <p>Role :</p>
@@ -29,8 +29,10 @@
                 <p>User</p>
             </role-mid>
             <!-- Enter to role id -->
-            <role-behind>Edit</role-behind>
+            <role-behind>
+                <button id="role-edit"></button>
+                <button id="role-delete"></button>
+            </role-behind>
         </role-item>
-        <!------------------->
     </list-item>
 </root-menu>

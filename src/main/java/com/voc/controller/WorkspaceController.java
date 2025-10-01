@@ -29,17 +29,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class WorkspaceController {
 
     /**
-     * Handles requests for specific workspace pages. 
+     * Handles requests for specific workspace pages.
      * <p>
      * If the page exists, it returns the corresponding JSP view.
      * If the page does not exist, it returns a 404 error page.
      * </p>
-     * <p> 
+     * <p>
      * Supports both full page loads and AJAX requests.
      * </p>
      *
-     * @param page The requested page name
-     * @param request The HTTP request
+     * @param page     The requested page name
+     * @param request  The HTTP request
      * @param response The HTTP response
      * @return The name of the JSP view to render
      */
@@ -69,11 +69,11 @@ public class WorkspaceController {
         }
     }
 
-    @GetMapping({"/decks/{deckId}", "/decks/{deckId}/{levelId}", "/decks/{deckId}/{levelId}/{cardId}"})
+    @GetMapping({ "/decks/{deckId}", "/decks/{deckId}/{levelId}", "/decks/{deckId}/{levelId}/{cardId}" })
     public String getDeckSubPages(
-            @PathVariable(required = false) String deckId,
-            @PathVariable(required = false) String levelId,
-            @PathVariable(required = false) String cardId,
+            @PathVariable(required = false) Long deckId,
+            @PathVariable(required = false) Long levelId,
+            @PathVariable(required = false) Long cardId,
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -81,6 +81,33 @@ public class WorkspaceController {
 
         if (isAjax) {
             return "workspace/deckDetail";
+        } else {
+            return "workspace";
+        }
+    }
+
+    @GetMapping("/root/assign")
+    public String getAssignPage(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+
+        if (isAjax) {
+            return "workspace/root/assign";
+        } else {
+            return "workspace";
+        }
+    }
+
+    @GetMapping("/root/{roleId}")
+    public String getRootEditPage(
+            @PathVariable(required = false) Long roleId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+
+        if (isAjax) {
+            return "workspace/root/edit";
         } else {
             return "workspace";
         }

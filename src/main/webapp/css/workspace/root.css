@@ -1,7 +1,10 @@
 root-menu,
 mod-menu {
     padding: 0 10px;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    height: fit-content;
 }
 
 /* Top component */
@@ -40,15 +43,15 @@ root-div div {
 list-item {
     margin-top: 10px;
     border-radius: 8px;
-    display: block;
-    background-color: var(--root-list-item);
+    background-color: var(--menu-primary-color);
+    border: var(--content-border);
     width: 100%;
-    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: auto;
     padding: 10px;
 }
-
-
-
 
 role-item,
 role-clickable {
@@ -77,18 +80,28 @@ role-mid p {
 }
 
 role-behind {
-    background-color: #2B2730;
-    padding: 8px 60px;
-    border-radius: 8px;
-    transition: ease-in 0.2s;
     user-select: none;
+    display: flex;
+    gap: 5px;
+}
+
+role-behind button {
+    background-color: var(--root-role-ul);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    align-items: center;
+    display: block;
+    transition: background-color ease 0.2s;
     cursor: pointer;
 }
 
 /*-----------*/
 /* Edit-Page */
 /*-----------*/
-
 
 permission-setting {
     display: flex;
@@ -138,8 +151,6 @@ role-confirm {
     padding: 5px 15px;
 }
 
-
-
 role-confirm .role-button {
     display: flex;
     gap: 10px;
@@ -168,7 +179,7 @@ role-dropdown {
 
 selected-role {
     width: 100%;
-    background-color: #2B2730;
+    background-color: #2b2730;
     display: flex;
     justify-content: space-between;
     padding: 7px 25px;
@@ -183,7 +194,7 @@ selected-role {
 role-dropdown ul {
     list-style: none;
     padding: 0.2em 0.5em;
-    background-color: #2B2730;
+    background-color: #2b2730;
     border: 1px #5e526b solid;
     box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
     border-radius: 0.5em;
@@ -270,13 +281,12 @@ role-dropdown ul li:hover {
     background-color: #453f4e;
 }
 
-role-behind:hover {
-    background-color: #423b4b;
+role-behind button:hover {
+    background-color: var(--root-role-ul-hover);
 }
 
 selected-role:hover {
     background-color: #423b4b;
-
 }
 
 role-button:hover,
