@@ -43,8 +43,8 @@
                 </a>
             </li>
             <li id="staff-moderation">
-                <a href="/workspace/moderation" data-workspace>
-                    <i class="nf nf-md-folder_edit"></i>Moderation
+                <a href="/workspace/user-overview" data-workspace>
+                    <i class="nf nf-md-folder_edit"></i>User Overview
                 </a>
             </li>
             <li id="root-manager">
