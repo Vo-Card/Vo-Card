@@ -2,12 +2,20 @@
   "compilerOptions": {
     "checkJs": true,
     "target": "es2020",
-    "lib": ["es2020", "dom"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "moduleResolution": "bundler",
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "/js/*": ["src/main/webapp/js/*"]
+      "/js/*": [
+        "src/main/webapp/js/*"
+      ]
     }
   },
-  "include": ["src/main/webapp/js/**/*"]
+  "include": [
+    "src/main/webapp/js/**/*"
+  ]
 }
