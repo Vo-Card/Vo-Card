@@ -1,9 +1,13 @@
 package com.voc.database;
 
 import com.voc.security.Permission;
+
+import java.util.List;
+
 import com.voc.security.AuthManager;
 import com.voc.security.PasswordUtils;
 import com.voc.security.SessionManager;
+import com.voc.utils.Convertors;
 import com.voc.utils.Row;
 
 public class UserManager {
@@ -50,7 +54,7 @@ public class UserManager {
         return false;
     }
 
-    public static Boolean removeUser(Long userId, String currentPassword) {
+    public static Boolean removeUser(Long userId, String currentPassword, boolean bypass) {
         // Get user current data
         Row userData = DatabaseUtils.sqlSingleRowStatement("SELECT * FROM usertb WHERE user_id_PK = ?", userId);
         if (userData == null)
@@ -59,7 +63,7 @@ public class UserManager {
         String hashedPassword = (String) userData.get("password");
         Boolean isCorrectPassword = PasswordUtils.verifyPassword(currentPassword, hashedPassword);
 
-        if (isCorrectPassword) {
+        if (isCorrectPassword || bypass) {
             String sql = "DELETE FROM usertb WHERE user_id_PK = ?";
             DatabaseUtils.sqlPrepareStatement(sql, userId);
 
@@ -67,5 +71,26 @@ public class UserManager {
         }
 
         return false;
+    }
+
+    public static List<Row> getAllUserByPage(Long page) {
+        if (page == null || page < 1) {
+            page = 1L; // default to first page
+        }
+
+        int pageSize = 20;
+        long offset = (page - 1) * pageSize;
+
+        String sql = """
+                SELECT user_id_PK,
+                        username
+                FROM usertb
+                ORDER BY user_id_PK
+                LIMIT ?
+                OFFSET ?
+                """;
+        List<Row> userTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
+        Convertors.convertIdsToString(userTable, "user_id_PK");
+        return userTable;
     }
 }
