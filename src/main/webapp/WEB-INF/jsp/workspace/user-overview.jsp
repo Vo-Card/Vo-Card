@@ -13,12 +13,12 @@
             <!-- loading username -->
             <role-front>
                 <i class="nf nf-fa-user"></i>
-                <p>Username</p>
+                <p class="username-display">Username</p>
             </role-front>
 
             <delete-user>
                 <!-- selected id -->
-                <div>
+                <div class="choosen-one">
                     <span class="selected">Delete user</span>
                     <i class="nf nf-fa-trash"></i>
                 </div>
