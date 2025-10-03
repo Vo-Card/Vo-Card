@@ -22,7 +22,7 @@
             <!-- loading username -->
             <role-front>
                 <i class="nf nf-fa-user"></i>
-                <p>Username</p>
+                <p class="username-display">Username</p>
             </role-front>
 
             <role-dropdown>
