@@ -25,6 +25,7 @@ public class Permission {
         public static final long VIEW_AUDIT_LOG = 1 << 6;
 
         public static final long CHANGE_USERNAME = 1 << 7;
+        public static final long VIEW_ALL_USER = 1 << 8;
     }
 
     private static Long getPermissionViaUserId(Long userId) {
@@ -51,6 +52,23 @@ public class Permission {
         Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId, DatabaseUtils.getRootUsername());
 
         return (res != null) ? ((Number) res.get("permission_id_PK")).longValue() : null;
+    }
+
+    public static boolean checkUserPermission(Long userId, Long checkPermission) {
+        String sql = """
+                SELECT p.permission_level
+                    FROM permissiontb p
+                    JOIN usertb u ON u.permission_level_FK = p.permission_id_PK
+                    WHERE u.user_id_PK = ?
+                """;
+
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId);
+        Long userPermission = ((Number) res.get("permission_level")).longValue();
+
+        if ((userPermission & checkPermission) != 0 || (userPermission & Values.ROOT_USER) != 0) {
+            return true;
+        }
+        return false;
     }
 
     private static boolean isRootUserPresent() {
