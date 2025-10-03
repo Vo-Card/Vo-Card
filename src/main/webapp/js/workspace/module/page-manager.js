@@ -16,7 +16,8 @@ import {
     createPopupBox,
 } from "../handler/popup-handler.js";
 import { loadUserInformation } from "../handler/home-handler.js";
-import { rtDropdowns } from "../dropdown.js";
+import { rtDropdowns, assignRole } from "../dropdown.js";
+import { lookOverview } from "../overview.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -50,9 +51,15 @@ const pageComponents = {
         css: "/css/workspace/review.css",
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
-    "/workspace/root": { js: rtDropdowns, css: "/css/workspace/root.css" },
+    "/workspace/root": { js: null, css: "/css/workspace/root.css" },
+    "/workspace/root/assign": {
+        js: () => {
+            rtDropdowns();
+            assignRole();
+        }, css: "/css/workspace/root.css"
+    },
     "/workspace/mod-log": { js: null, css: "/css/workspace/root.css" },
-    "/workspace/user-overview": { js: rtDropdowns, css: "/css/workspace/root.css" },
+    "/workspace/user-overview": { js: lookOverview, css: "/css/workspace/root.css" },
 };
 
 /**
