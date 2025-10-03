@@ -1,3 +1,6 @@
+import { fetchWithAuth } from "/js/auth/auth.js";
+import { loadPage } from "./module/page-manager.js";
+
 export async function rtDropdowns() {
     const dropdowns = document.querySelectorAll('role-dropdown')
     dropdowns.forEach(dropdowns => {
@@ -27,3 +30,28 @@ export async function rtDropdowns() {
     });
 }
 
+let pageCache = 1;
+export async function assignRole() {
+    console.log("Ello");
+    const res = await fetchWithAuth("/api/user/getUser?page=" + pageCache);
+
+    if (res.ok) {
+        const data = await res.json();
+        const container = document.querySelector('list-item');
+        const roleItem = document.querySelector('role-item');
+        const roleItemCopy = roleItem.cloneNode(true);
+        roleItem.remove();
+        console.log(roleItemCopy);
+        console.log(data.User);
+        data.User.forEach(user => {
+            const roleItemAppend = roleItemCopy.cloneNode(true);
+            // @ts-ignore
+            const username = roleItemAppend.querySelector('.username-display');
+
+            username.textContent = user.username;
+            container.append(roleItemAppend);
+        });
+    } else {
+        console.log("ello");
+    }
+}
