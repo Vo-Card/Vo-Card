@@ -12,7 +12,7 @@
         <list-item style="width: 35%;">
             <!--loading Role name -->
             <!-- reminder: is role name is unique -->
-            <role-clickable>place-holder</role-clickable>
+            <role-item class="role-name-display">place-holder</role-item>
         </list-item>
 
         <!-- Right side -->
@@ -77,8 +77,12 @@
                                     name="allowCloning"><span class="slider"></span></label>
                         </div>
                     </div>
+                </div>
 
-
+                <div class="permission-bottom" style="width: 100%; ">
+                    <label for="role-description" style="margin-bottom: 10px;">Role Description</label>
+                    <textarea type="text" name="role-desc" id="role-description" 
+                    style="resize: none;"></textarea>
                 </div>
             </permission-container>
 
