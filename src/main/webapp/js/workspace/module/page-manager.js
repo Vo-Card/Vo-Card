@@ -18,6 +18,7 @@ import {
 import { loadUserInformation } from "../handler/home-handler.js";
 import { rtDropdowns, assignRole } from "../dropdown.js";
 import { lookOverview } from "../overview.js";
+import {showAllRoles, createEmptyRole,} from "../roleOverview.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -51,7 +52,13 @@ const pageComponents = {
         css: "/css/workspace/review.css",
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
-    "/workspace/root": { js: null, css: "/css/workspace/root.css" },
+    "/workspace/root": { js: () => {
+        showAllRoles();
+        createEmptyRole();
+        }, css: "/css/workspace/root.css" },
+    "/workspace/root/edit": { js: () => {
+        roleSideBar();
+    }, css: "/css/workspace/root.css" },
     "/workspace/root/assign": {
         js: () => {
             rtDropdowns();

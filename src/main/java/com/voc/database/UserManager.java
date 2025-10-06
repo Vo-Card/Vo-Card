@@ -93,4 +93,36 @@ public class UserManager {
         Convertors.convertIdsToString(userTable, "user_id_PK");
         return userTable;
     }
+
+    public static List<Row> getAllRoleByPage(Long page){
+        if (page == null || page < 1) {
+            page = 1L;
+        }
+
+        int pageSize = 20;
+        long offset = (page - 1) * pageSize;
+
+        String sql = """
+               SELECT
+                    p.permission_id_PK,
+                    p.permission_name,
+                    p.permission_level,
+                    p.permission_description,
+                    COUNT(u.user_id_PK) AS user_count
+                FROM
+                    permissiontb p
+                LEFT JOIN
+                    usertb u ON p.permission_id_PK = u.permission_level_FK
+                GROUP BY
+                    p.permission_id_PK, p.permission_name
+                ORDER BY
+                    p.permission_id_PK
+                LIMIT ?
+                OFFSET ?;
+                """;
+
+        List<Row> roleTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
+        Convertors.convertIdsToString(roleTable, "permission_id_PK");
+        return roleTable;
+    }
 }
