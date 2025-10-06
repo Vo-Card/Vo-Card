@@ -109,7 +109,8 @@ permission-setting {
 }
 
 .permission-header,
-.permission-details {
+.permission-details,
+.permission-bottom {
     padding: 10px;
     background-color: var(--menu-primary-color);
     border-radius: 10px;
@@ -168,6 +169,7 @@ role-confirm .role-button {
     scale: 0.8;
     align-items: center;
 }
+
 
 /*----------*/
 /* Dropdown */
