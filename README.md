@@ -4,6 +4,16 @@
 
 Vo-Card is a web application designed to help users practice English using flashcards.
 
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [SQL Setup](#sql-setup)
+   - [Automatic Setup](#automatic-setup)
+   - [Manual Setup](#manual-setup)
+3. [Getting Start](#getting-started)
+
+**For more info on how things operate, please see [developer ducments]()**
+
 ## Prerequisites
 Before running the project, ensure you have the following installed:
 
@@ -26,17 +36,18 @@ Vo-Card can automatically set up the database for you **if** you use an account 
 
 ## Getting Started
 
+Here is the simple way on how to start the code :
+
 ```bash
 # Clone the repository
 git clone https://github.com/Vo-Card/Vo-Card.git
 cd Vo-Card
 
 # On Windows, you can use the provided dev.bat script:
-./dev.bat --All
+./dev.bat --all
 
-# On Linux (no bash script yet):
-# 1. Build the project
-mvn clean install
+# On Linux, you can use the provided dev.sh instead:
+./dev.sh --all
+```
+*use `--all` **only once** for initialization. You can run dev without any option afterward (e.g. `./dev.sh`)*
 
-# 2. Run the project using Tomcat
-mvn tomcat9:run
