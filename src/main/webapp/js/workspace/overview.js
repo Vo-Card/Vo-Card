@@ -11,8 +11,6 @@ export async function lookOverview() {
         const roleItem = document.querySelector('role-item');
         const roleItemCopy = roleItem.cloneNode(true);
         roleItem.remove();
-        console.log(roleItemCopy);
-        console.log(data.User);
         data.User.forEach(user => {
             const roleItemAppend = roleItemCopy.cloneNode(true);
             // @ts-ignore
