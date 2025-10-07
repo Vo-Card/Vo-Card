@@ -8,20 +8,13 @@
     </root-div>
 
     <permission-setting>
-        <!-- left side -->
-        <list-item style="width: 35%;">
-            <!--loading Role name -->
-            <!-- reminder: is role name is unique -->
-            <role-item class="role-name-display">place-holder</role-item>
-        </list-item>
-
         <!-- Right side -->
-        <form style="width: 100%;">
+        <form autocomplete="off" style="width: 100%;">
             <!-- I hate naming the things -->
             <permission-container>
                 <div class="permission-header">
                     <h5>Role Name *</h5>
-                    <input type="text" id="role-name" value="New-role">
+                    <input type="text" id="role-name" placeholder="New-role">
                 </div>
 
                 <div class="permission-details">
@@ -81,7 +74,7 @@
 
                 <div class="permission-bottom" style="width: 100%; ">
                     <label for="role-description" style="margin-bottom: 10px;">Role Description</label>
-                    <textarea type="text" name="role-desc" id="role-description" 
+                    <textarea type="text" name="role-desc" id="role-description" placeholder="Role Description" 
                     style="resize: none;"></textarea>
                 </div>
             </permission-container>
