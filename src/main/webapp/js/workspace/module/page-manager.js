@@ -229,10 +229,9 @@ export async function loadPage(path, addHistory = true) {
             createEmptyRole();
         } else if (/^\/workspace\/root\/assign\/?$/.test(path)) {
             rtDropdowns();
-            assignRole();
+            assignRole(path);
         } else if (/^\/workspace\/root\/[^/]+\/?$/.test(path)) {
-            updateRole();
-
+            updateRole(path);
         }
     }
 
