@@ -18,7 +18,7 @@ import {
 import { loadUserInformation } from "../handler/home-handler.js";
 import { rtDropdowns, assignRole } from "../dropdown.js";
 import { lookOverview } from "../overview.js";
-import { showAllRoles, createEmptyRole } from "../roleOverview.js";
+import { showAllRoles, createEmptyRole, updateRole } from "../roleOverview.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -223,6 +223,7 @@ export async function loadPage(path, addHistory = true) {
 
     // Root-specific AJAX loader
     if (path.startsWith("/workspace/root")) {
+        console.log(path);
         if (/^\/workspace\/root\/?$/.test(path)) {
             showAllRoles();
             createEmptyRole();
@@ -230,6 +231,8 @@ export async function loadPage(path, addHistory = true) {
             rtDropdowns();
             assignRole();
         } else if (/^\/workspace\/root\/[^/]+\/?$/.test(path)) {
+            updateRole();
+
         }
     }
 
