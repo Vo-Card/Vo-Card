@@ -5,6 +5,7 @@ import static com.voc.utils.AnsiColor.TAG_ERROR;
 import com.voc.database.DatabaseUtils;
 import com.voc.database.SQLResult;
 import com.voc.server.Snowflake;
+import com.voc.utils.Convertors;
 import com.voc.utils.Row;
 
 public class Permission {
@@ -41,15 +42,15 @@ public class Permission {
         return (res != null) ? ((Number) res.get("permission_level")).longValue() : null;
     }
 
-    private static Long getRootUserPermissionId(Long userId) {
+    public static Long getRootUserPermissionId() {
         String sql = """
                 SELECT p.permission_id_PK
                 FROM permissiontb p
                 JOIN usertb u ON u.permission_level_FK = p.permission_id_PK
-                WHERE u.user_id_PK = ? AND u.username = ?
+                WHERE u.username = ?
                                 """;
 
-        Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId, DatabaseUtils.getRootUsername());
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, DatabaseUtils.getRootUsername());
 
         return (res != null) ? ((Number) res.get("permission_id_PK")).longValue() : null;
     }
@@ -130,17 +131,18 @@ public class Permission {
         return permId;
     }
 
-    public static void removeRole(Long userId, Long selectedRole) {
+
+    public static Boolean removeRole(Long userId, Long selectedRole) {
         Long permissionLevel = getPermissionViaUserId(userId);
 
         if (permissionLevel == null) {
             System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
-            return;
+            return null;
         }
 
         if ((permissionLevel & Values.ROOT_USER) == 0) {
             System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
-            return;
+            return null;
         }
 
         String sql = """
@@ -152,7 +154,9 @@ public class Permission {
 
         if (!res.isSuccess()) {
             System.err.println(TAG_ERROR + res.getErrorMessage());
+            return false;
         }
+        return true;
     }
 
     public static void updateRole(Long permissionId, String newName, Long newLevel, String newDescription,
@@ -166,6 +170,11 @@ public class Permission {
 
         if ((permissionLevel & Values.ROOT_USER) == 0) {
             System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+            return;
+        }
+
+        if ((newLevel & Values.ROOT_USER ) == 1) {
+            System.err.println(TAG_ERROR + "Cannot create new root role");
             return;
         }
 
@@ -234,6 +243,20 @@ public class Permission {
         if (!result.isSuccess()) {
             System.err.println(TAG_ERROR + result.getErrorMessage());
         }
+    }
+
+    public static Row getCurrentRowInfo(Long target){
+        String sql ="""
+                SELECT *
+                FROM permissiontb
+                WHERE permission_id_PK = ?
+                """;
+        Row result = DatabaseUtils.sqlSingleRowStatement(sql, target);
+        if (result != null) {
+            Convertors.convertIdsToString(result, "permission_id_PK");
+            return result;
+        }
+        return null;
     }
 
 }
