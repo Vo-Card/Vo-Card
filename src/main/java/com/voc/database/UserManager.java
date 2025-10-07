@@ -106,8 +106,6 @@ public class UserManager {
                SELECT
                     p.permission_id_PK,
                     p.permission_name,
-                    p.permission_level,
-                    p.permission_description,
                     COUNT(u.user_id_PK) AS user_count
                 FROM
                     permissiontb p
