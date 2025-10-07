@@ -17,6 +17,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,13 @@ public class UserApiController {
         public String displayName;
         public String newPassword;
         public String confirmPassword;
+    }
+
+    private static class RoleUpdateRequest {
+        public String roleId;
+        public String roleName;
+        public String roleDesc;
+        public String bitmask;
     }
 
     private static String getUserSessionToken(@NonNull HttpServletRequest request) {
@@ -309,6 +317,47 @@ public class UserApiController {
         return null;
     }
 
+    @DeleteMapping("/deleteRole")
+    public ResponseEntity<Map<String,Object>> deleteRoles(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
+            @RequestParam(required = false) Long target){
+
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+            
+            if (Permission.getRootUserPermissionId().equals(target)) {
+                response.put("message", "You're not allow to do that.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+            if (isSuccess) {
+                Boolean isComplete = Permission.removeRole(userId.get(), target);
+                if (isComplete) {
+                    response.put("message", "Remove role sucessfully");
+                    return ResponseEntity.ok(response);
+                }
+            }
+        }
+        return null;
+    }
+
     // TODO: Create empty role API include backend
     // TODO: load Role API include backend
     // TODO: Update empty role API include backend
@@ -346,6 +395,76 @@ public class UserApiController {
         return null;
     }
 
+    @GetMapping("/currentRole")
+    public ResponseEntity<Map<String,Object>> currentRole(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
+            @RequestParam(required = false) Long target){
+            
+            Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+            if (isSuccess) {
+                Row roleInfo = Permission.getCurrentRowInfo(target);
+                response.put("role", roleInfo);
+                return ResponseEntity.ok(response);
+            }
+        }
+        return null;
+    }
+
+    @PutMapping("/updateRole")
+    public ResponseEntity<Map<String, Object>> updateRole(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
+            @RequestBody RoleUpdateRequest req ) {
+
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+            System.out.println(TAG_DEBUG + "Body :" + req);
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+            Long roleId = new java.math.BigInteger(req.roleId).longValue();
+            Long bitmask = new java.math.BigInteger(req.bitmask).longValue();
+            String name = req.roleName;
+            String desc = req.roleDesc;
+
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+            if (isSuccess) {
+                Permission.updateRole(roleId, name, bitmask, desc, userId.get());
+                response.put("Message", "Role has been updated");
+                return ResponseEntity.ok(response);
+            }
+        }
+        return null;
+    }
+    
     @PostMapping("/createNewRole")
     public ResponseEntity<Map<String, Object>> createNewRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
