@@ -78,6 +78,7 @@ public class DatabaseUtils {
 
     private static String ROOT_USERNAME;
     private static String ROOT_DISPLAYNAME;
+    private static Long ROOT_USERID;
 
     /**
      * Initializes database configuration from a map of settings.
@@ -111,6 +112,10 @@ public class DatabaseUtils {
 
     public static String getRootUsername() {
         return ROOT_USERNAME;
+    }
+
+    public static Long getRootUserId() {
+        return ROOT_USERID;
     }
 
     /**
@@ -171,6 +176,14 @@ public class DatabaseUtils {
                 System.out.println(TAG_IMPORTANT + "The password will show only once.");
 
                 System.out.println(TAG_SUCCESS + "Root user initialized");
+
+                System.out.println(TAG_INFO + "Keeping ROOT UserID for further usage.");
+                ROOT_USERID = rootUserId;
+                System.out.println(TAG_INFO + ">>> " + ROOT_USERID);
+            } else {
+                System.out.println(TAG_INFO + "Keeping ROOT UserID for further usage.");
+                ROOT_USERID = ((Number) row.get("user_id_PK")).longValue();
+                System.out.println(TAG_INFO + ">>> " + ROOT_USERID);
             }
         } else {
             System.err.println(TAG_ERROR + "Database not ready or check failed");
