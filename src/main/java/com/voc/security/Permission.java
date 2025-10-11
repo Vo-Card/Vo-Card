@@ -2,6 +2,8 @@ package com.voc.security;
 
 import static com.voc.utils.AnsiColor.TAG_ERROR;
 
+import java.util.List;
+
 import com.voc.database.DatabaseUtils;
 import com.voc.database.SQLResult;
 import com.voc.server.Snowflake;
@@ -178,6 +180,7 @@ public class Permission {
             return;
         }
 
+
         String sql = """
                 UPDATE permissiontb
                 SET permission_name = COALESCE(?, permission_name),
@@ -259,4 +262,53 @@ public class Permission {
         return null;
     }
 
+    // Hard code
+    public static void moderationAutoLog(Long userId, String usedFunc, String message){
+        String sql = """
+                INSERT INTO
+                moderation_action (action_id_PK, action_type, action_message, user_id)
+                VALUES (?,?,?,?)
+                """;
+
+        Long permId = Snowflake.nextId();
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, permId, usedFunc, message, userId);
+        if (!result.isSuccess()) {
+            System.err.println(TAG_ERROR + result.getErrorMessage());
+        }
+    }
+
+    public static List<Row> getModerationLog(Long userId){
+        Long permissionLevel = getPermissionViaUserId(userId);
+        
+        if (permissionLevel == null) {
+            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+            return null;
+        }
+
+        // if (page == null || page < 1) { 
+        //         page = 1L;
+        //     }
+
+        //     int pageSize = 20;
+        //     long offset = (page - 1) * pageSize;
+
+        if (((permissionLevel & Values.VIEW_AUDIT_LOG) != 0) || ((permissionLevel & Values.ROOT_USER) != 0)) {
+            
+            String sql = """
+                        SELECT  m.action_type,
+                                m.action_message,
+                                m.action_time_stamp,
+                                u.username
+                        FROM moderation_action m
+                        JOIN usertb u ON m.user_id = u.user_id_PK
+                        ORDER BY m.action_time_stamp
+
+                    """;
+            List<Row> result = DatabaseUtils.sqlPrepareStatement(sql).getData();
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
 }
