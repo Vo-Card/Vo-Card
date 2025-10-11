@@ -6,7 +6,7 @@ import { loadPage } from "./module/page-manager.js";
 
 import {} from "./handler/popup-handler.js";
 
-const DELETE_USER = 1n << 0n;
+const VIEW_ALL_USER = 1n << 8n;
 const VIEW_AUDIT_LOG = 1n << 6n;
 const IS_ROOT = 1n << 63n;
 
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const permission = TokenManager.getPrtmissionBit();
 
-    if ((permission & (IS_ROOT | VIEW_AUDIT_LOG | DELETE_USER)) != 0n) {
+    if ((permission & (IS_ROOT | VIEW_AUDIT_LOG | VIEW_ALL_USER)) != 0n) {
         au.style.display = "block";
         as.style.display = "block";
     }
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if ((permission & VIEW_AUDIT_LOG) != 0n) {
             al.style.display = "block";
         }
-        if ((permission & DELETE_USER) != 0n) {
+        if ((permission & VIEW_ALL_USER) != 0n) {
             mo.style.display = "block";
         }
     }
