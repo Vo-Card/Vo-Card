@@ -4,8 +4,12 @@
     <h2 style="margin-bottom: 10px;">ROOT Menu</h2>
 
     <root-div style="border-bottom: 2px solid white;">
-        <role-button>Role</role-button>
-        <assign-role-button>Assign Role</assign-role-button>
+        <a href="/workspace/root">
+            <role-button>Role</role-button>
+        </a>
+        <a href="/workspace/root/assign">
+            <assign-role-button>Assign Role</assign-role-button>
+        </a>
     </root-div>
 
     <root-div style="padding: 15px 10px 15px 0; justify-content: space-between;">
@@ -13,10 +17,11 @@
             <p>User :</p>
             <p class="all-user">1</p>
         </div>
-        
+
         <div>
-            <button class="previous"> < </button>
-            <button class="next"> > </button>
+            <button class="previous">
+                < </button>
+                    <button class="next"> > </button>
         </div>
     </root-div>
 
@@ -28,7 +33,7 @@
                 <i class="nf nf-fa-user"></i>
                 <p class="username-display">Username</p>
             </role-front>
-                    
+
             <role-dropdown>
                 <!-- selected id -->
                 <selected-role class="">
@@ -37,7 +42,7 @@
                 </selected-role>
                 <!-- Loadding role on this attribute as li -->
                 <ul class="role-selector">
-                    <li permissionId="null" permissionName = "None" class="active">None</li>
+                    <li permissionId="null" permissionName="None" class="active">None</li>
                 </ul>
             </role-dropdown>
         </role-item>
