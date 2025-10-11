@@ -63,20 +63,12 @@ public class UserApiController {
         return null;
     }
 
-    private static Optional<Long> getUserIdFromJWT(String authToken) {
-        if (authToken != null && authToken.startsWith("Bearer ")) {
-            String token = authToken.substring(7);
-            return JwtManager.validateJwt(token);
-        }
-        return Optional.empty();
-    }
-
     @GetMapping("/sessions")
     public ResponseEntity<Map<String, Object>> getSessions(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -113,7 +105,7 @@ public class UserApiController {
             @NonNull HttpServletRequest request,
             @RequestBody UserProfileBody profile) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -174,7 +166,7 @@ public class UserApiController {
             @NonNull HttpServletRequest request,
             @RequestBody UserProfileBody profile) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -215,7 +207,7 @@ public class UserApiController {
             @NonNull HttpServletRequest request,
             @RequestParam String selectedSession) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -251,7 +243,7 @@ public class UserApiController {
             @NonNull HttpServletRequest request,
             @RequestParam(required = false) Long page) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
@@ -284,7 +276,7 @@ public class UserApiController {
             @RequestParam(required = false) Long target) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
@@ -325,7 +317,7 @@ public class UserApiController {
             @RequestParam(required = false) Long target) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -370,7 +362,7 @@ public class UserApiController {
             @NonNull HttpServletRequest request,
             @RequestParam(required = false) Long page) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
@@ -403,7 +395,7 @@ public class UserApiController {
             @RequestParam(required = false) Long target) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
@@ -436,7 +428,7 @@ public class UserApiController {
             @RequestBody RoleUpdateRequest req) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
@@ -474,7 +466,7 @@ public class UserApiController {
             @RequestParam(required = false) Long bitmask) {
 
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];
