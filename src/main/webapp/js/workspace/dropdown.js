@@ -61,6 +61,7 @@ export async function assignRole() {
         const roleItemCopy = roleItem.cloneNode(true);
         const counter = document.querySelector('.all-user');
         roleItem.remove();
+        
 
         data.User.forEach((user) => {
             const roleItemAppend = roleItemCopy.cloneNode(true);
@@ -72,7 +73,7 @@ export async function assignRole() {
             const selected = roleItemAppend.querySelector(".selected");
             selected.textContent = user.permission_name;
             //@ts-ignore
-            const roleContainer = roleItemAppend.querySelector(".role-container");
+            const roleContainer = roleItemAppend.querySelector(".role-selector");
             dataRole.Roles.forEach(role => {
                 const li = document.createElement('li');
                 li.textContent = role.permission_name;
@@ -82,7 +83,7 @@ export async function assignRole() {
             });
 
             //@ts-ignore
-            const roleItem = roleItemAppend.querySelectorAll('.role-container li');
+            const roleItem = roleItemAppend.querySelectorAll('.role-selector li');
             select.addEventListener('click', () => {
                 select.classList.toggle("select-clicked");
                 roleContainer.classList.toggle("menu-open");
@@ -96,6 +97,7 @@ export async function assignRole() {
                         targetId : uid,
                         roleId : rid
                     };
+                    console.log(preparedData);
                     
                     const response = await fetchWithAuth("/api/user/assignRole", {
                         method: "PUT",
