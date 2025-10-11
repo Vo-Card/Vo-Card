@@ -1,4 +1,11 @@
-liked-value.voted, dislikes-value.voted {
+liked-value.voted,
+dislikes-value.voted {
     font-weight: bold;
-    color: var(--like-color)!important;
+    color: var(--like-color) !important;
+}
+
+public-decks-container {
+    gap: 5px;
+    justify-content: center;
+    flex-wrap: wrap;
 }

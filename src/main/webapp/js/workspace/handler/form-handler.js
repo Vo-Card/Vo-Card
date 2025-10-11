@@ -61,8 +61,6 @@ function callCreate(type, apiEndpoint, form) {
             data[cb.name] = cb.checked;
         });
 
-        console.log(data);
-
         try {
             const response = await fetchWithAuth(apiEndpoint, {
                 method: type,
@@ -358,8 +356,6 @@ export async function editLoader(path, type, data) {
 
     const template = await (await fetch(path)).text();
     temp.innerHTML = template;
-
-    console.log(data);
 
     switch (type) {
         case "deck":
@@ -801,7 +797,6 @@ function displayDefinition(target, posData, posbtn) {
 
     currentPos = posData.pos_id_PK;
 
-    console.log(posData, posData.pos_id_PK.split("_"));
     let isFake = false;
 
     if (posData.pos_id_PK.split("_").length > 1) {
@@ -851,7 +846,6 @@ function displayDefinition(target, posData, posbtn) {
                 posData.pos_id_PK,
                 def.definition_id_PK
             );
-            console.log(getEditUpdate(posData.pos_id_PK, def.definition_id_PK));
 
             textarea.setAttribute("edited", "");
         } else textarea.value = def.definition;
@@ -907,7 +901,6 @@ function displayDefinition(target, posData, posbtn) {
 
     // Display create Data
     const createdDefinitions = getCreateDefUpdate(posData.pos_id_PK);
-    console.log(createdDefinitions);
 
     createdDefinitions.forEach((def) => {
         const wraper = document.createElement("div");
@@ -1068,7 +1061,6 @@ function addEditUpdate(posId, newPos, defId, newDef) {
     }
 
     postCache.set("editData", editData);
-    console.log("editData:", editData);
 }
 
 function getEditUpdate(posId, defId) {
@@ -1116,7 +1108,6 @@ function addDeleteUpdate(posId, isPos, defId) {
     }
 
     postCache.set("deleteData", deleteData);
-    console.log(deleteData);
 }
 
 function removeDeleteUpdate(posId, isPos, defId) {
@@ -1144,7 +1135,6 @@ function removeDeleteUpdate(posId, isPos, defId) {
     }
 
     postCache.set("deleteData", deleteData);
-    console.log(deleteData);
 }
 
 function isDeleteUpdate(posId, defId) {
@@ -1223,7 +1213,6 @@ function removeCreateUpdate(dataType, targetId, updatedContent, uuid) {
         addData = addData.filter(
             (d) => !(d.dataType === "definition" && d.targetId === uuid)
         );
-        console.log(addData);
     } else {
         // remove a specific definition or other types
         addData = addData.filter(

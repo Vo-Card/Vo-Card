@@ -2,32 +2,36 @@ package com.voc.security;
 
 import static com.voc.utils.AnsiColor.TAG_ERROR;
 
+import java.util.List;
+
 import com.voc.database.DatabaseUtils;
 import com.voc.database.SQLResult;
 import com.voc.server.Snowflake;
+import com.voc.utils.Convertors;
 import com.voc.utils.Row;
 
 public class Permission {
 
     // Normal Permission
     public class Values {
-        public static final long ROOT_USER = 1 << 63;
+        public static final long ROOT_USER = 1L << 63;
 
-        public static final long DELETE_USER = 1 << 0;
-        public static final long UPDATE_USER = 1 << 1;
+        public static final long DELETE_USER = 1L << 0;
+        public static final long UPDATE_USER = 1L << 1;
 
-        public static final long FORCE_DELETE_ITEM = 1 << 2;
-        public static final long FORCE_UPDATE_ITEM = 1 << 3;
-        public static final long FORCE_CREATE_ITEM = 1 << 4;
+        public static final long FORCE_DELETE_ITEM = 1L << 2;
+        public static final long FORCE_UPDATE_ITEM = 1L << 3;
+        public static final long FORCE_CREATE_ITEM = 1L << 4;
 
-        public static final long MODERATE_EXPLORER = 1 << 5;
+        public static final long MODERATE_EXPLORER = 1L << 5;
 
-        public static final long VIEW_AUDIT_LOG = 1 << 6;
+        public static final long VIEW_AUDIT_LOG = 1L << 6;
 
-        public static final long CHANGE_USERNAME = 1 << 7;
+        public static final long CHANGE_USERNAME = 1L << 7;
+        public static final long VIEW_ALL_USER = 1L << 8;
     }
 
-    private static Long getPermissionViaUserId(Long userId) {
+    public static Long getPermissionViaUserId(Long userId) {
         String sql = """
                 SELECT p.permission_level
                 FROM permissiontb p
@@ -40,62 +44,37 @@ public class Permission {
         return (res != null) ? ((Number) res.get("permission_level")).longValue() : null;
     }
 
-    private static Long getRootUserPermissionId(Long userId) {
+    public static Long getRootUserPermissionId() {
         String sql = """
                 SELECT p.permission_id_PK
                 FROM permissiontb p
                 JOIN usertb u ON u.permission_level_FK = p.permission_id_PK
-                WHERE u.user_id_PK = ? AND u.username = ?
+                WHERE u.username = ?
                                 """;
 
-        Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId, DatabaseUtils.getRootUsername());
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, DatabaseUtils.getRootUsername());
 
         return (res != null) ? ((Number) res.get("permission_id_PK")).longValue() : null;
     }
 
-    private static boolean isRootUserPresent() {
+    public static boolean checkUserPermission(Long userId, Long checkPermission) {
         String sql = """
-                    SELECT p.permission_level
+                SELECT p.permission_level
                     FROM permissiontb p
                     JOIN usertb u ON u.permission_level_FK = p.permission_id_PK
-                    WHERE u.username = ?
+                    WHERE u.user_id_PK = ?
                 """;
 
-        Row res = DatabaseUtils.sqlSingleRowStatement(sql, DatabaseUtils.getRootUsername());
-        if (res == null)
-            return false;
+        Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId);
+        Long userPermission = res != null ? ((Number) res.get("permission_level")).longValue() : 0;
 
-        Long permissionLevel = ((Number) res.get("permission_level")).longValue();
-        return (permissionLevel & Values.ROOT_USER) != 0;
-    }
-
-    public static Boolean isUserRoot(Long userId) {
-        Long permissionLevel = getPermissionViaUserId(userId);
-        if (permissionLevel == null)
-            return false;
-
-        return (permissionLevel & Values.ROOT_USER) != 0;
+        if ((userPermission & checkPermission) != 0 || (userPermission & Values.ROOT_USER) != 0) {
+            return true;
+        }
+        return false;
     }
 
     public static Long createRole(Long userId, Long permissionBitmask, String roleName, String roleDesc) {
-        if (isRootUserPresent()) {
-            Long permissionLevel = getPermissionViaUserId(userId);
-
-            if (permissionLevel == null) {
-                System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
-                return null;
-            }
-
-            if ((permissionLevel & Values.ROOT_USER) == 0) {
-                System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
-                return null;
-            }
-
-            if ((permissionBitmask & Values.ROOT_USER) != 0 && isRootUserPresent()) {
-                System.err.println(TAG_ERROR + "You cannot have more than 1 ROOT USER");
-                return null;
-            }
-        }
 
         Long permId = Snowflake.nextId();
         String sql = """
@@ -112,17 +91,17 @@ public class Permission {
         return permId;
     }
 
-    public static void removeRole(Long userId, Long selectedRole) {
+    public static Boolean removeRole(Long userId, Long selectedRole) {
         Long permissionLevel = getPermissionViaUserId(userId);
 
         if (permissionLevel == null) {
             System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
-            return;
+            return null;
         }
 
         if ((permissionLevel & Values.ROOT_USER) == 0) {
             System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
-            return;
+            return null;
         }
 
         String sql = """
@@ -134,7 +113,9 @@ public class Permission {
 
         if (!res.isSuccess()) {
             System.err.println(TAG_ERROR + res.getErrorMessage());
+            return false;
         }
+        return true;
     }
 
     public static void updateRole(Long permissionId, String newName, Long newLevel, String newDescription,
@@ -148,6 +129,11 @@ public class Permission {
 
         if ((permissionLevel & Values.ROOT_USER) == 0) {
             System.err.println(TAG_ERROR + "Access denied: only root user can perform this action.");
+            return;
+        }
+
+        if ((newLevel & Values.ROOT_USER) == 1) {
+            System.err.println(TAG_ERROR + "Cannot create new root role");
             return;
         }
 
@@ -218,4 +204,67 @@ public class Permission {
         }
     }
 
+    public static Row getCurrentRowInfo(Long target) {
+        String sql = """
+                SELECT *
+                FROM permissiontb
+                WHERE permission_id_PK = ?
+                """;
+        Row result = DatabaseUtils.sqlSingleRowStatement(sql, target);
+        if (result != null) {
+            Convertors.convertIdsToString(result, "permission_id_PK");
+            return result;
+        }
+        return null;
+    }
+
+    // Hard code
+    public static void moderationAutoLog(Long userId, String usedFunc, String message) {
+        String sql = """
+                INSERT INTO
+                moderation_action (action_id_PK, action_type, action_message, user_id)
+                VALUES (?,?,?,?)
+                """;
+
+        Long permId = Snowflake.nextId();
+        SQLResult result = DatabaseUtils.sqlPrepareStatement(sql, permId, usedFunc, message, userId);
+        if (!result.isSuccess()) {
+            System.err.println(TAG_ERROR + result.getErrorMessage());
+        }
+    }
+
+    public static List<Row> getModerationLog(Long userId) {
+        Long permissionLevel = getPermissionViaUserId(userId);
+
+        if (permissionLevel == null) {
+            System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
+            return null;
+        }
+
+        // if (page == null || page < 1) {
+        // page = 1L;
+        // }
+
+        // int pageSize = 20;
+        // long offset = (page - 1) * pageSize;
+
+        if (((permissionLevel & Values.VIEW_AUDIT_LOG) != 0) || ((permissionLevel & Values.ROOT_USER) != 0)) {
+
+            String sql = """
+                        SELECT  m.action_type,
+                                m.action_message,
+                                m.action_time_stamp,
+                                u.username
+                        FROM moderation_action m
+                        JOIN usertb u ON m.user_id = u.user_id_PK
+                        ORDER BY m.action_time_stamp
+
+                    """;
+            List<Row> result = DatabaseUtils.sqlPrepareStatement(sql).getData();
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
 }

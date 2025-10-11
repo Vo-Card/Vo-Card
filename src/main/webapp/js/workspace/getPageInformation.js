@@ -6,6 +6,10 @@ import { loadPage } from "./module/page-manager.js";
 
 import {} from "./handler/popup-handler.js";
 
+const VIEW_ALL_USER = 1n << 8n;
+const VIEW_AUDIT_LOG = 1n << 6n;
+const IS_ROOT = 1n << 63n;
+
 /**
  * Save the previous page URL
  */
@@ -37,6 +41,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
     if (usernamePlaceholder) {
         usernamePlaceholder.textContent = displayName;
+    }
+
+    // Permission management
+
+    const au = document.getElementById("authority");
+    const as = document.getElementById("au-sep");
+
+    const rm = document.getElementById("root-manager");
+    const al = document.getElementById("staff-audit-log");
+    const mo = document.getElementById("staff-moderation");
+
+    const permission = TokenManager.getPrtmissionBit();
+
+    if ((permission & (IS_ROOT | VIEW_AUDIT_LOG | VIEW_ALL_USER)) != 0n) {
+        au.style.display = "block";
+        as.style.display = "block";
+    }
+
+    if ((permission & IS_ROOT) != 0n) {
+        rm.style.display = "block";
+        al.style.display = "block";
+        mo.style.display = "block";
+    } else {
+        if ((permission & VIEW_AUDIT_LOG) != 0n) {
+            al.style.display = "block";
+        }
+        if ((permission & VIEW_ALL_USER) != 0n) {
+            mo.style.display = "block";
+        }
     }
 
     loadPage(document.location.pathname);

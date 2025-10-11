@@ -16,7 +16,10 @@ import {
     createPopupBox,
 } from "../handler/popup-handler.js";
 import { loadUserInformation } from "../handler/home-handler.js";
-import { rtDropdowns } from "../dropdown.js";
+import { rtDropdowns, assignRole } from "../dropdown.js";
+import { lookOverview } from "../overview.js";
+import { showAllRoles, createEmptyRole, updateRole } from "../roleOverview.js";
+import { getModLog } from "../moderationLog.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -50,9 +53,15 @@ const pageComponents = {
         css: "/css/workspace/review.css",
     },
     "/workspace/decks": { js: null, css: "/css/workspace/decks.css" },
-    "/workspace/root": { js: rtDropdowns, css: "/css/workspace/root.css" },
-    "/workspace/mod-log": { js: null, css: "/css/workspace/root.css" },
-    "/workspace/user-overview": { js: rtDropdowns, css: "/css/workspace/root.css" },
+    "/workspace/root": {
+        js: null,
+        css: "/css/workspace/root.css",
+    },
+    "/workspace/mod-log": { js: getModLog, css: "/css/workspace/root.css" },
+    "/workspace/user-overview": {
+        js: lookOverview,
+        css: "/css/workspace/root.css",
+    },
 };
 
 /**
@@ -211,6 +220,19 @@ export async function loadPage(path, addHistory = true) {
             deckDetailLoader(path);
         else if (/^\/workspace\/decks\/[^/]+\/[^/]+\/?$/.test(path))
             levelDetailLoader(path);
+    }
+
+    // Root-specific AJAX loader
+    if (path.startsWith("/workspace/root")) {
+        if (/^\/workspace\/root\/?$/.test(path)) {
+            showAllRoles();
+            createEmptyRole();
+        } else if (/^\/workspace\/root\/assign\/?$/.test(path)) {
+            rtDropdowns();
+            assignRole();
+        } else if (/^\/workspace\/root\/[^/]+\/?$/.test(path)) {
+            updateRole(path);
+        }
     }
 
     const match = path.match(/^\/workspace\/([^\/]+)/);
@@ -470,7 +492,7 @@ async function sessionLoader(path) {
                 console.log("[Deleting] User session");
                 const res = await fetchWithAuth(
                     "/api/user/sessions?selectedSession=" +
-                    session.session_id_PK,
+                        session.session_id_PK,
                     {
                         method: "DELETE",
                     }

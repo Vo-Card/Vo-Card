@@ -37,7 +37,6 @@ export async function loadUserInformation() {
     ).innerHTML = `<span style="color: #C38A39;">${wM}</span> ${TokenManager.getDisplayName()}.`;
 
     // const display
-    console.log(data);
     const reviewedCard = data.recent_review;
 
     const dailyCardContainer = /**@type {HTMLElement} */ (

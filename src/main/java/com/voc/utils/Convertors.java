@@ -13,4 +13,13 @@ public class Convertors {
             }
         }
     }
+
+    public static void convertIdsToString(Row row, String... keys) {
+        for (String key : keys) {
+            Object value = row.get(key);
+                if (value != null) {
+                row.put(key, value.toString());
+            }
+        }
+    }
 }

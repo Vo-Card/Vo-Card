@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.DatabaseUtils;
 import com.voc.database.DeckManager;
 import com.voc.jwt.JwtManager;
+import com.voc.security.Permission;
 import com.voc.server.Snowflake;
 import com.voc.utils.Row;
 import com.voc.utils.ThemeTypes;
@@ -28,14 +30,6 @@ import com.voc.utils.ThemeTypes;
 @RestController
 @RequestMapping("/api/decks")
 public class DeckApiController {
-
-    public static Optional<Long> getUserIdFromJWT(String authToken) {
-        if (authToken != null && authToken.startsWith("Bearer ")) {
-            String token = authToken.substring(7);
-            return JwtManager.validateJwt(token);
-        }
-        return Optional.empty();
-    }
 
     private static class UpdateCardRequest {
         public String newCardName;
@@ -123,7 +117,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 2);
             response.put("message", message);
@@ -139,7 +133,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 1);
             response.put("message", message);
@@ -155,7 +149,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody ForkDeckRequest forkData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean success = DeckManager.forkDeck(forkData.deckId, userId.get());
             if (success) {
@@ -177,7 +171,7 @@ public class DeckApiController {
             @RequestBody DeckCreateRequest deckData) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Long deckId = Snowflake.nextId();
@@ -209,11 +203,13 @@ public class DeckApiController {
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -247,11 +243,13 @@ public class DeckApiController {
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -277,7 +275,7 @@ public class DeckApiController {
 
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             List<Row> ownedDecks = DeckManager.getOwnedDecks(userId.get());
@@ -295,7 +293,7 @@ public class DeckApiController {
     public ResponseEntity<Map<String, Object>> getPublicDecks(
             @RequestHeader(value = "Authorization", required = false) String authToken) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             List<Row> publicDecks = DeckManager.getPublicDecks(userId.get());
             response.put("publicDecks", publicDecks);
@@ -313,10 +311,10 @@ public class DeckApiController {
 
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), deckId, null, null, null, null);
             Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
             if (!validateOwner || ownershipType.isEmpty()) {
                 response.put("message", "You don't have permission.");
@@ -341,10 +339,11 @@ public class DeckApiController {
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), deckId, levelId, null, null,
+                    null);
             Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
             if (!validateOwner || ownershipType.isEmpty()) {
                 response.put("message", "You don't have permission.");
@@ -373,10 +372,11 @@ public class DeckApiController {
             @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), deckId, levelId, cardId, null,
+                    null);
             Optional<String> ownershipType = DeckManager.getOwnershipType(userId.get(), deckId);
             if (!validateOwner || ownershipType.isEmpty()) {
                 response.put("message", "You don't have permission.");
@@ -398,6 +398,30 @@ public class DeckApiController {
     /* POST MAPPINGS */
     /* ------------- */
 
+    @PostMapping("/modExplore")
+    public ResponseEntity<Map<String, Object>> modExplore(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestParam Long deckId) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
+
+        if (userId.isPresent()) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.MODERATE_EXPLORER);
+
+            if (!bypass) {
+                response.put("message", "You don't have permission.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
+            }
+
+            DeckManager.toggleDeckPublic(deckId);
+            response.put("message", "Successfully toggled Deck public status");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "JWT missing userData");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+        }
+    }
+
     @PostMapping("/{deckId}/{levelId}/{cardId}/update")
     public ResponseEntity<Map<String, Object>> updateCard(
             @RequestHeader(value = "Authorization", required = false) String authToken,
@@ -406,13 +430,19 @@ public class DeckApiController {
             @PathVariable Long cardId,
             @RequestBody UpdateCardRequest updateReq) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+
+        // Check Force Bypass
+
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isEmpty()) {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
         }
-        Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
-        if (!validateOwner) {
+
+        Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_UPDATE_ITEM);
+
+        Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, cardId, null, null);
+        if (!validateOwner && !bypass) {
             response.put("message", "You don't have permission.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
         }
@@ -528,9 +558,9 @@ public class DeckApiController {
         }
 
         for (Map.Entry<Long, String> entry : posToDelete.entrySet()) {
-            validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId,
+            validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId,
                     cardId, entry.getKey(), null);
-            if (!validateOwner) {
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -540,9 +570,9 @@ public class DeckApiController {
 
         for (Map.Entry<Long, List<Long>> entry : defToDelete.entrySet()) {
             for (Long defId : entry.getValue()) {
-                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId,
+                validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId,
                         cardId, entry.getKey(), defId);
-                if (!validateOwner) {
+                if (!validateOwner && !bypass) {
                     response.put("message", "You don't have permission.");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
                 }
@@ -552,8 +582,9 @@ public class DeckApiController {
 
         // Edit POS
         for (Map.Entry<Long, String> entry : posToEdit.entrySet()) {
-            validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, entry.getKey(), null);
-            if (!validateOwner) {
+            validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, cardId, entry.getKey(),
+                    null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -567,8 +598,9 @@ public class DeckApiController {
             for (Map.Entry<Long, String> defEntry : defs.entrySet()) {
                 Long defId = defEntry.getKey();
                 String newDef = defEntry.getValue();
-                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, posId, defId);
-                if (!validateOwner) {
+                validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, cardId, posId,
+                        defId);
+                if (!validateOwner && !bypass) {
                     response.put("message", "You don't have permission.");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
                 }
@@ -592,8 +624,8 @@ public class DeckApiController {
 
             for (Map.Entry<Long, String> defEntry : defMap.entrySet()) {
                 Long posId = defEntry.getKey();
-                validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, posId, null);
-                if (!validateOwner) {
+                validateOwner = DeckManager.validateOwnership(true, userId.get(), deckId, levelId, cardId, posId, null);
+                if (!validateOwner && !bypass) {
                     response.put("message", "You don't have permission.");
                     return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
                 }
@@ -612,10 +644,13 @@ public class DeckApiController {
             @PathVariable Long deckId,
             @RequestBody UpdateDeckRequest deckUpd) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
+
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_UPDATE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -636,9 +671,9 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), deckId, null, null, null, null);
             if (!validateOwner) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
@@ -664,10 +699,13 @@ public class DeckApiController {
             @PathVariable Long levelId,
             @RequestBody UpdateLevelRequest levelUpd) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_UPDATE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, null, null,
+                    null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -691,7 +729,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 0);
             response.put("message", message);
@@ -707,7 +745,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean success = DeckManager.unForkDeck(deckId, userId.get());
             if (success) {
@@ -728,10 +766,13 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
+
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -755,10 +796,13 @@ public class DeckApiController {
             @PathVariable Long deckId,
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, null, null,
+                    null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }
@@ -783,10 +827,13 @@ public class DeckApiController {
             @PathVariable Long levelId,
             @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
-            if (!validateOwner) {
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+
+            Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, cardId, null,
+                    null);
+            if (!validateOwner && !bypass) {
                 response.put("message", "You don't have permission.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).body(response);
             }

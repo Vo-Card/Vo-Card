@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.voc.database.DeckManager;
 import com.voc.database.ReviewManager;
+import com.voc.jwt.JwtManager;
 import com.voc.utils.Row;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,7 +68,7 @@ public class ReviewApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = DeckApiController.getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
 
@@ -88,7 +89,7 @@ public class ReviewApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = DeckApiController.getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
 
@@ -110,10 +111,11 @@ public class ReviewApiController {
             @RequestBody LearnCardRequest learnedCard) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = DeckApiController.getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), learnedCard.deckId, null, null, null,
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), learnedCard.deckId, null, null,
+                    null,
                     null);
             if (!validateOwner || !(DeckManager.getDeckIdFromCardId(learnedCard.cardId) != learnedCard.deckId)) {
                 response.put("message", "You don't have permission.");
@@ -139,7 +141,7 @@ public class ReviewApiController {
             @RequestBody CompletionRequest completedSession) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = DeckApiController.getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             if (!ReviewManager.addCompletionSession(userId.get(), completedSession.totalCards,

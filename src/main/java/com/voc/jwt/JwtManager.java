@@ -111,7 +111,7 @@ public class JwtManager {
      * @param username The username to embed in the JWT.
      * @return A signed JWT string.
      */
-    public static String signJwt(String userId, String username, String displayName) {
+    public static String signJwt(String userId, String username, String displayName, Long permissionBit) {
         if (primaryKid == null) {
             rotateKey();
         } else {
@@ -136,6 +136,7 @@ public class JwtManager {
                 .setSubject(userId)
                 .claim("username", username)
                 .claim("display_name", displayName)
+                .claim("permission", permissionBit.toString())
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plus(JWT_EXP_MINUTES, ChronoUnit.MINUTES)))
                 .signWith(signingKey)
@@ -187,5 +188,13 @@ public class JwtManager {
         } catch (JwtException | IOException | NullPointerException e) {
             return Optional.empty();
         }
+    }
+
+    public static Optional<Long> getUserIdFromJWT(String authToken) {
+        if (authToken != null && authToken.startsWith("Bearer ")) {
+            String token = authToken.substring(7);
+            return validateJwt(token);
+        }
+        return Optional.empty();
     }
 }

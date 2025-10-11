@@ -33,21 +33,21 @@
         </ul>
     </div>
 
-    <div class="separator"></div>
+    <div id="au-sep" class="separator" style="display: none;"></div>
 
-    <div id="authority" class="moderation selection">
+    <div id="authority" class="moderation selection" style="display: none;">
         <ul class="moderation menu">
-            <li id="staff-audit-log">
+            <li id="staff-audit-log" style="display: none;">
                 <a href="/workspace/mod-log" data-workspace>
                     <i class="nf nf-md-newspaper_variant_multiple"></i>Mod Log
                 </a>
             </li>
-            <li id="staff-moderation">
+            <li id="staff-moderation" style="display: none;">
                 <a href="/workspace/user-overview" data-workspace>
                     <i class="nf nf-md-folder_edit"></i>User Overview
                 </a>
             </li>
-            <li id="root-manager">
+            <li id="root-manager" style="display: none;">
                 <a href="/workspace/root" data-workspace>
                     <i class="nf nf-md-tools"></i>Root
                 </a>

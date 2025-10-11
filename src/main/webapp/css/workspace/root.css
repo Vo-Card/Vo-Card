@@ -109,7 +109,8 @@ permission-setting {
 }
 
 .permission-header,
-.permission-details {
+.permission-details,
+.permission-bottom {
     padding: 10px;
     background-color: var(--menu-primary-color);
     border-radius: 10px;
@@ -129,6 +130,9 @@ list-item h5 {
     font-size: 16px;
 }
 
+.role-container-selector{
+    display: none;
+}
 permission-container {
     margin-top: 10px;
     border-radius: 8px;
@@ -169,6 +173,7 @@ role-confirm .role-button {
     align-items: center;
 }
 
+
 /*----------*/
 /* Dropdown */
 /*----------*/
@@ -188,7 +193,6 @@ selected-role {
     align-items: center;
     cursor: pointer;
     transition: 0.4s;
-    margin-bottom: 10px;
 }
 
 role-dropdown ul {
@@ -224,6 +228,13 @@ role-dropdown ul li {
     cursor: pointer;
 }
 
+.previous,
+.next{
+    padding: 5px 25px;
+    background-color: var(--root-button-color);
+    border-radius: 8px;
+    border: none;
+}
 /*---------*/
 /* MOD LOG */
 /*---------*/
@@ -241,6 +252,9 @@ mod-menu h2 {
     margin-bottom: 12px;
 }
 
+.log-item{
+    margin-bottom: 8px;
+}
 .log-header,
 .log-item {
     width: 100%;
@@ -271,7 +285,7 @@ delete-user {
 }
 
 delete-user div {
-    padding: 2px 5px;
+    padding: 2px 3px;
 }
 
 /*-------*/
