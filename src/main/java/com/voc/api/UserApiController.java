@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.voc.database.DatabaseUtils;
 import com.voc.database.UserManager;
 import com.voc.jwt.JwtManager;
 import com.voc.security.Permission;
@@ -189,7 +190,7 @@ public class UserApiController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
 
-            if (Permission.isUserRoot(userId.get())) {
+            if (userId.get().equals(DatabaseUtils.getRootUserId())) {
                 response.put("message", "You are not allow to do that.");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
             }
@@ -298,7 +299,7 @@ public class UserApiController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
 
-            if (Permission.isUserRoot(target)) {
+            if (target.equals(DatabaseUtils.getRootUserId())) {
                 response.put("message", "You are not allow to do that.");
                 return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
             }
@@ -319,10 +320,10 @@ public class UserApiController {
     }
 
     @DeleteMapping("/deleteRole")
-    public ResponseEntity<Map<String,Object>> deleteRoles(
+    public ResponseEntity<Map<String, Object>> deleteRoles(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestParam(required = false) Long target){
+            @RequestParam(required = false) Long target) {
 
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
@@ -340,7 +341,7 @@ public class UserApiController {
                 response.put("message", "You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
-            
+
             if (Permission.getRootUserPermissionId().equals(target)) {
                 response.put("Message", "You're not allow to do that.");
                 return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
@@ -408,7 +409,7 @@ public class UserApiController {
     public ResponseEntity<Map<String, Object>> viewRoles(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestParam(required = false) Long page){
+            @RequestParam(required = false) Long page) {
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
@@ -437,12 +438,12 @@ public class UserApiController {
     }
 
     @GetMapping("/currentRole")
-    public ResponseEntity<Map<String,Object>> currentRole(
+    public ResponseEntity<Map<String, Object>> currentRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestParam(required = false) Long target){
-            
-            Map<String, Object> response = new HashMap<>();
+            @RequestParam(required = false) Long target) {
+
+        Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -473,7 +474,7 @@ public class UserApiController {
     public ResponseEntity<Map<String, Object>> updateRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestBody RoleUpdateRequest req ) {
+            @RequestBody RoleUpdateRequest req) {
 
         Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
@@ -513,7 +514,7 @@ public class UserApiController {
         }
         return null;
     }
-    
+
     @PostMapping("/createNewRole")
     public ResponseEntity<Map<String, Object>> createNewRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
@@ -546,8 +547,9 @@ public class UserApiController {
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
 
             if (isSuccess) {
-                Long isCreated = Permission.createRole(userId.get(),bitmask, roleName, null);
-                Permission.moderationAutoLog(userId.get(), "Create Role" , "User created role");
+                System.out.println(bitmask);
+                System.out.println(roleName);
+                Long isCreated = Permission.createRole(userId.get(), bitmask, roleName, null);
                 response.put("Message", isCreated);
                 return ResponseEntity.ok(response);
             }

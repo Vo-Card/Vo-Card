@@ -11,6 +11,7 @@ export const TokenManager = {
         const payloadJSON = JSON.parse(atob(payload));
         sessionStorage.setItem("username", payloadJSON?.username);
         sessionStorage.setItem("display_name", payloadJSON?.display_name);
+        sessionStorage.setItem("permission", payloadJSON?.permission);
         sessionStorage.setItem("uid", payloadJSON?.sub);
     },
     clearAccessToken: () => {
@@ -26,6 +27,11 @@ export const TokenManager = {
             return null;
         }
     },
+
+    getPrtmissionBit: () => {
+        return BigInt(sessionStorage.getItem("permission"));
+    },
+
     getUsername: () => {
         return sessionStorage.getItem("username");
     },

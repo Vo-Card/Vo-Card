@@ -29,14 +29,6 @@ import com.voc.utils.ThemeTypes;
 @RequestMapping("/api/decks")
 public class DeckApiController {
 
-    public static Optional<Long> getUserIdFromJWT(String authToken) {
-        if (authToken != null && authToken.startsWith("Bearer ")) {
-            String token = authToken.substring(7);
-            return JwtManager.validateJwt(token);
-        }
-        return Optional.empty();
-    }
-
     private static class UpdateCardRequest {
         public String newCardName;
         public List<DeleteData> deleteData;
@@ -123,7 +115,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 2);
             response.put("message", message);
@@ -139,7 +131,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 1);
             response.put("message", message);
@@ -155,7 +147,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody ForkDeckRequest forkData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean success = DeckManager.forkDeck(forkData.deckId, userId.get());
             if (success) {
@@ -177,7 +169,7 @@ public class DeckApiController {
             @RequestBody DeckCreateRequest deckData) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Long deckId = Snowflake.nextId();
@@ -209,7 +201,7 @@ public class DeckApiController {
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
@@ -247,7 +239,7 @@ public class DeckApiController {
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
@@ -277,7 +269,7 @@ public class DeckApiController {
 
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             List<Row> ownedDecks = DeckManager.getOwnedDecks(userId.get());
@@ -295,7 +287,7 @@ public class DeckApiController {
     public ResponseEntity<Map<String, Object>> getPublicDecks(
             @RequestHeader(value = "Authorization", required = false) String authToken) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             List<Row> publicDecks = DeckManager.getPublicDecks(userId.get());
             response.put("publicDecks", publicDecks);
@@ -313,7 +305,7 @@ public class DeckApiController {
 
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
@@ -341,7 +333,7 @@ public class DeckApiController {
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
@@ -373,7 +365,7 @@ public class DeckApiController {
             @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
 
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
@@ -406,7 +398,7 @@ public class DeckApiController {
             @PathVariable Long cardId,
             @RequestBody UpdateCardRequest updateReq) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isEmpty()) {
             response.put("message", "JWT missing userData");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
@@ -612,7 +604,7 @@ public class DeckApiController {
             @PathVariable Long deckId,
             @RequestBody UpdateDeckRequest deckUpd) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
             if (!validateOwner) {
@@ -636,7 +628,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
             if (!validateOwner) {
@@ -664,7 +656,7 @@ public class DeckApiController {
             @PathVariable Long levelId,
             @RequestBody UpdateLevelRequest levelUpd) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
             if (!validateOwner) {
@@ -691,7 +683,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody VoteRequest voteData) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String message = DeckManager.addReviewToDeck(voteData.deckId, userId.get(), 0);
             response.put("message", message);
@@ -707,7 +699,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean success = DeckManager.unForkDeck(deckId, userId.get());
             if (success) {
@@ -728,7 +720,7 @@ public class DeckApiController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @PathVariable Long deckId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, null, null, null, null);
             if (!validateOwner) {
@@ -755,7 +747,7 @@ public class DeckApiController {
             @PathVariable Long deckId,
             @PathVariable Long levelId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, null, null, null);
             if (!validateOwner) {
@@ -783,7 +775,7 @@ public class DeckApiController {
             @PathVariable Long levelId,
             @PathVariable Long cardId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Long> userId = getUserIdFromJWT(authToken);
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             Boolean validateOwner = DeckManager.validateOwnership(userId.get(), deckId, levelId, cardId, null, null);
             if (!validateOwner) {

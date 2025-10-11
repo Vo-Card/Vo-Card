@@ -46,7 +46,11 @@ public class SessionManager {
         DatabaseUtils.sqlPrepareStatement(sql, sessionId, userId, hashedRefreshToken, rememberMe, Date.from(expiresAt),
                 ipAddress, userAgent);
         // checking user Jwt key
-        String accessToken = JwtManager.signJwt(userId.toString(), username, displayName);
+
+        Long permission_bit = Permission.getPermissionViaUserId(userId);
+
+        String accessToken = JwtManager.signJwt(userId.toString(), username, displayName,
+                permission_bit != null ? permission_bit : 0L);
 
         Row sessionData = new Row();
         sessionData.put("session_id", sessionId);

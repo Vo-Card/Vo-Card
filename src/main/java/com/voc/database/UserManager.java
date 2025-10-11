@@ -1,7 +1,5 @@
 package com.voc.database;
 
-import com.voc.security.Permission;
-
 import java.util.List;
 
 import com.voc.security.AuthManager;
@@ -29,7 +27,7 @@ public class UserManager {
         if (isCorrectPassword) {
             if (newUsername != null && !newUsername.equals(userData.get("username"))) {
                 // Check if username is taken
-                if (AuthManager.isUserExist(newUsername) || Permission.isUserRoot(userId)) {
+                if (AuthManager.isUserExist(newUsername) || userId == DatabaseUtils.getRootUserId()) {
                     return false;
                 }
                 String sql = "UPDATE usertb SET username = ? WHERE user_id_PK = ?";
@@ -94,7 +92,7 @@ public class UserManager {
         return userTable;
     }
 
-    public static List<Row> getAllRoleByPage(Long page){
+    public static List<Row> getAllRoleByPage(Long page) {
         if (page == null || page < 1) {
             page = 1L;
         }
@@ -103,21 +101,21 @@ public class UserManager {
         long offset = (page - 1) * pageSize;
 
         String sql = """
-               SELECT
-                    p.permission_id_PK,
-                    p.permission_name,
-                    COUNT(u.user_id_PK) AS user_count
-                FROM
-                    permissiontb p
-                LEFT JOIN
-                    usertb u ON p.permission_id_PK = u.permission_level_FK
-                GROUP BY
-                    p.permission_id_PK, p.permission_name
-                ORDER BY
-                    p.permission_id_PK
-                LIMIT ?
-                OFFSET ?;
-                """;
+                SELECT
+                     p.permission_id_PK,
+                     p.permission_name,
+                     COUNT(u.user_id_PK) AS user_count
+                 FROM
+                     permissiontb p
+                 LEFT JOIN
+                     usertb u ON p.permission_id_PK = u.permission_level_FK
+                 GROUP BY
+                     p.permission_id_PK, p.permission_name
+                 ORDER BY
+                     p.permission_id_PK
+                 LIMIT ?
+                 OFFSET ?;
+                 """;
 
         List<Row> roleTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
         Convertors.convertIdsToString(roleTable, "permission_id_PK");
