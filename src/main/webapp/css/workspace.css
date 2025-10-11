@@ -237,6 +237,7 @@ hr.sep-info {
 .action-wraper {
     border-radius: 5px;
     width: 32px;
+    margin-bottom: 15px;
     overflow: hidden;
     display: flex;
     width: 100%;
