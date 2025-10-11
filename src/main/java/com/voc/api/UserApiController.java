@@ -366,36 +366,6 @@ public class UserApiController {
         return null;
     }
 
-    @GetMapping("/listRole")
-    public ResponseEntity<Map<String,Object>> listRole(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NonNull HttpServletRequest request)
-            {
-                Map<String, Object> response = new HashMap<>();
-                Optional<Long> userId = getUserIdFromJWT(authToken);
-                    if (userId.isPresent()) {
-                        String[] sessionToken = getUserSessionToken(request).split(":");
-                        String sessionid = sessionToken[0];
-                        String refreshToken = sessionToken[1];
-
-                        // Validate userssion :D
-                            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
-                                    userId.get())) {
-                                // Logout the user since they are not authorize
-                                SessionManager.deleteSession(sessionid);
-                                response.put("message", "You are not authorized.");
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
-                            }
-            
-                            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
-
-                    if (isSuccess) {
-                    
-                }   
-            }
-        return null;
-    }
-
     @PutMapping("/assignRole")
     public ResponseEntity<Map<String,Object>> assignRoleUser(
             @RequestHeader(value = "Authorization", required = false) String authToken,
