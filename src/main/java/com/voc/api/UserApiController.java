@@ -44,7 +44,7 @@ public class UserApiController {
         public String confirmPassword;
     }
 
-    private static class AssignUserRole{
+    private static class AssignUserRole {
         public Long targetId;
         public Long roleId;
     }
@@ -267,6 +267,7 @@ public class UserApiController {
 
             if (isSuccess) {
                 List<Row> getUserPerPage = UserManager.getAllUserByPage(page);
+                System.out.println(getUserPerPage);
                 response.put("User", getUserPerPage);
                 return ResponseEntity.ok(response);
             }
@@ -359,90 +360,91 @@ public class UserApiController {
     }
 
     @GetMapping("/listRole")
-    public ResponseEntity<Map<String,Object>> listRole(
+    public ResponseEntity<Map<String, Object>> listRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NonNull HttpServletRequest request)
-            {
-                Map<String, Object> response = new HashMap<>();
-                Optional<Long> userId = getUserIdFromJWT(authToken);
-                    if (userId.isPresent()) {
-                        String[] sessionToken = getUserSessionToken(request).split(":");
-                        String sessionid = sessionToken[0];
-                        String refreshToken = sessionToken[1];
+            @NonNull HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
 
-                        // Validate userssion :D
-                            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
-                                    userId.get())) {
-                                // Logout the user since they are not authorize
-                                SessionManager.deleteSession(sessionid);
-                                response.put("message", "You are not authorized.");
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
-                            }
-            
-                            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
-
-                    if (isSuccess) {
-                    
-                }   
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
+
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+            if (isSuccess) {
+
+            }
+        }
         return null;
     }
 
     @PutMapping("/assignRole")
-    public ResponseEntity<Map<String,Object>> assignRoleUser(
+    public ResponseEntity<Map<String, Object>> assignRoleUser(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestBody AssignUserRole req)
-            {
-                Map<String, Object> response = new HashMap<>();
-                Optional<Long> userId = getUserIdFromJWT(authToken);
-                    if (userId.isPresent()) {
-                        String[] sessionToken = getUserSessionToken(request).split(":");
-                        String sessionid = sessionToken[0];
-                        String refreshToken = sessionToken[1];
+            @RequestBody AssignUserRole req) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
 
-                        // Validate userssion :D
-                            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
-                                    userId.get())) {
-                                // Logout the user since they are not authorize
-                                SessionManager.deleteSession(sessionid);
-                                response.put("message", "You are not authorized.");
-                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
-                            }
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
 
-                            Long target = req.targetId;
-                            Long role = req.roleId;
-                            
-                            if (target.equals(DatabaseUtils.getRootUserId())) {
-                                response.put("message", "You are not allow to do this.");
-                                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
-                            }
-                            System.out.println("is null?");
-                            if (role == null) {
-                                boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
-                                if (isSuccess) {
-                                    Permission.updateUserRole(target, null, userId.get());
-                                    response.put("Success", "Complete assigned role");
-                                    return ResponseEntity.ok(response);
-                                }
-                            }
-                            System.out.println("PAss");
-                            if (role.equals(Permission.getRootUserPermissionId())) {
-                                response.put("message", "You are not allow to do this.");
-                                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE.value()).body(response);
-                            }
+            Long target = req.targetId;
+            Long role = req.roleId;
 
-                            System.out.println(TAG_DEBUG + "Target :" + target);
+            if (target.equals(DatabaseUtils.getRootUserId())) {
+                response.put("message", "You are not allow to do this.");
+                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
+            }
+            System.out.println("is null?");
+            if (role == null) {
+                boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+                if (isSuccess) {
+                    Permission.updateUserRole(target, null, userId.get());
+                    response.put("Success", "Complete assigned role");
+                    return ResponseEntity.ok(response);
+                } else {
+                    response.put("message", "Failed to remove role");
+                    return ResponseEntity.ok(response);
+                }
+            }
+            System.out.println("Pass");
+            if (role.equals(Permission.getRootUserPermissionId())) {
+                response.put("message", "You are not allow to do this.");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE.value()).body(response);
+            }
 
-                            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+            System.out.println(TAG_DEBUG + "Target :" + target);
 
-                            if (isSuccess) {
-                                Permission.updateUserRole(target, role, userId.get());
-                                response.put("Success", "Complete assigned role");
-                                return ResponseEntity.ok(response);
-                            }
-                    }
-        return null;   
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+            if (isSuccess) {
+                Permission.updateUserRole(target, role, userId.get());
+                response.put("Success", "Complete assigned role");
+                return ResponseEntity.ok(response);
+            }
+        }
+        return null;
     }
 
     @GetMapping("/viewRoles")
@@ -539,7 +541,7 @@ public class UserApiController {
 
             // If the role is ROOT
             if (Permission.getRootUserPermissionId().equals(roleId)) {
-                response.put("Message","You're not allow to change permission on ROOT");
+                response.put("Message", "You're not allow to change permission on ROOT");
                 return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
             }
 
@@ -580,7 +582,7 @@ public class UserApiController {
 
             if ((bitmask & Values.ROOT_USER) == 1) {
                 // In case
-                response.put("Message","You can't create ROOT");
+                response.put("Message", "You can't create ROOT");
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE.value()).body(response);
             }
 
@@ -598,13 +600,13 @@ public class UserApiController {
     }
 
     @GetMapping("/modLog")
-    public ResponseEntity<Map<String,Object>> getModerationLog(
+    public ResponseEntity<Map<String, Object>> getModerationLog(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
-            @RequestParam (required = false) Long page){
-            
-            Map<String, Object> response = new HashMap<>();
-            Optional<Long> userId = getUserIdFromJWT(authToken);
+            @RequestParam(required = false) Long page) {
+
+        Map<String, Object> response = new HashMap<>();
+        Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
             String sessionid = sessionToken[0];

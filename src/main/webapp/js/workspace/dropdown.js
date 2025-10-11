@@ -34,32 +34,34 @@ export async function assignRole() {
     let pageCache = 1;
     let person = 0;
 
-    const nextButton = document.querySelector('.next');
-    const previousButton = document.querySelector('.previous');
+    const nextButton = document.querySelector(".next");
+    const previousButton = document.querySelector(".previous");
 
-    nextButton.addEventListener('click', () => {
+    nextButton.addEventListener("click", () => {
         pageCache++;
-        
     });
-    
-    previousButton.addEventListener('click', () => {
+
+    previousButton.addEventListener("click", () => {
         pageCache--;
-        if (pageCache <= 0){
+        if (pageCache <= 0) {
             pageCache = 1;
         }
     });
 
     const res = await fetchWithAuth("/api/user/getUser?page=" + pageCache);
-    const resRole = await fetchWithAuth("/api/user/viewRoles")
+    const resRole = await fetchWithAuth("/api/user/viewRoles");
 
     if (res.ok && resRole.ok) {
         const data = await res.json();
         const dataRole = await resRole.json();
+
+        console.log(data);
+
         const container = document.querySelector("list-item");
         const roleItem = document.querySelector("role-item");
-        
+
         const roleItemCopy = roleItem.cloneNode(true);
-        const counter = document.querySelector('.all-user');
+        const counter = document.querySelector(".all-user");
         roleItem.remove();
 
         data.User.forEach((user) => {
@@ -70,53 +72,60 @@ export async function assignRole() {
             const select = roleItemAppend.querySelector("selected-role");
             //@ts-ignore
             const selected = roleItemAppend.querySelector(".selected");
-            selected.textContent = user.permission_name;
-            //@ts-ignore
-            const roleContainer = roleItemAppend.querySelector(".role-container");
-            dataRole.Roles.forEach(role => {
-                const li = document.createElement('li');
+            selected.textContent =
+                user.permission_name !== null ? user.permission_name : "None";
+            const roleContainer =
+                //@ts-ignore
+                roleItemAppend.querySelector(".role-container");
+            dataRole.Roles.forEach((role) => {
+                const li = document.createElement("li");
                 li.textContent = role.permission_name;
                 li.setAttribute("permissionName", role.permission_name);
                 li.setAttribute("permissionId", role.permission_id_PK);
                 roleContainer.append(li);
             });
 
-            //@ts-ignore
-            const roleItem = roleItemAppend.querySelectorAll('.role-container li');
-            select.addEventListener('click', () => {
+            const roleItem =
+                //@ts-ignore
+                roleItemAppend.querySelectorAll(".role-container li");
+            select.addEventListener("click", () => {
                 select.classList.toggle("select-clicked");
                 roleContainer.classList.toggle("menu-open");
             });
 
             roleItem.forEach((role) => {
-                role.addEventListener('click', async () => {
+                role.addEventListener("click", async () => {
                     const uid = user.user_id_PK;
                     const rid = role.getAttribute("permissionId");
                     const preparedData = {
-                        targetId : uid,
-                        roleId : rid
+                        targetId: uid,
+                        roleId: rid,
                     };
-                    
-                    const response = await fetchWithAuth("/api/user/assignRole", {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json"},
-                        body: JSON.stringify(preparedData),
-                    });
+                    roleContainer.classList.toggle("menu-open");
 
-                    if (response.ok){
-                        selected.textContent = role.getAttribute("permissionName");
+                    const response = await fetchWithAuth(
+                        "/api/user/assignRole",
+                        {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(preparedData),
+                        }
+                    );
+
+                    if (response.ok) {
+                        selected.textContent =
+                            role.getAttribute("permissionName");
                         const chk = await response.json();
                         console.log(chk);
                     } else {
                     }
-
-                })  
+                });
             });
             username.textContent = user.username;
             container.append(roleItemAppend);
             person++;
         });
-            //@ts-ignore
+        //@ts-ignore
         counter.textContent = person;
     } else {
         console.log("ello");
