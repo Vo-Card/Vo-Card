@@ -114,7 +114,8 @@ public class ReviewApiController {
         Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean validateOwner = DeckManager.validateOwnership(userId.get(), learnedCard.deckId, null, null, null,
+            Boolean validateOwner = DeckManager.validateOwnership(true, userId.get(), learnedCard.deckId, null, null,
+                    null,
                     null);
             if (!validateOwner || !(DeckManager.getDeckIdFromCardId(learnedCard.cardId) != learnedCard.deckId)) {
                 response.put("message", "You don't have permission.");

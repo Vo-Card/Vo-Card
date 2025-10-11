@@ -492,8 +492,8 @@ public class DeckManager {
      * @param posId   optional
      * @return true if the user owns (or forked) the deck/item, false otherwise
      */
-    public static boolean validateOwnership(Long userId, Long deckId, Long levelId, Long cardId, Long posId,
-            Long definitionId) {
+    public static boolean validateOwnership(Boolean checkFork, Long userId, Long deckId, Long levelId, Long cardId,
+            Long posId, Long definitionId) {
 
         String sql = """
                     SELECT 1
@@ -503,8 +503,11 @@ public class DeckManager {
                     LEFT JOIN postb p ON p.card_id_FK = c.card_id_PK
                     LEFT JOIN definitiontb def ON def.pos_id_FK = p.pos_id_PK
                     LEFT JOIN forktb f ON f.deck_id_FK = d.deck_id_PK AND f.user_id_FK = ?
-                    WHERE (d.user_id_FK = ? OR f.user_id_FK IS NOT NULL)
-                      AND d.deck_id_PK = ?
+                    WHERE d.deck_id_PK = ?
+                      AND (
+                          d.user_id_FK = ?
+                          OR (? = TRUE AND f.user_id_FK IS NOT NULL)
+                      )
                       AND (? IS NULL OR cl.level_id_PK = ?)
                       AND (? IS NULL OR c.card_id_PK = ?)
                       AND (? IS NULL OR p.pos_id_PK = ?)
@@ -512,11 +515,13 @@ public class DeckManager {
                     LIMIT 1
                 """;
 
+        // Prepare parameters
         Row row = DatabaseUtils.sqlSingleRowStatement(
                 sql,
                 userId, // for forktb join
-                userId, // for owned deck
                 deckId,
+                userId, // check ownership
+                checkFork, // control fork check
                 levelId, levelId,
                 cardId, cardId,
                 posId, posId,
@@ -968,14 +973,14 @@ public class DeckManager {
         return true;
     }
 
-    public static Boolean toggleDeckPublic(Long deckId, Long userId) {
+    public static Boolean toggleDeckPublic(Long deckId) {
         Row deck = DatabaseUtils.sqlSingleRowStatement(
-                "SELECT deck_is_public FROM decktb WHERE deck_id_PK = ? AND user_id_FK = ?", deckId, userId);
+                "SELECT deck_is_public FROM decktb WHERE deck_id_PK = ?", deckId);
         if (deck != null) {
             boolean currentStatus = (Boolean) deck.get("deck_is_public");
             DatabaseUtils.sqlPrepareStatement(
-                    "UPDATE decktb SET deck_is_public = ? WHERE deck_id_PK = ? AND user_id_FK = ?",
-                    !currentStatus, deckId, userId);
+                    "UPDATE decktb SET deck_is_public = ? WHERE deck_id_PK = ?",
+                    !currentStatus, deckId);
             return !currentStatus;
         }
         return null;
@@ -1184,6 +1189,7 @@ public class DeckManager {
         SQLResult res = DatabaseUtils.sqlPrepareStatement(
                 "DELETE FROM card_leveltb WHERE level_id_PK = ? AND deck_id_FK = ?",
                 levelId, deckId);
+        updateDeckContainCard(deckId);
         return res.getAffectedRow() > 0;
     }
 
@@ -1191,6 +1197,7 @@ public class DeckManager {
         SQLResult res = DatabaseUtils.sqlPrepareStatement(
                 "DELETE FROM cardtb WHERE card_id_PK = ?",
                 cardId);
+        updateLevelContainCard(levelId);
         return res.getAffectedRow() > 0;
     }
 
