@@ -592,7 +592,7 @@ public class UserApiController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
 
-            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.MODERATE_EXPLORER);
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.VIEW_AUDIT_LOG);
 
             if (isSuccess) {
                 List<Row> modList = Permission.getModerationLog(userId.get());
