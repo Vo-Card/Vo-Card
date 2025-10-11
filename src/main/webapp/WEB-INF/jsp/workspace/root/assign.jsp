@@ -36,7 +36,7 @@
                     <i class="nf nf-md-chevron_down_circle"></i>
                 </selected-role>
                 <!-- Loadding role on this attribute as li -->
-                <ul class="role-container">
+                <ul class="role-selector">
                     <li permissionId="null" permissionName = "None" class="active">None</li>
                 </ul>
             </role-dropdown>
