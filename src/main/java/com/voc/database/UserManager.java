@@ -84,12 +84,13 @@ public class UserManager {
                         u.username,
                         p.permission_name
                 FROM usertb u
-                JOIN permissiontb p ON u.permission_level_FK = p.permission_id_PK 
+                LEFT JOIN permissiontb p ON u.permission_level_FK = p.permission_id_PK
                 ORDER BY user_id_PK
                 LIMIT ?
-				OFFSET ?
+                OFFSET ?
                 """;
         List<Row> userTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
+        System.out.println(userTable);
         Convertors.convertIdsToString(userTable, "user_id_PK");
         return userTable;
     }
