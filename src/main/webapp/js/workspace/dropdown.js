@@ -76,7 +76,7 @@ export async function assignRole() {
                 user.permission_name !== null ? user.permission_name : "None";
             const roleContainer =
                 //@ts-ignore
-                roleItemAppend.querySelector(".role-container");
+                roleItemAppend.querySelector(".role-selector");
             dataRole.Roles.forEach((role) => {
                 const li = document.createElement("li");
                 li.textContent = role.permission_name;
@@ -87,7 +87,7 @@ export async function assignRole() {
 
             const roleItem =
                 //@ts-ignore
-                roleItemAppend.querySelectorAll(".role-container li");
+                roleItemAppend.querySelectorAll(".role-selector li");
             select.addEventListener("click", () => {
                 select.classList.toggle("select-clicked");
                 roleContainer.classList.toggle("menu-open");
