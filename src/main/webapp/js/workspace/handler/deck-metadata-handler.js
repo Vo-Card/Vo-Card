@@ -3,7 +3,12 @@
 import { loadPage } from "../module/page-manager.js";
 import { editLoader } from "./form-handler.js";
 import { createConfirmationPopup, createPopupBox } from "./popup-handler.js";
-import { fetchWithAuth } from "/js/auth/auth.js";
+import { fetchWithAuth, TokenManager } from "/js/auth/auth.js";
+
+// Permission bitmask
+const FORCE_DELETE = 1n << 2n;
+const FORCE_UPDATE = 1n << 3n;
+const IS_ROOT = 1n << 63n;
 
 /**
  *
@@ -111,48 +116,53 @@ function addedOwnedButtonActions(
     const actionWraper = document.createElement("div");
     actionWraper.className = "action-wraper";
 
-    const removeAct = document.createElement("button");
-    removeAct.textContent = "Delete";
-    removeAct.classList = "btn-warned";
+    if (!(delConfirm === null || delText === null)) {
+        const removeAct = document.createElement("button");
+        removeAct.textContent = "Delete";
+        removeAct.classList = "btn-warned";
 
-    removeAct.addEventListener("click", () => {
-        createConfirmationPopup(
-            "50vw",
-            "fit-content",
-            delText,
-            delConfirm,
-            async () => {
-                const response = await fetchWithAuth(delEndPoint, {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    console.log(data.message);
-                    loadPage(window.location.pathname);
-                } else {
-                    console.error(data.message);
+        removeAct.addEventListener("click", () => {
+            createConfirmationPopup(
+                "50vw",
+                "fit-content",
+                delText,
+                delConfirm,
+                async () => {
+                    const response = await fetchWithAuth(delEndPoint, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        console.log(data.message);
+                        loadPage(window.location.pathname);
+                    } else {
+                        console.error(data.message);
+                    }
                 }
-            }
-        );
-    });
+            );
+        });
+        actionWraper.appendChild(removeAct);
+    }
 
-    const editAct = document.createElement("button");
-    editAct.textContent = "Edit";
-    editAct.classList = "btn-act";
+    if (!(editText === null || editTemplate === null)) {
+        const editAct = document.createElement("button");
+        editAct.textContent = "Edit";
+        editAct.classList = "btn-act";
 
-    editAct.addEventListener("click", async () => {
-        await createPopupBox(
-            "60vw",
-            "60vh",
-            editText,
-            await editLoader(editTemplate, type, data)
-        );
-    });
-    actionWraper.appendChild(removeAct);
-    actionWraper.appendChild(editAct);
+        editAct.addEventListener("click", async () => {
+            await createPopupBox(
+                "60vw",
+                "60vh",
+                editText,
+                await editLoader(editTemplate, type, data)
+            );
+        });
+        actionWraper.appendChild(editAct);
+    }
+
     target.appendChild(actionWraper);
 }
 
@@ -222,6 +232,49 @@ export function showDeckInformation(
     const hr = document.createElement("hr");
     hr.classList = "sep-info";
     dataContainer.append(hr);
+
+    // Check if has permission to force Update Deck
+    const permission = TokenManager.getPrtmissionBit();
+
+    if (
+        ((permission & IS_ROOT) != 0n ||
+            (permission & (FORCE_DELETE | FORCE_UPDATE)) ===
+                (FORCE_DELETE | FORCE_UPDATE)) &&
+        ownershipType !== "owned"
+    ) {
+        addedOwnedButtonActions(
+            dataContainer,
+            "deck",
+            deckData,
+            "Delete Deck",
+            "Are you sure you want to delete this deck? This action cannot be undone.",
+            `/api/decks/${deckData.deck_id_PK}/delete`,
+            "Deck Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
+        );
+    } else if ((permission & FORCE_DELETE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "deck",
+            deckData,
+            "Delete Deck",
+            "Are you sure you want to delete this deck? This action cannot be undone.",
+            `/api/decks/${deckData.deck_id_PK}/delete`,
+            null,
+            null
+        );
+    } else if ((permission & FORCE_UPDATE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "deck",
+            deckData,
+            null,
+            null,
+            null,
+            "Deck Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
+        );
+    }
 
     if (ownershipType === "owned") {
         addedOwnedButtonActions(
@@ -334,6 +387,11 @@ export async function showLevelInformation(
         container.querySelector("deck-data-container")
     );
 
+    const match = window.location.pathname.match(
+        /^\/workspace\/decks\/([^/]+)/
+    );
+    const deckId = match ? match[1] : null;
+
     const sel = container.querySelector("selection");
 
     if (sel != null) sel.remove();
@@ -366,17 +424,53 @@ export async function showLevelInformation(
         `${levelData.level_contain_card} Cards`
     );
 
-    console.log(ownershipType);
+    // Check if has permission to force Update Deck
+    const permission = TokenManager.getPrtmissionBit();
+
+    if (
+        ((permission & IS_ROOT) != 0n ||
+            (permission & (FORCE_DELETE | FORCE_UPDATE)) ===
+                (FORCE_DELETE | FORCE_UPDATE)) &&
+        ownershipType !== "owned"
+    ) {
+        addedOwnedButtonActions(
+            dataContainer,
+            "level",
+            levelData,
+            "Delete Level",
+            "Are you sure you want to delete this level? This action cannot be undone.",
+            `/api/decks/${deckId}/${levelData.level_id_PK}/delete`,
+            "Level Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
+        );
+    } else if ((permission & FORCE_DELETE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "level",
+            levelData,
+            "Delete Level",
+            "Are you sure you want to delete this level? This action cannot be undone.",
+            `/api/decks/${deckId}/${levelData.level_id_PK}/delete`,
+            null,
+            null
+        );
+    } else if ((permission & FORCE_UPDATE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "level",
+            levelData,
+            null,
+            null,
+            null,
+            "Level Information: Edit Mode",
+            "/components/content/popup/edit-item.jsp"
+        );
+    }
 
     if (ownershipType === "owned") {
         const hr = document.createElement("hr");
         hr.className = "sep-info";
         dataContainer.append(hr);
-
-        const match = window.location.pathname.match(
-            /^\/workspace\/decks\/([^/]+)/
-        );
-        const deckId = match ? match[1] : null;
 
         // Add delete level button
         addedOwnedButtonActions(
@@ -411,6 +505,12 @@ export async function showCardInformation(
 
     const sel = container.querySelector("selection");
 
+    const match = window.location.pathname.match(
+        /^\/workspace\/decks\/([^/]+)\/([^/]+)/
+    );
+    const deckId = match ? match[1] : null;
+    const levelId = match ? match[2] : null;
+
     if (sel != null) sel.remove();
 
     const cardContainer = container.querySelector(".card-item-container");
@@ -431,16 +531,65 @@ export async function showCardInformation(
         cardData.card_created_date
     );
 
+    // Check if has permission to force Update Deck
+    const permission = TokenManager.getPrtmissionBit();
+
+    if (
+        ((permission & IS_ROOT) != 0n ||
+            (permission & (FORCE_DELETE | FORCE_UPDATE)) ===
+                (FORCE_DELETE | FORCE_UPDATE)) &&
+        ownershipType !== "owned"
+    ) {
+        addedOwnedButtonActions(
+            dataContainer,
+            "card",
+            await (
+                await fetchWithAuth(
+                    `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}`
+                )
+            ).json(),
+            "Delete Card",
+            "Are you sure you want to delete this card? This action cannot be undone.",
+            `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}/delete`,
+            "Card Information: Edit Mode",
+            "/components/content/popup/card-edit.jsp"
+        );
+    } else if ((permission & FORCE_DELETE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "card",
+            await (
+                await fetchWithAuth(
+                    `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}`
+                )
+            ).json(),
+            "Delete Card",
+            "Are you sure you want to delete this card? This action cannot be undone.",
+            `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}/delete`,
+            null,
+            null
+        );
+    } else if ((permission & FORCE_UPDATE) != 0n && ownershipType !== "owned") {
+        addedOwnedButtonActions(
+            dataContainer,
+            "card",
+            await (
+                await fetchWithAuth(
+                    `/api/decks/${deckId}/${levelId}/${cardData.card_id_PK}`
+                )
+            ).json(),
+            null,
+            null,
+            null,
+            "Card Information: Edit Mode",
+            "/components/content/popup/card-edit.jsp"
+        );
+    }
+
     if (ownershipType === "owned") {
         const hr = document.createElement("hr");
         hr.className = "sep-info";
         dataContainer.append(hr);
-
-        const match = window.location.pathname.match(
-            /^\/workspace\/decks\/([^/]+)\/([^/]+)/
-        );
-        const deckId = match ? match[1] : null;
-        const levelId = match ? match[2] : null;
 
         addedOwnedButtonActions(
             dataContainer,

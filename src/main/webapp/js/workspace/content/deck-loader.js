@@ -1,6 +1,6 @@
 // @ts-check
 
-import { fetchWithAuth } from "/js/auth/auth.js";
+import { fetchWithAuth, TokenManager } from "/js/auth/auth.js";
 import {
     insertCreateEventActions,
     insertDataEventActions,
@@ -9,6 +9,9 @@ import { cardSessionPlay } from "../review.js";
 import { loadPage } from "../module/page-manager.js";
 
 const templateCache = new Map();
+
+const FORCE_CREATE = 1n << 4n;
+const IS_ROOT = 1n << 63n;
 
 /* ------------- */
 /*   Utilities   */
@@ -247,7 +250,12 @@ export async function deckDetailLoader(path) {
             data.ownership_type
         );
 
-    if (data.ownership_type === "owned") {
+    const permission = TokenManager.getPrtmissionBit();
+
+    if (
+        data.ownership_type === "owned" ||
+        (permission & (FORCE_CREATE | IS_ROOT)) != 0n
+    ) {
         await appendTemplate(
             levelContainer,
             "/components/template/new_card.svg",
@@ -285,8 +293,12 @@ export async function levelDetailLoader(path) {
             "card",
             data.ownership_type
         );
+    const permission = TokenManager.getPrtmissionBit();
 
-    if (data.ownership_type === "owned") {
+    if (
+        data.ownership_type === "owned" ||
+        (permission & (FORCE_CREATE | IS_ROOT)) != 0n
+    ) {
         await appendTemplate(
             cardContainer,
             "/components/template/new_card.svg",
@@ -333,7 +345,9 @@ export async function loadAllDecksToReview() {
         if (selectedDecks.size >= 1)
             cardSessionPlay(
                 Array.from(selectedDecks),
+                // @ts-ignore
                 data["total-session"],
+                // @ts-ignore
                 data["timelimit"] * 60
             );
     });

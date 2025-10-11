@@ -75,10 +75,16 @@
                     <div id="dislike-bar-fill" style="height: 5px; background-color: var(--dislike-color); width: 50%;">
                     </div>
                 </like-value-bar>
-                <button id="fork-deck-button"
-                    style="width: 100%; padding: 5px; border: none; border-radius: 10px; background-color: #5050a1; color: var(--background-color); font-size: 18px; cursor: pointer;">
-                    Fork
-                </button>
+                <div style="width: 100%; gap: 5px; display: flex; justify-content: space-between;">
+                    <button id="fork-deck-button"
+                        style="width: 100%; padding: 5px; border: none; border-radius: 10px; background-color: #5050a1; color: var(--background-color); font-size: 18px; cursor: pointer;">
+                        Fork
+                    </button>
+                    <button id="moderate-deck-button"
+                        style="display: none; width: 100%; padding: 5px; border: none; border-radius: 10px; background-color: #a15050; color: var(--background-color); font-size: 18px; cursor: pointer;">
+                        Take Down
+                    </button>
+                </div>
 
             </deck-content>
         </explore-template>

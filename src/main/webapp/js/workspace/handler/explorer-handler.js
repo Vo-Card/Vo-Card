@@ -1,6 +1,10 @@
 // Module for handling the explorer page functionality
 import { populateContainer } from "../content/deck-loader.js";
-import { fetchWithAuth } from "/js/auth/auth.js";
+import { loadPage } from "../module/page-manager.js";
+import { fetchWithAuth, TokenManager } from "/js/auth/auth.js";
+
+const MODERATE_EXPLORER = 1n << 5n;
+const IS_ROOT = 1n << 63n;
 
 /**
  * Fetch public decks from the server
@@ -32,8 +36,6 @@ export async function displayPublicDecks() {
     const template = /**@type {HTMLElement} */ (getDeckTemplate());
     template.style.display = "flex";
     container.innerHTML = "";
-
-    console.log(decks);
 
     decks.forEach((deck) => {
         const deckElement = /**@type {HTMLElement} */ (
@@ -207,7 +209,7 @@ export async function displayPublicDecks() {
                     body: JSON.stringify({ deckId: deck.deck_id_PK }),
                 });
                 if (response.ok) {
-                    console.log("Deck forked successfully!");
+                    loadPage("/workspace/decks");
                 } else {
                     console.error("Failed to fork deck.");
                 }
@@ -217,8 +219,40 @@ export async function displayPublicDecks() {
             }
         });
 
+        const permission = TokenManager.getPrtmissionBit();
+
+        if (
+            (permission & MODERATE_EXPLORER) != 0n ||
+            (permission & IS_ROOT) != 0n
+        ) {
+            const takeDownButton = deckElement.querySelector(
+                "#moderate-deck-button"
+            );
+            //@ts-ignore
+            takeDownButton.style.display = "block";
+            takeDownButton.addEventListener("click", async (e) => {
+                try {
+                    const response = await fetchWithAuth(
+                        `/api/decks/modExplore?deckId=${deck.deck_id_PK}`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        }
+                    );
+                    if (response.ok) {
+                        deckElement.remove();
+                    } else {
+                        console.error("Failed to fork deck.");
+                    }
+                } catch (error) {
+                    console.error("Error forking deck:", error);
+                    alert("Error occurred while forking the deck.");
+                }
+            });
+        }
+
         container.appendChild(deckElement);
     });
-
-    console.log(decks);
 }
