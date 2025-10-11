@@ -9,6 +9,7 @@ const FORCE_CREATE_ITEM = 1n << 4n;
 const MODERATE_EXPLORER = 1n << 5n;
 const VIEW_AUDIT_LOG = 1n << 6n;
 const CHANGE_USERNAME = 1n << 7n;
+const VIEW_ALL_USER = 1n << 8n;
 
 export async function createEmptyRole() {
     const createRoleButton = document.querySelector("#createNewRole");
@@ -69,7 +70,9 @@ export async function showAllRoles() {
                 loadPage("/workspace/root/" + role.permission_id_PK);
             });
             // @ts-ignore
-            const deleteRoleButton = roleItemAppend.querySelector("#role-delete");
+            const deleteRoleButton =
+                // @ts-ignore
+                roleItemAppend.querySelector("#role-delete");
             deleteRoleButton.addEventListener(
                 "click",
                 async () => await deleteRole(role.permission_id_PK)
@@ -122,7 +125,7 @@ async function getCurrentRoleInfo(path) {
 // TODO: updaterole....
 export async function updateRole(path) {
     const data = await getCurrentRoleInfo(path);
-    whichBitmaskOn(data.permission_level)
+    whichBitmaskOn(data.permission_level);
     console.log(data);
 
     const createRoleButton = document.querySelector("#submit-role");
@@ -179,6 +182,10 @@ export async function updateRole(path) {
         if (document.querySelector("#change-username")?.checked)
             permissions |= CHANGE_USERNAME;
 
+        //@ts-ignore
+        if (document.querySelector("#view-all-users")?.checked)
+            permissions |= VIEW_ALL_USER;
+
         console.log("Final permission bitmask:", permissions.toString());
         console.log(newRoleName);
         console.log(newRoleDesc);
@@ -202,17 +209,18 @@ export async function updateRole(path) {
 }
 
 async function whichBitmaskOn(bitmask) {
-    console.log("Get bit :" +bitmask);
-    
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-bit]');
+    console.log("Get bit :" + bitmask);
+
+    const checkboxes = document.querySelectorAll(
+        'input[type="checkbox"][data-bit]'
+    );
     console.log(checkboxes);
-    
-  
-  checkboxes.forEach(checkbox => {
-            //@ts-ignore
-    const bit = parseInt(checkbox.dataset.bit, 10);
-    const isOn = (bitmask & (1 << bit)) !== 0; 
-            //@ts-ignore
-    checkbox.checked = isOn;
-  });
+
+    checkboxes.forEach((checkbox) => {
+        //@ts-ignore
+        const bit = parseInt(checkbox.dataset.bit, 10);
+        const isOn = (bitmask & (1 << bit)) !== 0;
+        //@ts-ignore
+        checkbox.checked = isOn;
+    });
 }
