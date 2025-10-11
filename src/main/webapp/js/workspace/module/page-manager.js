@@ -19,6 +19,7 @@ import { loadUserInformation } from "../handler/home-handler.js";
 import { rtDropdowns, assignRole } from "../dropdown.js";
 import { lookOverview } from "../overview.js";
 import { showAllRoles, createEmptyRole, updateRole } from "../roleOverview.js";
+import { getModLog } from "../moderationLog.js";
 
 // Use to cache pages
 const cache = new Map();
@@ -56,7 +57,7 @@ const pageComponents = {
         js: null,
         css: "/css/workspace/root.css",
     },
-    "/workspace/mod-log": { js: null, css: "/css/workspace/root.css" },
+    "/workspace/mod-log": { js: getModLog, css: "/css/workspace/root.css" },
     "/workspace/user-overview": {
         js: lookOverview,
         css: "/css/workspace/root.css",
@@ -229,7 +230,7 @@ export async function loadPage(path, addHistory = true) {
             createEmptyRole();
         } else if (/^\/workspace\/root\/assign\/?$/.test(path)) {
             rtDropdowns();
-            assignRole(path);
+            assignRole();
         } else if (/^\/workspace\/root\/[^/]+\/?$/.test(path)) {
             updateRole(path);
         }

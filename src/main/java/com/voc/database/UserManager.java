@@ -80,25 +80,21 @@ public class UserManager {
         long offset = (page - 1) * pageSize;
 
         String sql = """
-                SELECT user_id_PK,
-                        username
-                FROM usertb
+                SELECT  u.user_id_PK,
+                        u.username,
+                        p.permission_name
+                FROM usertb u
+                JOIN permissiontb p ON u.permission_level_FK = p.permission_id_PK 
                 ORDER BY user_id_PK
                 LIMIT ?
-                OFFSET ?
+				OFFSET ?
                 """;
         List<Row> userTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
         Convertors.convertIdsToString(userTable, "user_id_PK");
         return userTable;
     }
 
-    public static List<Row> getAllRoleByPage(Long page) {
-        if (page == null || page < 1) {
-            page = 1L;
-        }
-
-        int pageSize = 20;
-        long offset = (page - 1) * pageSize;
+    public static List<Row> getAllRole() {
 
         String sql = """
                 SELECT
@@ -113,11 +109,9 @@ public class UserManager {
                      p.permission_id_PK, p.permission_name
                  ORDER BY
                      p.permission_id_PK
-                 LIMIT ?
-                 OFFSET ?;
                  """;
 
-        List<Row> roleTable = DatabaseUtils.sqlPrepareStatement(sql, pageSize, offset).getData();
+        List<Row> roleTable = DatabaseUtils.sqlPrepareStatement(sql).getData();
         Convertors.convertIdsToString(roleTable, "permission_id_PK");
         return roleTable;
     }

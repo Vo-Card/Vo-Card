@@ -4,13 +4,18 @@
     <h2 style="margin-bottom: 10px;">ROOT Menu</h2>
 
     <root-div style="border-bottom: 2px solid white;">
-        <role-button>Role</role-button>
-        <assign-role-button>Assign Role</assign-role-button>
+        <a href="">
+            <role-button>Role</role-button>
+        </a>
+        <a href="/workspace/root/assign"">
+            <assign-role-button>Assign Role</assign-role-button>
+        </a>
     </root-div>
-
-    <form id="createNewRole" style=" padding: 15px 10px 15px 0;">
-        <input type="submit" style="width: fit-content;" value="Create">
-    </form>
+    <root-div>
+        <form id="createNewRole">
+            <input type="submit" style="width: fit-content ; padding: 5px;" value="Create">
+        </form>
+    </root-div>
     <input style="width: 50%;" type="text" name="roleName" id="search-roles" placeholder="Search or Create roles..">
 
     <root-div style="border-bottom: 2px solid white;">
