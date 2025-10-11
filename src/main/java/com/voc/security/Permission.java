@@ -66,7 +66,7 @@ public class Permission {
                 """;
 
         Row res = DatabaseUtils.sqlSingleRowStatement(sql, userId);
-        Long userPermission = ((Number) res.get("permission_level")).longValue();
+        Long userPermission = res != null ? ((Number) res.get("permission_level")).longValue() : 0;
 
         if ((userPermission & checkPermission) != 0 || (userPermission & Values.ROOT_USER) != 0) {
             return true;
@@ -136,7 +136,6 @@ public class Permission {
             System.err.println(TAG_ERROR + "Cannot create new root role");
             return;
         }
-
 
         String sql = """
                 UPDATE permissiontb
@@ -220,7 +219,7 @@ public class Permission {
     }
 
     // Hard code
-    public static void moderationAutoLog(Long userId, String usedFunc, String message){
+    public static void moderationAutoLog(Long userId, String usedFunc, String message) {
         String sql = """
                 INSERT INTO
                 moderation_action (action_id_PK, action_type, action_message, user_id)
@@ -234,23 +233,23 @@ public class Permission {
         }
     }
 
-    public static List<Row> getModerationLog(Long userId){
+    public static List<Row> getModerationLog(Long userId) {
         Long permissionLevel = getPermissionViaUserId(userId);
-        
+
         if (permissionLevel == null) {
             System.err.println(TAG_ERROR + "User not found or no permissions assigned.");
             return null;
         }
 
-        // if (page == null || page < 1) { 
-        //         page = 1L;
-        //     }
+        // if (page == null || page < 1) {
+        // page = 1L;
+        // }
 
-        //     int pageSize = 20;
-        //     long offset = (page - 1) * pageSize;
+        // int pageSize = 20;
+        // long offset = (page - 1) * pageSize;
 
         if (((permissionLevel & Values.VIEW_AUDIT_LOG) != 0) || ((permissionLevel & Values.ROOT_USER) != 0)) {
-            
+
             String sql = """
                         SELECT  m.action_type,
                                 m.action_message,
