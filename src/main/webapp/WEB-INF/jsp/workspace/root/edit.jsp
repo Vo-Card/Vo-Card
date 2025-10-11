@@ -21,62 +21,82 @@
                     <h5>Permission</h5>
 
                     <div class="role-container">
-                        <p>Update User</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="update-user"
-                                    name="allowCloning"><span class="slider"></span></label></div>
-                    </div>
-
-                    <div class="role-container">
                         <p>Delete User</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="delete-user"
-                                    name="allowCloning"><span class="slider"></span></label></div>
-                    </div>
-
-                    <div class="role-container">
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="delete-user" data-bit="0"><span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                  
+                      <div class="role-container">
+                        <p>Update User</p>
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="update-user" data-bit="1"><span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                  
+                      <div class="role-container">
                         <p>Force Delete Item</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="force-delete-item"
-                                    name="allowCloning"><span class="slider"></span></label></div>
-                    </div>
-
-                    <div class="role-container">
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="force-delete-item" data-bit="2"><span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                  
+                      <div class="role-container">
                         <p>Force Update Item</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="force-update-item"
-                                    name="allowCloning"><span class="slider"></span></label></div>
-                    </div>
-
-                    <div class="role-container">
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="force-update-item" data-bit="3"><span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                  
+                      <div class="role-container">
                         <p>Force Create Item</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="force-create-item"
-                                    name="allowCloning"><span class="slider"></span></label></div>
-                    </div>
-
-                    <div class="role-container">
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="force-create-item" data-bit="4"><span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                  
+                      <div class="role-container">
                         <p>Moderation Explore</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox"
-                                    id="moderation-explore" name="allowCloning"><span class="slider"></span></label>
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="moderation-explore" data-bit="5"><span class="slider"></span>
+                          </label>
                         </div>
-                    </div>
-
-                    <div class="role-container">
+                      </div>
+                  
+                      <div class="role-container">
                         <p>View Audit Log</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="view-audit-log"
-                                    name="allowCloning"><span class="slider"></span></label>
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="view-audit-log" data-bit="6"><span class="slider"></span>
+                          </label>
                         </div>
-                    </div>
-
-                    <div class="role-container">
+                      </div>
+                  
+                      <div class="role-container">
                         <p>Change Username</p>
-                        <div class="checkbox-custom"><label class="switch"><input type="checkbox" id="change-username"
-                                    name="allowCloning"><span class="slider"></span></label>
+                        <div class="checkbox-custom">
+                          <label class="switch">
+                            <input type="checkbox" id="change-username" data-bit="7"><span class="slider"></span>
+                          </label>
                         </div>
+                      </div>
                     </div>
-                </div>
 
-                <div class="permission-bottom" style="width: 100%; ">
-                    <label for="role-description" style="margin-bottom: 10px;">Role Description</label>
-                    <textarea type="text" name="role-desc" id="role-description" placeholder="Role Description" 
-                    style="resize: none;"></textarea>
-                </div>
+                    <div class="permission-bottom" style="width: 100%;">
+                      <label for="role-description" style="margin-bottom: 10px;">Role Description</label>
+                      <textarea id="role-description" placeholder="Role Description" style="resize: none;"></textarea>
+                    </div>
             </permission-container>
 
             <role-confirm>

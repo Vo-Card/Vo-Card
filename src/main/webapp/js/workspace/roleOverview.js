@@ -40,12 +40,11 @@ export async function createEmptyRole() {
     });
 }
 
-let pageCache = 1;
 export async function showAllRoles() {
     let allRoleCounter = 0;
     console.log(`Current paht : ${window.location.pathname}`);
 
-    const res = await fetchWithAuth("/api/user/viewRoles?page=" + pageCache);
+    const res = await fetchWithAuth("/api/user/viewRoles");
 
     if (res.ok) {
         const data = await res.json();
@@ -70,8 +69,7 @@ export async function showAllRoles() {
                 loadPage("/workspace/root/" + role.permission_id_PK);
             });
             // @ts-ignore
-            const deleteRoleButton =
-                roleItemAppend.querySelector("#role-delete");
+            const deleteRoleButton = roleItemAppend.querySelector("#role-delete");
             deleteRoleButton.addEventListener(
                 "click",
                 async () => await deleteRole(role.permission_id_PK)
@@ -124,6 +122,7 @@ async function getCurrentRoleInfo(path) {
 // TODO: updaterole....
 export async function updateRole(path) {
     const data = await getCurrentRoleInfo(path);
+    whichBitmaskOn(data.permission_level)
     console.log(data);
 
     const createRoleButton = document.querySelector("#submit-role");
@@ -138,11 +137,11 @@ export async function updateRole(path) {
     createRoleButton?.addEventListener("click", async (e) => {
         const roleNameInput = document.querySelector("#role-name");
         //@ts-ignore
-        const newRoleName = roleNameInput?.value?.trim() || "New Role";
+        const newRoleName = roleNameInput?.value?.trim() || null;
 
         const roleDescInput = document.querySelector("#role-description");
         //@ts-ignore
-        const newRoleDesc = roleDescInput?.value?.trim() || "Role desc";
+        const newRoleDesc = roleDescInput?.value?.trim() || null;
         e.preventDefault();
 
         let permissions = 0n;
@@ -200,4 +199,20 @@ export async function updateRole(path) {
         const result = await response.json();
         console.log("Server response:", result);
     });
+}
+
+async function whichBitmaskOn(bitmask) {
+    console.log("Get bit :" +bitmask);
+    
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-bit]');
+    console.log(checkboxes);
+    
+  
+  checkboxes.forEach(checkbox => {
+            //@ts-ignore
+    const bit = parseInt(checkbox.dataset.bit, 10);
+    const isOn = (bitmask & (1 << bit)) !== 0; 
+            //@ts-ignore
+    checkbox.checked = isOn;
+  });
 }
