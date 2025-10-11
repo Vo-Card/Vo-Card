@@ -44,6 +44,11 @@ public class UserApiController {
         public String confirmPassword;
     }
 
+    private static class AssignUserRole{
+        public Long targetId;
+        public Long roleId;
+    }
+
     private static class RoleUpdateRequest {
         public String roleId;
         public String roleName;
@@ -361,10 +366,6 @@ public class UserApiController {
         return null;
     }
 
-    // TODO: Create empty role API include backend
-    // TODO: load Role API include backend
-    // TODO: Update empty role API include backend
-    // TODO: Delete empty role API include backend
     @GetMapping("/listRole")
     public ResponseEntity<Map<String,Object>> listRole(
             @RequestHeader(value = "Authorization", required = false) String authToken,
@@ -398,10 +399,57 @@ public class UserApiController {
     @PutMapping("/assignRole")
     public ResponseEntity<Map<String,Object>> assignRoleUser(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NonNull HttpServletRequest request)
-                {
+            @NonNull HttpServletRequest request,
+            @RequestBody AssignUserRole req)
+            {
+                Map<String, Object> response = new HashMap<>();
+                Optional<Long> userId = getUserIdFromJWT(authToken);
+                    if (userId.isPresent()) {
+                        String[] sessionToken = getUserSessionToken(request).split(":");
+                        String sessionid = sessionToken[0];
+                        String refreshToken = sessionToken[1];
 
+                        // Validate userssion :D
+                            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                                    userId.get())) {
+                                // Logout the user since they are not authorize
+                                SessionManager.deleteSession(sessionid);
+                                response.put("message", "You are not authorized.");
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+                            }
 
+                            Long target = req.targetId;
+                            Long role = req.roleId;
+                            
+                            if (target.equals(DatabaseUtils.getRootUserId())) {
+                                response.put("message", "You are not allow to do this.");
+                                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
+                            }
+                            System.out.println("is null?");
+                            if (role == null) {
+                                boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+                                if (isSuccess) {
+                                    Permission.updateUserRole(target, null, userId.get());
+                                    response.put("Success", "Complete assigned role");
+                                    return ResponseEntity.ok(response);
+                                }
+                            }
+                            System.out.println("PAss");
+                            if (role.equals(Permission.getRootUserPermissionId())) {
+                                response.put("message", "You are not allow to do this.");
+                                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE.value()).body(response);
+                            }
+
+                            System.out.println(TAG_DEBUG + "Target :" + target);
+
+                            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+                            if (isSuccess) {
+                                Permission.updateUserRole(target, role, userId.get());
+                                response.put("Success", "Complete assigned role");
+                                return ResponseEntity.ok(response);
+                            }
+                    }
         return null;   
     }
 
@@ -429,7 +477,7 @@ public class UserApiController {
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
 
             if (isSuccess) {
-                List<Row> getRolePerPage = UserManager.getAllRoleByPage(page);
+                List<Row> getRolePerPage = UserManager.getAllRole();
                 response.put("Roles", getRolePerPage);
                 return ResponseEntity.ok(response);
             }
