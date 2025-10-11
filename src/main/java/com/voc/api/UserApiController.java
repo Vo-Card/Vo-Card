@@ -300,7 +300,7 @@ public class UserApiController {
 
             if (Permission.isUserRoot(target)) {
                 response.put("message", "You are not allow to do that.");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(response);
+                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
             }
 
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.DELETE_USER);
@@ -310,6 +310,7 @@ public class UserApiController {
 
                 if (isComplete) {
                     response.put("message", "Remove user sucessfully");
+                    Permission.moderationAutoLog(userId.get(), "Force Delete User", "User deleted user");
                     return ResponseEntity.ok(response);
                 }
             }
@@ -341,8 +342,8 @@ public class UserApiController {
             }
             
             if (Permission.getRootUserPermissionId().equals(target)) {
-                response.put("message", "You're not allow to do that.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+                response.put("Message", "You're not allow to do that.");
+                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
             }
 
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
@@ -350,6 +351,7 @@ public class UserApiController {
             if (isSuccess) {
                 Boolean isComplete = Permission.removeRole(userId.get(), target);
                 if (isComplete) {
+                    Permission.moderationAutoLog(userId.get(), "Delete role", "User deleted role");
                     response.put("message", "Remove role sucessfully");
                     return ResponseEntity.ok(response);
                 }
@@ -362,13 +364,52 @@ public class UserApiController {
     // TODO: load Role API include backend
     // TODO: Update empty role API include backend
     // TODO: Delete empty role API include backend
+    @GetMapping("/listRole")
+    public ResponseEntity<Map<String,Object>> listRole(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request)
+            {
+                Map<String, Object> response = new HashMap<>();
+                Optional<Long> userId = getUserIdFromJWT(authToken);
+                    if (userId.isPresent()) {
+                        String[] sessionToken = getUserSessionToken(request).split(":");
+                        String sessionid = sessionToken[0];
+                        String refreshToken = sessionToken[1];
+
+                        // Validate userssion :D
+                            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                                    userId.get())) {
+                                // Logout the user since they are not authorize
+                                SessionManager.deleteSession(sessionid);
+                                response.put("message", "You are not authorized.");
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+                            }
+            
+                            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
+
+                    if (isSuccess) {
+                    
+                }   
+            }
+        return null;
+    }
+
+    @PutMapping("/assignRole")
+    public ResponseEntity<Map<String,Object>> assignRoleUser(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request)
+                {
+
+
+        return null;   
+    }
 
     @GetMapping("/viewRoles")
     public ResponseEntity<Map<String, Object>> viewRoles(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NonNull HttpServletRequest request,
             @RequestParam(required = false) Long page){
-                Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         Optional<Long> userId = getUserIdFromJWT(authToken);
         if (userId.isPresent()) {
             String[] sessionToken = getUserSessionToken(request).split(":");
@@ -449,15 +490,23 @@ public class UserApiController {
                 response.put("message", "You are not authorized.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
+
             Long roleId = new java.math.BigInteger(req.roleId).longValue();
             Long bitmask = new java.math.BigInteger(req.bitmask).longValue();
             String name = req.roleName;
             String desc = req.roleDesc;
 
+            // If the role is ROOT
+            if (Permission.getRootUserPermissionId().equals(roleId)) {
+                response.put("Message","You're not allow to change permission on ROOT");
+                return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT.value()).body(response);
+            }
+
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
 
             if (isSuccess) {
                 Permission.updateRole(roleId, name, bitmask, desc, userId.get());
+                Permission.moderationAutoLog(userId.get(), "Update Role", "User updated " + name + " role");
                 response.put("Message", "Role has been updated");
                 return ResponseEntity.ok(response);
             }
@@ -488,16 +537,54 @@ public class UserApiController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
             }
 
+            if ((bitmask & Values.ROOT_USER) == 1) {
+                // In case
+                response.put("Message","You can't create ROOT");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE.value()).body(response);
+            }
+
             boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.ROOT_USER);
 
             if (isSuccess) {
-                System.out.println(bitmask);
-                System.out.println(roleName);
                 Long isCreated = Permission.createRole(userId.get(),bitmask, roleName, null);
+                Permission.moderationAutoLog(userId.get(), "Create Role" , "User created role");
                 response.put("Message", isCreated);
                 return ResponseEntity.ok(response);
             }
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Unable to create role"));
+    }
+
+    @GetMapping("/modLog")
+    public ResponseEntity<Map<String,Object>> getModerationLog(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NonNull HttpServletRequest request,
+            @RequestParam (required = false) Long page){
+            
+            Map<String, Object> response = new HashMap<>();
+            Optional<Long> userId = getUserIdFromJWT(authToken);
+        if (userId.isPresent()) {
+            String[] sessionToken = getUserSessionToken(request).split(":");
+            String sessionid = sessionToken[0];
+            String refreshToken = sessionToken[1];
+
+            // Validate userssion :D
+            if (!SessionManager.validateSessionToken(sessionid, refreshToken,
+                    userId.get())) {
+                // Logout the user since they are not authorize
+                SessionManager.deleteSession(sessionid);
+                response.put("message", "You are not authorized.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(response);
+            }
+
+            boolean isSuccess = Permission.checkUserPermission(userId.get(), Values.MODERATE_EXPLORER);
+
+            if (isSuccess) {
+                List<Row> modList = Permission.getModerationLog(userId.get());
+                response.put("actionList", modList);
+                return ResponseEntity.ok(response);
+            }
+        }
+        return null;
     }
 }
