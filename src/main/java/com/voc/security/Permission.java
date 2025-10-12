@@ -241,12 +241,6 @@ public class Permission {
             return null;
         }
 
-        // if (page == null || page < 1) {
-        // page = 1L;
-        // }
-
-        // int pageSize = 20;
-        // long offset = (page - 1) * pageSize;
 
         if (((permissionLevel & Values.VIEW_AUDIT_LOG) != 0) || ((permissionLevel & Values.ROOT_USER) != 0)) {
 
