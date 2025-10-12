@@ -411,6 +411,7 @@ public class UserApiController {
 
             if (isSuccess) {
                 Permission.updateUserRole(target, role, userId.get());
+                Permission.moderationAutoLog(userId.get(), "Assign role", "User assign role to user");
                 response.put("Success", "Complete assigned role");
                 return ResponseEntity.ok(response);
             }

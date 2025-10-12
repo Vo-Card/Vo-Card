@@ -206,7 +206,7 @@ public class DeckApiController {
         Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_CREATE_ITEM);
 
             Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
             if (!validateOwner && !bypass) {
@@ -226,7 +226,7 @@ public class DeckApiController {
             DatabaseUtils.sqlPrepareStatement(
                     "UPDATE card_leveltb SET theme_id_FK = ?, modifier_id_FK = ? WHERE level_id_PK = ?",
                     themeId, modifierId, levelId);
-
+            Permission.moderationAutoLog(userId.get(), "FORCE CREATE ITEM", "User created level in deck");
             response.put("message", "Successfully created Level");
             return ResponseEntity.ok(response);
         } else {
@@ -246,7 +246,7 @@ public class DeckApiController {
         Optional<Long> userId = JwtManager.getUserIdFromJWT(authToken);
 
         if (userId.isPresent()) {
-            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_DELETE_ITEM);
+            Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_CREATE_ITEM);
 
             Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, null, null, null, null);
             if (!validateOwner && !bypass) {
@@ -256,6 +256,8 @@ public class DeckApiController {
             Long cardId = Snowflake.nextId();
 
             DeckManager.createNewCard(cardId, levelId, cardData.cardWord);
+            
+            Permission.moderationAutoLog(userId.get(), "FORCE CREATE ITEM", "User force created card in deck");
 
             response.put("message", "Successfully created Level");
             return ResponseEntity.ok(response);
@@ -414,6 +416,7 @@ public class DeckApiController {
             }
 
             DeckManager.toggleDeckPublic(deckId);
+            Permission.moderationAutoLog(userId.get(), "MODERATE EXPOLRER", "Toggled deck public");
             response.put("message", "Successfully toggled Deck public status");
             return ResponseEntity.ok(response);
         } else {
@@ -440,7 +443,7 @@ public class DeckApiController {
         }
 
         Boolean bypass = Permission.checkUserPermission(userId.get(), Permission.Values.FORCE_UPDATE_ITEM);
-
+        Permission.moderationAutoLog(userId.get(), "FORCE UPDATED ITEM", "User updated card in deck");
         Boolean validateOwner = DeckManager.validateOwnership(false, userId.get(), deckId, levelId, cardId, null, null);
         if (!validateOwner && !bypass) {
             response.put("message", "You don't have permission.");
@@ -658,6 +661,7 @@ public class DeckApiController {
                     deckId, deckUpd.deckName, deckUpd.deckDescription,
                     deckUpd.primaryColor, deckUpd.secondaryColor, deckUpd.isPublic,
                     deckUpd.allowCloning);
+            Permission.moderationAutoLog(userId.get(), "FORCE UPDATE ITEM", "User updated deck");
             response.put("message", "Successfully toggled Deck public status");
             return ResponseEntity.ok(response);
         } else {
@@ -712,6 +716,7 @@ public class DeckApiController {
             DeckManager.updateLevel(
                     levelId, levelUpd.levelValue, levelUpd.levelWeight,
                     levelUpd.primaryColor, levelUpd.secondaryColor);
+            Permission.moderationAutoLog(userId.get(), "FORCE UPDATE ITEM", "User updated level in deck");
             response.put("message", "Successfully toggled Deck public status");
             return ResponseEntity.ok(response);
         } else {
@@ -778,6 +783,7 @@ public class DeckApiController {
             }
             Boolean success = DeckManager.deleteDeckCascade(deckId, userId.get());
             if (success) {
+                Permission.moderationAutoLog(userId.get(), "FORCE DELETE ITEM", "User deleted deck");
                 response.put("message", "Successfully deleted Deck");
                 return ResponseEntity.ok(response);
             } else {
@@ -808,6 +814,7 @@ public class DeckApiController {
             }
             Boolean success = DeckManager.deleteLevelCascade(levelId, deckId);
             if (success) {
+                Permission.moderationAutoLog(userId.get(), "FORCE DELETE ITEM", "User deleted level in deck");
                 response.put("message", "Successfully deleted Level");
                 return ResponseEntity.ok(response);
             } else {
@@ -839,6 +846,7 @@ public class DeckApiController {
             }
             Boolean success = DeckManager.deleteCardCascade(cardId, levelId);
             if (success) {
+                Permission.moderationAutoLog(userId.get(), "FORCE DELETE ITEM", "User deleted the card");
                 response.put("message", "Successfully deleted Card");
                 return ResponseEntity.ok(response);
             } else {
